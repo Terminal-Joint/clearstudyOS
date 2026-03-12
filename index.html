@@ -6,6 +6,8 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='52' font-size='52'%3E%F0%9F%93%98%3C/text%3E%3C/svg%3E" />
   <title>For Clear Studies</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc =
 "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
@@ -443,7 +445,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
 
   <section id="notes-window" class="window" style="left:100px;top:70px;">
     <div class="titlebar" data-window="notes-window"><div class="title">Notes</div><div class="w-controls"><button class="ctrl min" data-close="notes-window">—</button><button class="ctrl max" data-max="notes-window">▢</button><button class="ctrl close" data-close="notes-window">✕</button></div></div>
-    <div class="toolbar"><button class="btn" id="note-new">New</button><button class="btn" id="note-delete">Delete</button><button class="btn primary" id="note-save">Save</button><button class="btn" id="note-highlight">Highlight Selection</button><button class="btn" id="pin-to-vault">Pin to Vault</button></div>
+    <div class="toolbar"><button class="btn" id="note-new">New</button><button class="btn" id="note-delete">Delete</button><button class="btn primary" id="note-save">Save</button><button class="btn" id="note-highlight">Highlight Selection</button><button class="btn" id="pin-to-vault">Pin to Vault</button><select id="note-block-type" class="field" style="max-width:140px;"><option value="text">Text</option><option value="heading">Heading</option><option value="formula">Formula</option><option value="checklist">Checklist</option><option value="quote">Quote</option><option value="code">Code</option><option value="image">Image</option></select><button class="btn" id="note-add-block">Add Block</button><button class="btn" id="note-generate-flashcards">Flashcards</button></div>
     <div class="app-body split">
       <aside class="panel" style="display:grid;grid-template-rows:1fr 220px;min-height:0;">
         <div id="notes-list" style="overflow:auto;"></div>
@@ -451,7 +453,8 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       </aside>
       <section class="panel" style="display:flex;flex-direction:column;gap:8px;padding:8px;">
         <input id="note-title" class="field" placeholder="Title">
-        <textarea id="note-content" class="field" style="min-height:320px;resize:vertical;" placeholder="Your study notes..."></textarea>
+        <div id="note-blocks" style="display:grid;gap:8px;overflow:auto;max-height:360px;"></div>
+        <textarea id="note-content" class="field" style="min-height:180px;resize:vertical;" placeholder="Legacy note text or summary..."></textarea>
       </section>
     </div>
   </section>
@@ -471,27 +474,42 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
     <div class="app-body" style="padding:8px;"><iframe id="browser-frame" src="https://www.google.com" referrerpolicy="no-referrer"></iframe></div>
   </section>
 
-  <section id="pdf-window" class="window" style="left:150px;top:80px;width:min(1080px,94vw);height:min(730px,86vh);">
-    <div class="titlebar" data-window="pdf-window"><div class="title">Bookshelf + PDF</div><div class="w-controls"><button class="ctrl min" data-close="pdf-window">—</button><button class="ctrl max" data-max="pdf-window">▢</button><button class="ctrl close" data-close="pdf-window">✕</button></div></div>
+  <section id="pdf-window" class="window" style="left:150px;top:80px;width:min(1200px,96vw);height:min(760px,88vh);">
+    <div class="titlebar" data-window="pdf-window"><div class="title">Bookshelf + PDF Workspace</div><div class="w-controls"><button class="ctrl min" data-close="pdf-window">—</button><button class="ctrl max" data-max="pdf-window">▢</button><button class="ctrl close" data-close="pdf-window">✕</button></div></div>
     <div class="toolbar">
 <input id="pdf-upload" type="file" accept="application/pdf">
 <input id="book-title" class="field" placeholder="Book title">
-
 <button class="btn primary" id="add-book">Add Book</button>
-
 <button class="btn" id="pdf-prev">◀ Page</button>
 <button class="btn" id="pdf-next">Page ▶</button>
-
+<span class="pill" id="pdf-page-info">Page 0 / 0</span>
 <button class="btn" id="pdf-zoom-in">Zoom +</button>
 <button class="btn" id="pdf-zoom-out">Zoom −</button>
-
+<button class="btn" id="pdf-toggle-split">Split View</button>
 <button class="btn" id="pdf-fullscreen">Fullscreen</button>
-
+<input id="pdf-search" class="field" placeholder="Search in PDF/OCR" style="max-width:170px;">
+<button class="btn" id="pdf-run-search">Search</button>
+<select id="pdf-highlight-color" class="field" style="max-width:120px;"><option value="concept">Yellow Concept</option><option value="formula">Blue Formula</option><option value="example">Green Example</option><option value="doubt">Red Doubt</option></select>
 <button class="btn" id="pdf-highlight">Save Highlight</button>
+<button class="btn" id="save-formula-vault">Save to Formula Vault</button>
 </div>
-    <div class="app-body split"><aside class="panel" id="bookshelf" style="overflow:auto;"></aside><section class="panel" style="padding:8px;"><div id="pdf-viewer-container" style="width:100%;height:100%;overflow:auto;background:#111;">
-  <canvas id="pdf-canvas"></canvas>
-</div></section></div>
+    <div class="app-body" style="display:grid;grid-template-columns:240px minmax(0,1fr) 280px;gap:8px;padding:8px;min-height:0;">
+      <aside class="panel" style="display:grid;grid-template-rows:160px minmax(0,1fr);overflow:hidden;">
+        <div id="bookshelf" style="overflow:auto;border-bottom:1px solid rgba(255,255,255,.14);"></div>
+        <div id="pdf-thumbnails" style="overflow:auto;padding:6px;display:grid;gap:6px;"></div>
+      </aside>
+      <section class="panel" style="padding:8px;min-width:0;">
+        <div id="pdf-viewer-container" style="width:100%;height:100%;overflow:auto;background:#111;display:grid;grid-template-columns:1fr;gap:8px;">
+          <canvas id="pdf-canvas"></canvas>
+          <canvas id="pdf-canvas-2" style="display:none;"></canvas>
+        </div>
+      </section>
+      <aside class="panel" style="display:grid;grid-template-rows:minmax(0,1fr) 170px 130px;gap:8px;padding:8px;">
+        <div id="workspace-notes" contenteditable="true" class="field" style="overflow:auto;min-height:120px;">Drop highlights here to build connections...</div>
+        <div id="workspace-links" style="overflow:auto;"></div>
+        <div id="pdf-search-results" style="overflow:auto;"></div>
+      </aside>
+    </div>
   </section>
 
   <section id="studio-window" class="window" style="left:180px;top:90px;width:min(920px,94vw);height:min(690px,84vh);">
@@ -505,6 +523,26 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
     <div class="toolbar"><input id="vault-input" class="field" style="flex:1;" placeholder="Save important point instantly"><button class="btn primary" id="vault-add">Save</button></div>
     <div class="app-body panel" id="vault-list"></div>
   </section>
+
+
+
+  <section id="flashcards-window" class="window" style="left:210px;top:90px;width:min(780px,92vw);height:min(560px,78vh);">
+    <div class="titlebar" data-window="flashcards-window"><div class="title">Flashcards</div><div class="w-controls"><button class="ctrl min" data-close="flashcards-window">—</button><button class="ctrl max" data-max="flashcards-window">▢</button><button class="ctrl close" data-close="flashcards-window">✕</button></div></div>
+    <div class="toolbar"><button class="btn" id="flash-prev">Prev</button><button class="btn" id="flash-next">Next</button><button class="btn" id="flash-flip">Flip</button></div>
+    <div class="app-body panel" id="flashcard-review"></div>
+  </section>
+
+  <section id="graph-window" class="window" style="left:250px;top:110px;width:min(760px,92vw);height:min(540px,74vh);">
+    <div class="titlebar" data-window="graph-window"><div class="title">Knowledge Graph</div><div class="w-controls"><button class="ctrl min" data-close="graph-window">—</button><button class="ctrl max" data-max="graph-window">▢</button><button class="ctrl close" data-close="graph-window">✕</button></div></div>
+    <div class="app-body panel" id="knowledge-graph"></div>
+  </section>
+
+  <section id="focus-window" class="window" style="left:170px;top:120px;width:min(600px,88vw);height:min(460px,70vh);">
+    <div class="titlebar" data-window="focus-window"><div class="title">Focus Mode</div><div class="w-controls"><button class="ctrl min" data-close="focus-window">—</button><button class="ctrl max" data-max="focus-window">▢</button><button class="ctrl close" data-close="focus-window">✕</button></div></div>
+    <div class="toolbar"><button class="btn primary" id="focus-start">Start Pomodoro</button><button class="btn" id="focus-stop">Stop</button><button class="btn" id="focus-fullscreen">Fullscreen</button></div>
+    <div class="app-body panel"><h2 id="focus-timer">25:00</h2><div id="focus-analytics"></div><div id="revision-output" style="margin-top:8px;"></div></div>
+  </section>
+
 
   <section id="settings-window" class="window" style="left:150px;top:82px;width:min(920px,94vw);height:min(700px,84vh);">
     <div class="titlebar" data-window="settings-window"><div class="title">Settings</div><div class="w-controls"><button class="ctrl min" data-close="settings-window">—</button><button class="ctrl max" data-max="settings-window">▢</button><button class="ctrl close" data-close="settings-window">✕</button></div></div>
@@ -562,10 +600,16 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       <button class="tb-btn" data-open="pdf-window" title="Bookshelf">📚</button>
       <button class="tb-btn" data-open="studio-window" title="Studio">🖊️</button>
       <button class="tb-btn" data-open="vault-window" title="Vault">⭐</button>
-      <button class="tb-btn" data-open="settings-window" title="Settings">⚙️</button>
+      <button class="tb-btn" data-open="settings-window" title="Settings">⚙️</button><button class="tb-btn" data-open="flashcards-window" title="Flashcards">🃏</button><button class="tb-btn" data-open="graph-window" title="Concept Map">🕸️</button><button class="tb-btn" data-open="focus-window" title="Focus">⏱️</button>
     </div>
     <div id="tb-right"><button class="tb-btn" id="tb-quick-note" title="Quick note">🗒️</button><div class="pill" id="space-pill">Space</div><div class="pill" id="status-pill">Saved</div><div class="pill" id="clock-pill"></div><button class="tb-btn" id="btn-login" title="Login">👤</button><button class="tb-btn" id="btn-logout" title="Logout" style="display:none;">⇦</button></div>
   </div>
+
+
+
+  <div id="desktop-context"><div class="ctx-item" data-ctx="refresh">Refresh Desktop</div><div class="ctx-item" data-ctx="new-note">New Note</div><div class="ctx-item" data-ctx="focus">Open Focus Mode</div></div>
+  <div id="window-context"><div class="ctx-item" data-wctx="left">Snap Left</div><div class="ctx-item" data-wctx="right">Snap Right</div><div class="ctx-item" data-wctx="top">Snap Top</div></div>
+
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
@@ -596,7 +640,10 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       { id:'pdf-window', name:'Bookshelf', icon:'📚' },
       { id:'studio-window', name:'Studio', icon:'🖊️' },
       { id:'vault-window', name:'Vault', icon:'⭐' },
-      { id:'settings-window', name:'Settings', icon:'⚙️' }
+      { id:'settings-window', name:'Settings', icon:'⚙️' },
+      { id:'flashcards-window', name:'Flashcards', icon:'🃏' },
+      { id:'graph-window', name:'Knowledge Graph', icon:'🕸️' },
+      { id:'focus-window', name:'Focus', icon:'⏱️' }
     ];
 
     const $ = id => document.getElementById(id);
@@ -638,7 +685,11 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
         browser: { tabs:[{ id: crypto.randomUUID(), title:'Google', url:'https://www.google.com' }], activeTabId:null },
         quickNotes: [],
         apps: CORE_APPS.map(a => ({ id: a.id, name: a.name, icon: a.icon, type:'core' })),
-        windows: {}
+        windows: {},
+        formulaVault: [],
+        flashcards: [],
+        ocrCache: {},
+        revisionSummaries: []
       };
     }
 
@@ -665,7 +716,8 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
           snap: true,
           homepage: 'https://www.wikipedia.org'
         },
-        installedAppsGlobal: []
+        installedAppsGlobal: [],
+        session: { lastOpenWindows: [] }
       };
     }
 
@@ -680,6 +732,10 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
         sp.notes = (sp.notes?.length ? sp.notes : base.notes).map(n => ({ ...n, updatedAt: n.updatedAt || Date.now() }));
         sp.selectedNoteId = sp.selectedNoteId && sp.notes.some(n => n.id === sp.selectedNoteId) ? sp.selectedNoteId : sp.notes[0]?.id || null;
         sp.tasks = sp.tasks || [];
+        sp.formulaVault = sp.formulaVault || [];
+        sp.flashcards = sp.flashcards || [];
+        sp.ocrCache = sp.ocrCache || {};
+        sp.revisionSummaries = sp.revisionSummaries || [];
         sp.books = sp.books || [];
         sp.studio = { drawing: sp.studio?.drawing || '', stickies: sp.studio?.stickies || [] };
         sp.vault = sp.vault || [];
@@ -1151,7 +1207,15 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       el.bookshelf.innerHTML = sp.books.map(b => `<div class="book-item" data-book="${b.id}"><div>${esc(b.title)}</div><small>${new Date(b.addedAt).toLocaleDateString()}</small></div>`).join('') || '<div class="book-item">No books yet.</div>';
       [...el.bookshelf.querySelectorAll('[data-book]')].forEach(n => n.onclick = () => {
         const b = sp.books.find(x => x.id === n.dataset.book);
-        if (b?.dataUrl) loadPDF(b.dataUrl);
+        if (b) {
+          currentBookTitle = b.title;
+          const last = Number(localStorage.getItem(`pdf-last-page:${currentBookTitle}`) || 1);
+          const loader = b.dataUrl ? Promise.resolve(b.dataUrl) : getPDFFromDB(b.id);
+          loader.then(url => {
+            if (!url) return;
+            loadPDF(url).then(() => { pdfPage = Math.max(1, Math.min(last, pdfDoc?.numPages || 1)); renderPage(); renderThumbnails(); });
+          });
+        }
       });
     }
 
@@ -1469,7 +1533,10 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
           fr.readAsDataURL(file);
         });
         const sp = getSpace();
-        sp.books.unshift({ id: crypto.randomUUID(), title, dataUrl, addedAt: Date.now() });
+        const bookId = crypto.randomUUID();
+        sp.books.unshift({ id: bookId, title, dataUrl, addedAt: Date.now() });
+        await savePDFToDB(bookId, dataUrl);
+        currentBookTitle = title;
         logStudyEvent('book-add', { title });
         renderBooks();
         loadPDF(dataUrl);
@@ -1631,122 +1698,330 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       if (Math.random() < 0.2) queueSave();
     }, 15000);
 
-    onAuthStateChanged(auth, async user => {
-      currentUser = user;
-      setAuthUI(user);
-      state = await loadState(user);
-      renderAll();
-      el.status.textContent = user ? 'Loaded Firebase' : 'Loaded local';
-      // no apps open at start
-      document.querySelectorAll('.window').forEach(w => { w.style.display='none'; w.classList.remove('active'); });
-      activeWindowId = '';
-      setActiveTaskbar('');
-    });
-
-    window.addEventListener('error', e => {
-      showToast(`Runtime error: ${e.message}`);
-    });
-    window.addEventListener('unhandledrejection', e => {
-      showToast(`Async error: ${e.reason?.message || e.reason || 'unknown'}`);
-    });
 let pdfDoc = null;
+let pdfDoc2 = null;
 let pdfPage = 1;
-let pdfScale = 1.5;
+let pdfPage2 = 1;
+let pdfScale = 1.35;
+let splitPDF = false;
+let currentBookTitle = '';
+let flashIndex = 0;
+let flashFlipped = false;
+let pomodoroTimer = null;
+let pomodoroRemaining = 25 * 60;
 
-function getPDFCanvas(){
+function markRunningIndicators() {
+  const open = new Set([...document.querySelectorAll('.window')].filter(w => w.style.display !== 'none').map(w => w.id));
+  [...document.querySelectorAll('.tb-btn[data-open]')].forEach(b => b.classList.toggle('running', open.has(b.dataset.open)));
+}
+const openWindowOriginal = openWindow;
+openWindow = function(id){ openWindowOriginal(id); markRunningIndicators(); state.session.lastOpenWindows = [...document.querySelectorAll('.window')].filter(w=>w.style.display!=='none').map(w=>w.id); };
+const closeWindowOriginal = closeWindow;
+closeWindow = function(id){ closeWindowOriginal(id); markRunningIndicators(); state.session.lastOpenWindows = [...document.querySelectorAll('.window')].filter(w=>w.style.display!=='none').map(w=>w.id); };
 
-  const canvas = document.getElementById("pdf-canvas");
-
-  if(!canvas) return null;
-
-  return {
-    canvas,
-    ctx: canvas.getContext("2d")
-  };
-
+function renderNoteBlocks() {
+  const sp = getSpace();
+  const cur = sp.notes.find(n => n.id === sp.selectedNoteId);
+  if (!cur) return;
+  cur.blocks = cur.blocks || [];
+  const c = $('note-blocks');
+  c.innerHTML = cur.blocks.map((b, i) => `<div class="note-block"><b>${esc(b.type)}</b><div>${b.type==='formula' ? esc(b.text) : esc(b.text || '')}</div><button class="btn" data-del-block="${i}">Delete</button></div>`).join('') || '<div class="note-block">No blocks yet.</div>';
+  [...c.querySelectorAll('[data-del-block]')].forEach(n => n.onclick = () => {
+    cur.blocks.splice(Number(n.dataset.delBlock),1);
+    renderNoteBlocks();
+    saveCurrentNote();
+  });
+  if (window.MathJax?.typesetPromise) MathJax.typesetPromise([c]).catch(()=>{});
 }
 
-async function loadPDF(url){
+function createFlashcardsFromContent() {
+  const sp = getSpace();
+  const source = [...(sp.highlights||[]).slice(0,15).map(h=>h.text), ...(sp.notes||[]).slice(0,6).map(n=>n.content || '')].join('\n');
+  const lines = source.split(/\n+/).map(x=>x.trim()).filter(Boolean);
+  sp.flashcards = lines.slice(0,24).map((line,i)=>({ id: crypto.randomUUID(), front: line.split(':')[0].slice(0,80) || `Card ${i+1}`, back: line.slice(0,180) }));
+  flashIndex = 0; flashFlipped = false;
+  renderFlashcardReview();
+  queueSave();
+}
 
+function renderFlashcardReview() {
+  const sp = getSpace();
+  const cards = sp.flashcards || [];
+  const target = $('flashcard-review');
+  if (!cards.length) { target.innerHTML = '<div class="panel" style="padding:12px;">No flashcards. Generate from notes/highlights.</div>'; return; }
+  const card = cards[Math.max(0, Math.min(flashIndex, cards.length - 1))];
+  target.innerHTML = `<div class="panel" style="padding:14px;"><div style="opacity:.8;">${flashIndex+1}/${cards.length}</div><h3>${esc(card.front)}</h3><hr><div>${esc(flashFlipped ? card.back : 'Click Flip to reveal')}</div></div>`;
+}
+
+function renderKnowledgeGraph() {
+  const sp = getSpace();
+  const nodes = [...(sp.highlights||[]).slice(0,20).map(h=>h.text), ...(sp.notes||[]).slice(0,10).map(n=>n.title)].filter(Boolean);
+  const words = nodes.flatMap(t => t.split(/\W+/).filter(w => w.length > 3));
+  const freq = {};
+  words.forEach(w => freq[w] = (freq[w] || 0) + 1);
+  const top = Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,24);
+  $('knowledge-graph').innerHTML = top.map(([w,c]) => `<span class="pill" style="margin:4px;display:inline-block;font-size:${12+Math.min(16,c*2)}px">${esc(w)}</span>`).join('') || 'Graph will appear from your notes and highlights.';
+}
+
+function renderRevisionSummary() {
+  const sp = getSpace();
+  const formulas = (sp.formulaVault||[]).slice(0,5).map(f => `• ${f.formula} (${f.book} p.${f.page})`).join('<br>');
+  const highlights = (sp.highlights||[]).slice(0,5).map(h => `• ${esc(h.text.slice(0,90))}`).join('<br>');
+  $('revision-output').innerHTML = `<div class="panel" style="padding:8px;"><b>Quick Revision</b><br>Important formulas:<br>${formulas || 'No formulas yet'}<br><br>Important highlights:<br>${highlights || 'No highlights yet'}</div>`;
+}
+
+function setupContextMenus() {
+  const desktopCtx = $('desktop-context');
+  const winCtx = $('window-context');
+  el.desktop.addEventListener('contextmenu', e => {
+    e.preventDefault();
+    desktopCtx.style.display = 'block';
+    desktopCtx.style.left = `${e.clientX}px`;
+    desktopCtx.style.top = `${e.clientY}px`;
+  });
+  document.querySelectorAll('.window .titlebar').forEach(bar => bar.addEventListener('contextmenu', e => {
+    e.preventDefault();
+    const id = bar.dataset.window;
+    winCtx.dataset.window = id;
+    winCtx.style.display = 'block';
+    winCtx.style.left = `${e.clientX}px`;
+    winCtx.style.top = `${e.clientY}px`;
+  }));
+  document.addEventListener('click', () => { desktopCtx.style.display='none'; winCtx.style.display='none'; });
+  [...desktopCtx.querySelectorAll('[data-ctx]')].forEach(i => i.onclick = () => {
+    if (i.dataset.ctx === 'refresh') renderDesktop();
+    if (i.dataset.ctx === 'new-note') $('note-new').click();
+    if (i.dataset.ctx === 'focus') launchApp('focus-window');
+  });
+  [...winCtx.querySelectorAll('[data-wctx]')].forEach(i => i.onclick = () => {
+    const id = winCtx.dataset.window;
+    const w = $(id);
+    if (!w) return;
+    if (i.dataset.wctx === 'left') { w.style.left='8px'; w.style.top='8px'; w.style.width='calc(50vw - 12px)'; w.style.height='calc(100vh - var(--taskbar-h) - 20px)'; }
+    if (i.dataset.wctx === 'right') { w.style.left='calc(50vw + 4px)'; w.style.top='8px'; w.style.width='calc(50vw - 12px)'; w.style.height='calc(100vh - var(--taskbar-h) - 20px)'; }
+    if (i.dataset.wctx === 'top') { w.style.left='8px'; w.style.top='8px'; w.style.width='calc(100vw - 16px)'; w.style.height='calc(50vh)'; }
+    saveWindowRect(id); queueSave();
+  });
+}
+
+async function runOCRForPage(pageNumber) {
+  const sp = getSpace();
+  const key = `${currentBookTitle || 'book'}:${pageNumber}`;
+  if (sp.ocrCache[key]) return sp.ocrCache[key];
+  const page = await pdfDoc.getPage(pageNumber);
+  const vp = page.getViewport({ scale: 1.4 });
+  const c = document.createElement('canvas');
+  c.width = vp.width; c.height = vp.height;
+  await page.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
+  const { data } = await Tesseract.recognize(c, 'eng');
+  sp.ocrCache[key] = data.text || '';
+  queueSave();
+  return sp.ocrCache[key];
+}
+
+async function loadPDF(url, second = false){
   const loadingTask = pdfjsLib.getDocument(url);
-
-  pdfDoc = await loadingTask.promise;
-
-  pdfPage = 1;
-
-  renderPage();
-
+  const doc = await loadingTask.promise;
+  if (second) { pdfDoc2 = doc; pdfPage2 = 1; } else { pdfDoc = doc; pdfPage = 1; }
+  await renderPage(second);
+  if (!second) renderThumbnails();
 }
 
-async function renderPage(){
-
-  if(!pdfDoc) return;
-
-  const pdfCanvas = getPDFCanvas();
-
-  if(!pdfCanvas) return;
-
-  const {canvas, ctx} = pdfCanvas;
-
-  const page = await pdfDoc.getPage(pdfPage);
-
+async function renderPage(second = false){
+  const doc = second ? pdfDoc2 : pdfDoc;
+  if (!doc) return;
+  const pageNo = second ? pdfPage2 : pdfPage;
+  const canvas = second ? $('pdf-canvas-2') : $('pdf-canvas');
+  const page = await doc.getPage(pageNo);
   const viewport = page.getViewport({scale: pdfScale});
-
   canvas.width = viewport.width;
   canvas.height = viewport.height;
-
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-
-  await page.render({
-    canvasContext: ctx,
-    viewport: viewport
-  }).promise;
-
+  await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+  if (!second) {
+    $('pdf-page-info').textContent = `Page ${pdfPage} / ${pdfDoc.numPages}`;
+    localStorage.setItem(`pdf-last-page:${currentBookTitle}`, String(pdfPage));
+  }
 }
 
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-await page.render(renderContext).promise;
+async function renderThumbnails() {
+  if (!pdfDoc) return;
+  const container = $('pdf-thumbnails');
+  const total = pdfDoc.numPages;
+  container.innerHTML = '';
+  for (let i = 1; i <= Math.min(total, 25); i++) {
+    const item = document.createElement('div');
+    item.className = `thumb-item ${i===pdfPage?'active':''}`;
+    item.textContent = `Page ${i}`;
+    item.onclick = () => { pdfPage = i; renderPage(); renderThumbnails(); };
+    container.appendChild(item);
+  }
+}
 
-document.getElementById("pdf-next").onclick = () => {
+function detectFormula(text='') {
+  return /=|\∫|\Σ|\sigma|ec|ector/i.test(text);
+}
 
-  if(!pdfDoc) return;
+function setupAdvancedBindings() {
+  $('pdf-next').onclick = () => { if (!pdfDoc || pdfPage >= pdfDoc.numPages) return; pdfPage++; renderPage(); renderThumbnails(); };
+  $('pdf-prev').onclick = () => { if (!pdfDoc || pdfPage <= 1) return; pdfPage--; renderPage(); renderThumbnails(); };
+  $('pdf-zoom-in').onclick = () => { pdfScale += 0.15; renderPage(); if (splitPDF) renderPage(true); };
+  $('pdf-zoom-out').onclick = () => { pdfScale = Math.max(0.6, pdfScale - 0.15); renderPage(); if (splitPDF) renderPage(true); };
+  $('pdf-toggle-split').onclick = () => {
+    splitPDF = !splitPDF;
+    $('pdf-canvas-2').style.display = splitPDF ? 'block' : 'none';
+    if (splitPDF) {
+      const sp = getSpace();
+      const second = sp.books[1]?.dataUrl;
+      if (second) loadPDF(second, true);
+    }
+  };
+  $('pdf-run-search').onclick = async () => {
+    const q = ($('pdf-search').value || '').trim().toLowerCase();
+    if (!q || !pdfDoc) return;
+    const out = [];
+    for (let i = 1; i <= Math.min(pdfDoc.numPages, 15); i++) {
+      const page = await pdfDoc.getPage(i);
+      const txt = await page.getTextContent();
+      let merged = txt.items.map(x => x.str).join(' ');
+      if (!merged.trim()) merged = await runOCRForPage(i);
+      if (merged.toLowerCase().includes(q)) out.push({ page: i, sample: merged.slice(0,120) });
+    }
+    $('pdf-search-results').innerHTML = out.map(r => `<div class="thumb-item" data-goto="${r.page}">P${r.page}: ${esc(r.sample)}</div>`).join('') || 'No results';
+    [...$('pdf-search-results').querySelectorAll('[data-goto]')].forEach(n => n.onclick = () => { pdfPage = Number(n.dataset.goto); renderPage(); renderThumbnails(); });
+  };
 
-  if(pdfPage >= pdfDoc.numPages) return;
+  $('pdf-highlight').onclick = () => {
+    const text = prompt('Highlight text');
+    if (!text?.trim()) return;
+    const kind = $('pdf-highlight-color').value;
+    const source = `${currentBookTitle || 'Book'} – Page ${pdfPage}`;
+    const meta = { id: crypto.randomUUID(), type: kind, text: text.trim(), source, at: Date.now(), page: pdfPage, book: currentBookTitle || 'Book' };
+    const sp = getSpace();
+    sp.highlights.unshift(meta);
+    const prefix = `[From Book: ${meta.book} – Page ${meta.page}]\n`;
+    sp.vault.unshift({ text: `${prefix}${meta.text}`, at: Date.now() });
+    $('workspace-notes').innerText += `\n${prefix}${meta.text}`;
+    if (detectFormula(text)) sp.formulaVault.unshift({ formula: text.trim(), book: meta.book, page: meta.page, at: Date.now() });
+    renderHighlightsPanel(); renderVault(); renderKnowledgeGraph(); renderRevisionSummary(); queueSave();
+  };
 
-  pdfPage++;
+  $('save-formula-vault').onclick = () => {
+    const text = prompt('Formula');
+    if (!text?.trim()) return;
+    getSpace().formulaVault.unshift({ formula: text.trim(), book: currentBookTitle || 'Book', page: pdfPage, at: Date.now() });
+    renderRevisionSummary(); queueSave();
+  };
 
-  renderPage();
+  $('note-add-block').onclick = () => {
+    const sp = getSpace();
+    const cur = sp.notes.find(n => n.id === sp.selectedNoteId);
+    if (!cur) return;
+    cur.blocks = cur.blocks || [];
+    const t = $('note-block-type').value;
+    const val = prompt(`Enter ${t} block content:`) || '';
+    cur.blocks.push({ type: t, text: val, at: Date.now() });
+    renderNoteBlocks(); saveCurrentNote();
+  };
+  $('note-generate-flashcards').onclick = () => { createFlashcardsFromContent(); openWindow('flashcards-window'); };
+  $('flash-prev').onclick = () => { flashIndex = Math.max(0, flashIndex - 1); renderFlashcardReview(); };
+  $('flash-next').onclick = () => { flashIndex = Math.min((getSpace().flashcards||[]).length - 1, flashIndex + 1); renderFlashcardReview(); };
+  $('flash-flip').onclick = () => { flashFlipped = !flashFlipped; renderFlashcardReview(); };
 
+  $('focus-start').onclick = () => {
+    clearInterval(pomodoroTimer);
+    pomodoroRemaining = 25 * 60;
+    pomodoroTimer = setInterval(() => {
+      pomodoroRemaining--;
+      const m = Math.floor(pomodoroRemaining / 60), s = pomodoroRemaining % 60;
+      $('focus-timer').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      if (pomodoroRemaining <= 0) { clearInterval(pomodoroTimer); showToast('Pomodoro completed'); }
+    }, 1000);
+  };
+  $('focus-stop').onclick = () => clearInterval(pomodoroTimer);
+  $('focus-fullscreen').onclick = () => document.documentElement.requestFullscreen?.();
+
+  $('workspace-notes').addEventListener('dragover', e => { e.preventDefault(); e.currentTarget.classList.add('drop-target'); });
+  $('workspace-notes').addEventListener('dragleave', e => e.currentTarget.classList.remove('drop-target'));
+
+  // Global search over notes/highlights/vault/OCR cache
+  el.startSearch.addEventListener('keydown', async e => {
+    if (e.key !== 'Enter') return;
+    const q = (el.startSearch.value || '').toLowerCase().trim();
+    const sp = getSpace();
+    const results = [];
+    (sp.notes || []).forEach(n => { if (`${n.title} ${n.content}`.toLowerCase().includes(q)) results.push(`Note: ${n.title}`); });
+    (sp.highlights || []).forEach(h => { if ((h.text || '').toLowerCase().includes(q)) results.push(`Highlight: p${h.page || '?'}`); });
+    (sp.vault || []).forEach(v => { if ((v.text || '').toLowerCase().includes(q)) results.push(`Vault: ${v.text.slice(0,20)}`); });
+    Object.entries(sp.ocrCache || {}).forEach(([k,v]) => { if ((v || '').toLowerCase().includes(q)) results.push(`OCR: ${k}`); });
+    $('pdf-search-results').innerHTML = results.map(r => `<div class="thumb-item">${esc(r)}</div>`).join('') || 'No global matches';
+  });
+}
+
+const renderNotesOriginal = renderNotes;
+renderNotes = function(){ renderNotesOriginal(); renderNoteBlocks(); renderKnowledgeGraph(); renderRevisionSummary(); };
+
+const renderAllOriginal = renderAll;
+renderAll = function() {
+  renderAllOriginal();
+  markRunningIndicators();
+  renderNoteBlocks();
+  renderKnowledgeGraph();
+  renderRevisionSummary();
+  renderFlashcardReview();
+  $('focus-analytics').innerHTML = Object.entries(getSpace().analytics.appMinutes || {}).map(([k,v]) => `<div>${k.replace('-window','')}: ${Math.round(v)} minutes</div>`).join('') || 'No analytics yet.';
 };
 
-document.getElementById("pdf-prev").onclick = () => {
 
-  if(!pdfDoc) return;
+function initPDFViewer() {
+  if (pdfDoc) renderPage();
+}
 
-  if(pdfPage <= 1) return;
+function openPDFDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('studyos-pdf-cache', 1);
+    req.onupgradeneeded = () => req.result.createObjectStore('pdfs');
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
 
-  pdfPage--;
+async function savePDFToDB(id, dataUrl) {
+  try {
+    const db = await openPDFDB();
+    const tx = db.transaction('pdfs', 'readwrite');
+    tx.objectStore('pdfs').put(dataUrl, id);
+  } catch {}
+}
 
-  renderPage();
+async function getPDFFromDB(id) {
+  try {
+    const db = await openPDFDB();
+    return await new Promise(resolve => {
+      const tx = db.transaction('pdfs', 'readonly');
+      const req = tx.objectStore('pdfs').get(id);
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () => resolve(null);
+    });
+  } catch { return null; }
+}
 
-};
-    
-document.getElementById("pdf-zoom-in").onclick = () => {
+setupContextMenus();
+setupAdvancedBindings();
 
-  pdfScale += 0.2;
+onAuthStateChanged(auth, async user => {
+  currentUser = user;
+  setAuthUI(user);
+  state = await loadState(user);
+  renderAll();
+  el.status.textContent = user ? 'Loaded Firebase' : 'Loaded local';
+  document.querySelectorAll('.window').forEach(w => { w.style.display='none'; w.classList.remove('active'); });
+  (state.session.lastOpenWindows || []).forEach(id => openWindow(id));
+  activeWindowId = '';
+  setActiveTaskbar('');
+});
 
-  renderPage();
-
-};
-
-document.getElementById("pdf-zoom-out").onclick = () => {
-
-  pdfScale = Math.max(0.6, pdfScale - 0.2);
-
-  renderPage();
-
-};
-    
+window.addEventListener('error', e => showToast(`Runtime error: ${e.message}`));
+window.addEventListener('unhandledrejection', e => showToast(`Async error: ${e.reason?.message || e.reason || 'unknown'}`));
   </script>
 </body>
 </html>
