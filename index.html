@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='52' font-size='52'%3E%F0%9F%93%98%3C/text%3E%3C/svg%3E" />
   <title>StudyOS 11 Pro</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -628,7 +629,7 @@
           clickClose: true,
           openStartOnLoad: false,
           snap: true,
-          homepage: 'https://www.google.com'
+          homepage: 'https://www.wikipedia.org'
         },
         installedAppsGlobal: []
       };
@@ -1023,6 +1024,18 @@
       return b.tabs.find(t => t.id === b.activeTabId) || b.tabs[0];
     }
 
+    function isKnownFrameBlocked(url='') {
+      try {
+        const h = new URL(url).hostname.toLowerCase();
+        return ['google.com','chatgpt.com','openai.com','accounts.google.com','gemini.google.com','copilot.microsoft.com','perplexity.ai'].some(d => h === d || h.endsWith(`.${d}`));
+      } catch { return false; }
+    }
+
+    function setBrowserBlockedMessage(url) {
+      const html = `<!doctype html><html><body style="margin:0;font-family:Segoe UI,Arial,sans-serif;background:#0b1220;color:#e5e7eb;display:grid;place-items:center;height:100vh;"><div style="max-width:620px;padding:24px;text-align:center;"><h2 style="margin:0 0 10px;">This site blocks embedding</h2><p style="opacity:.9;line-height:1.5;">${url.replace(/</g,'&lt;')} cannot open inside an iframe due to browser security headers (X-Frame-Options/CSP). Use <b>Open External</b> for full access and login support.</p></div></body></html>`;
+      el.browserFrame.src = `data:text/html;charset=utf-8,${encodeURIComponent(html)}`;
+    }
+
     function renderBrowserTabs() {
       const b = getSpace().browser;
       el.browserTabs.innerHTML = b.tabs.map(t => `
@@ -1053,7 +1066,11 @@
       const tab = getActiveTab();
       if (!tab) return;
       el.browserUrl.value = tab.url;
-      el.browserFrame.src = tab.url;
+      if (isKnownFrameBlocked(tab.url)) {
+        setBrowserBlockedMessage(tab.url);
+      } else {
+        el.browserFrame.src = tab.url;
+      }
     }
 
     function navigateBrowser(inputRaw) {
@@ -1066,7 +1083,12 @@
       tab.title = v.replace(/^https?:\/\//,'').slice(0, 30);
       logStudyEvent('navigate', { url: v.slice(0,120) });
       renderBrowserTabs();
-      loadActiveTab();
+      if (isKnownFrameBlocked(v)) {
+        setBrowserBlockedMessage(v);
+        window.open(v, '_blank');
+      } else {
+        loadActiveTab();
+      }
       queueSave();
     }
 
@@ -1507,7 +1529,7 @@
       $('set-click-close').checked = !!state.prefs.clickClose;
       $('set-open-start').checked = !!state.prefs.openStartOnLoad;
       $('set-snap').checked = !!state.prefs.snap;
-      $('set-homepage').value = state.prefs.homepage || 'https://www.google.com';
+      $('set-homepage').value = state.prefs.homepage || 'https://www.wikipedia.org';
     }
 
     function renderAll() {
