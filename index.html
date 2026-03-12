@@ -1,216 +1,1732 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>macOS Sequoia</title>
-    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-    <style>
-        :root {
-            --mac-glass: rgba(255, 255, 255, 0.2);
-            --mac-border: rgba(255, 255, 255, 0.3);
-            --blur-strength: blur(40px) saturate(180%);
-            --shadow-standard: 0 20px 50px rgba(0,0,0,0.3);
-            --accent: #007AFF;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StudyOS Pro</title>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+  <style>
+    :root {
+      --glass: rgba(255, 255, 255, 0.18);
+      --border: rgba(255, 255, 255, 0.33);
+      --accent: #0a84ff;
+      --text: #edf3ff;
+      --menu-h: 34px;
+      --dock-h: 80px;
+    }
 
-        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; }
-        
-        body, html { 
-            margin: 0; height: 100vh; width: 100vw; overflow: hidden;
-            /* Official macOS Sequoia Wallpaper */
-            background: url('https://wallpapers.ispazio.net/wp-content/uploads/2024/06/macOS-Sequoia-Light.jpg') center/cover no-repeat;
-        }
+    * { box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+      color: var(--text);
+      user-select: none;
+      background: #0f1a2f;
+    }
 
-        /* Top Menu Bar (Cleaned) */
-        .menu-bar {
-            height: 28px; width: 100%; background: rgba(0, 0, 0, 0.15); backdrop-filter: var(--blur-strength);
-            display: flex; align-items: center; padding: 0 15px; color: white; font-size: 13px;
-            position: fixed; top: 0; z-index: 10000;
-        }
+    body {
+      background-image:
+        radial-gradient(120% 120% at 50% 0%, rgba(255,255,255,.12), rgba(255,255,255,0)),
+        url('https://wallpapers.ispazio.net/wp-content/uploads/2024/06/macOS-Sequoia-Light.jpg');
+      background-size: cover;
+      background-position: center;
+      transition: background-image .25s ease;
+    }
 
-        /* Desktop Shortcuts Layer */
-        #desktop {
-            position: absolute; inset: 28px 0 0 0; padding: 20px;
-            display: grid; grid-template-columns: repeat(auto-fill, 100px);
-            grid-template-rows: repeat(auto-fill, 110px); grid-auto-flow: column; gap: 10px;
-        }
+    .menu-bar {
+      position: fixed;
+      inset: 0 0 auto 0;
+      height: var(--menu-h);
+      z-index: 20000;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0 10px;
+      background: rgba(15, 20, 35, .42);
+      backdrop-filter: blur(30px) saturate(180%);
+      border-bottom: 1px solid rgba(255,255,255,.2);
+      transition: transform .2s ease;
+      font-size: 12px;
+    }
+    .menu-bar.hidden-bar { transform: translateY(-30px); }
 
-        .shortcut {
-            width: 90px; height: 100px; display: flex; flex-direction: column; align-items: center;
-            cursor: pointer; transition: background 0.2s; border-radius: 8px; padding-top: 10px;
-        }
-        .shortcut:hover { background: rgba(255,255,255,0.1); }
-        .shortcut img, .shortcut .note-icon {
-            width: 64px; height: 64px; border-radius: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
-        .shortcut span { color: white; font-size: 12px; margin-top: 8px; text-shadow: 0 1px 3px rgba(0,0,0,0.8); text-align: center; }
+    .menu-btn, .space-chip {
+      border: 0;
+      border-radius: 8px;
+      background: transparent;
+      color: #fff;
+      padding: 3px 7px;
+      cursor: pointer;
+      font: inherit;
+    }
+    .space-chip.active { background: rgba(255,255,255,.2); font-weight: 700; }
+    #active-app { font-weight: 700; }
 
-        /* Window Styling */
-        .window {
-            position: absolute; background: rgba(255, 255, 255, 0.85); backdrop-filter: var(--blur-strength);
-            border-radius: 12px; box-shadow: var(--shadow-standard); display: none; flex-direction: column;
-            border: 0.5px solid var(--mac-border); overflow: hidden;
-        }
-        .window.active { z-index: 5000; box-shadow: 0 40px 100px rgba(0,0,0,0.5); }
-        
-        .title-bar {
-            height: 40px; display: flex; align-items: center; padding: 0 12px; cursor: move;
-            background: rgba(255, 255, 255, 0.1);
-        }
-        .traffic-lights { display: flex; gap: 8px; }
-        .dot { width: 12px; height: 12px; border-radius: 50%; }
-        .dot.close { background: #FF5F56; } .dot.min { background: #FFBD2E; } .dot.max { background: #27C93F; }
+    .dock {
+      position: fixed;
+      left: 50%;
+      bottom: 10px;
+      transform: translateX(-50%);
+      height: var(--dock-h);
+      padding: 10px;
+      display: flex;
+      align-items: end;
+      gap: 10px;
+      border-radius: 24px;
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-top: 1px solid rgba(255,255,255,.2);
+      backdrop-filter: blur(30px) saturate(180%);
+      z-index: 12000;
+      transition: opacity .2s ease;
+    }
+    .dock.hidden-dock { opacity: 0; pointer-events: none; }
+    .dock button {
+      width: 54px;
+      height: 54px;
+      border: 0;
+      border-radius: 15px;
+      background: transparent;
+      font-size: 28px;
+      cursor: pointer;
+      transition: transform .14s;
+    }
+    .dock button:hover { transform: translateY(-8px) scale(1.08); }
 
-        /* Custom Context Menu */
-        #ctx-menu {
-            position: fixed; display: none; background: rgba(255, 255, 255, 0.6); backdrop-filter: var(--blur-strength);
-            border: 1px solid var(--mac-border); border-radius: 8px; padding: 5px; width: 200px; z-index: 11000;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-        .ctx-item {
-            padding: 6px 12px; font-size: 13px; color: #333; cursor: pointer; border-radius: 5px;
-        }
-        .ctx-item:hover { background: var(--accent); color: white; }
+    #top-edge-sensor {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      z-index: 21000;
+      pointer-events: auto;
+      background: transparent;
+    }
 
-        /* Dock (Sequoia Style) */
-        .dock-container {
-            position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.2); backdrop-filter: var(--blur-strength);
-            padding: 8px; border-radius: 22px; display: flex; gap: 12px; border: 1px solid var(--mac-border);
-        }
-        .dock-icon { width: 54px; height: 54px; transition: transform 0.2s; cursor: pointer; }
-        .dock-icon:hover { transform: scale(1.3) translateY(-10px); }
-    </style>
+    #desktop {
+      position: absolute;
+      inset: var(--menu-h) 0 calc(var(--dock-h) + 8px) 0;
+      padding: 14px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(98px,1fr));
+      grid-auto-rows: 116px;
+      gap: 8px;
+      overflow: auto;
+      align-content: start;
+      justify-items: center;
+    }
+    .icon { width: 92px; text-align: center; border-radius: 10px; padding: 6px 4px; cursor: pointer; }
+    .icon:hover { background: rgba(255,255,255,.14); }
+    .tile {
+      width: 62px;
+      height: 62px;
+      margin: 0 auto;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.3);
+      box-shadow: 0 10px 20px rgba(0,0,0,.32);
+      display: grid;
+      place-items: center;
+      font-size: 30px;
+      background: linear-gradient(150deg, rgba(255,255,255,.35), rgba(255,255,255,.08));
+    }
+    .label { margin-top: 8px; font-size: 11px; color: #fff; text-shadow: 0 2px 6px rgba(0,0,0,.8); word-break: break-word; }
+
+    .window {
+      position: absolute;
+      display: none;
+      flex-direction: column;
+      min-width: 360px;
+      min-height: 220px;
+      background: rgba(249,252,255,.86);
+      color: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 28px 50px rgba(0,0,0,.35);
+      overflow: hidden;
+      resize: both;
+      z-index: 700;
+    }
+    .window.active { z-index: 18000; }
+    .window.fullscreen {
+      left: 0 !important;
+      top: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      border-radius: 0;
+      z-index: 19000;
+    }
+    .snap-left { left: 0 !important; top: var(--menu-h) !important; width: 50vw !important; height: calc(100vh - var(--menu-h) - 2px) !important; }
+    .snap-right { left: 50vw !important; top: var(--menu-h) !important; width: 50vw !important; height: calc(100vh - var(--menu-h) - 2px) !important; }
+
+    .title-bar {
+      height: 44px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 10px;
+      border-bottom: 1px solid rgba(0,0,0,.08);
+      background: rgba(255,255,255,.6);
+      cursor: move;
+    }
+    .traffic { display: flex; gap: 7px; }
+    .dot { width: 12px; height: 12px; border: 0; border-radius: 50%; cursor: pointer; }
+    .close{background:#ff5f57}.min{background:#febc2f}.max{background:#28c840}
+    .title { font-weight: 700; }
+
+    .btn { border:0; border-radius:8px; padding:7px 10px; font-size:12px; font-weight:700; cursor:pointer; background:#e6edf9; color:#0f172a; }
+    .btn.primary { background: var(--accent); color:#fff; }
+    .btn.danger { background: #fee2e2; color: #7f1d1d; }
+
+    .tabs { display:flex; gap:6px; align-items:center; padding:6px 8px; border-bottom:1px solid rgba(0,0,0,.08); background: rgba(241,246,255,.92); overflow-x:auto; }
+    .tab { min-width:110px; max-width:180px; border:1px solid rgba(0,0,0,.12); border-radius:8px; padding:4px 8px; background:#fff; font-size:11px; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .tab.active { background:#dbeafe; border-color:#93c5fd; }
+
+    .browser-controls { display:flex; gap:8px; flex:1; }
+    .browser-controls input { width:100%; border:1px solid rgba(0,0,0,.15); border-radius:8px; padding:7px 9px; font:inherit; }
+    #browser-frame { flex:1; border:0; background:#fff; }
+    #browser-frame.grayscale { filter: grayscale(1) contrast(.86); }
+
+    .notes-shell { display:grid; grid-template-columns:250px 1fr; height:100%; min-height:0; }
+    .notes-side { background: rgba(239,245,253,.9); border-right: 1px solid rgba(0,0,0,.12); display:flex; flex-direction:column; min-height:0; }
+    .notes-tools { display:flex; flex-wrap:wrap; gap:6px; padding:10px; border-bottom:1px solid rgba(0,0,0,.1); }
+    .note-list { overflow:auto; min-height:0; }
+    .note-item { padding:10px; border-bottom:1px solid rgba(0,0,0,.08); cursor:pointer; }
+    .note-item.active { background: rgba(10,132,255,.12); }
+    .note-item small { color:#64748b; font-size:10px; }
+
+    .notes-editor { display:flex; flex-direction:column; min-height:0; }
+    #note-title { margin:10px 10px 7px; padding:9px 10px; border:1px solid rgba(0,0,0,.15); border-radius:8px; font-size:15px; font-weight:700; }
+    #note-body { margin:0 10px 10px; padding:10px; border:1px solid rgba(0,0,0,.15); border-radius:8px; resize:none; flex:1; font:inherit; line-height:1.45; }
+    .timeline { display:flex; align-items:center; gap:8px; padding:8px 10px; border-top:1px solid rgba(0,0,0,.1); background: rgba(243,247,255,.9); }
+    #version-range { flex:1; }
+
+    .scratchpad { height:100%; display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:12px; background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(242,246,255,.9)); }
+    #latex-input { width:100%; height:100%; resize:none; border:1px solid rgba(0,0,0,.15); border-radius:10px; padding:10px; font:inherit; }
+    #latex-preview { background:#fff; border:1px solid rgba(0,0,0,.12); border-radius:10px; padding:10px; overflow:auto; }
+
+    .graph-toolbar { padding:8px 10px; border-bottom:1px solid rgba(0,0,0,.08); background: rgba(241,246,255,.92); }
+    #graph-canvas { width:100%; height: calc(100% - 38px); background: rgba(255,255,255,.95); }
+
+    .shelf {
+      position: fixed;
+      right: 10px;
+      top: 96px;
+      bottom: 130px;
+      width: 74px;
+      z-index: 15000;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--glass);
+      backdrop-filter: blur(30px) saturate(180%);
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+      overflow: auto;
+    }
+    .shelf.drag-over { outline: 2px dashed var(--accent); }
+    .chip { width:52px; min-height:42px; border-radius:10px; background: rgba(255,255,255,.82); border:1px solid rgba(0,0,0,.12); color:#111827; font-size:11px; display:grid; place-items:center; text-align:center; padding:4px; cursor:grab; overflow:hidden; }
+
+    #context-menu {
+      position: fixed;
+      display: none;
+      z-index: 21000;
+      min-width: 240px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: rgba(255,255,255,.88);
+      backdrop-filter: blur(30px) saturate(180%);
+      box-shadow: 0 20px 30px rgba(0,0,0,.25);
+      padding: 6px;
+    }
+    #context-menu button { display:block; width:100%; text-align:left; border:0; border-radius:8px; background:transparent; color:#0f172a; padding:8px 10px; cursor:pointer; }
+    #context-menu button:hover { background: rgba(10,132,255,.12); }
+
+    .launchpad {
+      position: fixed;
+      inset: 0;
+      display: none;
+      z-index: 17000;
+      padding: 60px 40px 115px;
+      background: rgba(17,24,39,.75);
+      backdrop-filter: blur(20px);
+    }
+    .start-header { display:flex; gap:10px; margin-bottom:12px; }
+    #start-search { flex:1; border:1px solid rgba(255,255,255,.35); border-radius:10px; padding:10px; background: rgba(255,255,255,.18); color:#fff; outline:none; }
+    .start-column { display:grid; grid-template-columns:1fr 280px; gap:14px; height: calc(100% - 46px); }
+    .launch-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(112px,1fr)); gap:14px; overflow:auto; }
+    .start-side { border:1px solid rgba(255,255,255,.25); border-radius:12px; background: rgba(255,255,255,.14); padding:10px; overflow:auto; }
+    .start-side h4 { margin:4px 0 8px; font-size:12px; }
+    .start-link { display:block; color:#fff; text-decoration:none; margin:4px 0; font-size:12px; cursor:pointer; }
+
+    .modal-wrap { position:fixed; inset:0; display:none; z-index:22000; place-items:center; background: rgba(2,6,23,.45); backdrop-filter: blur(8px); }
+    .modal { width:min(560px,94vw); background:#fff; color:#0f172a; border:1px solid rgba(0,0,0,.1); border-radius:14px; padding:16px; box-shadow: 0 24px 50px rgba(0,0,0,.3); }
+    .modal h3 { margin:0 0 10px; }
+    .row { display:flex; flex-direction:column; gap:6px; margin:10px 0; font-size:13px; }
+    .modal input,.modal textarea,.modal select { border:1px solid rgba(0,0,0,.15); border-radius:8px; padding:8px; font:inherit; }
+    .actions { display:flex; justify-content:end; gap:8px; margin-top:12px; }
+
+    .palette {
+      position: fixed;
+      top: 56px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(640px, 92vw);
+      border: 1px solid rgba(0,0,0,.12);
+      border-radius: 14px;
+      overflow: hidden;
+      display: none;
+      background: rgba(255,255,255,.95);
+      color: #0f172a;
+      z-index: 23000;
+      box-shadow: 0 30px 50px rgba(0,0,0,.35);
+    }
+    .palette input { width:100%; border:0; border-bottom:1px solid rgba(0,0,0,.12); padding:14px; font-size:15px; }
+    .palette-list { max-height:220px; overflow:auto; }
+    .palette-item { padding:10px 14px; border-bottom:1px solid rgba(0,0,0,.07); font-size:13px; }
+
+    #snap-hint { position: fixed; top: 42px; left: 50%; transform: translateX(-50%); display:none; z-index: 24000; background: rgba(15,23,42,.75); border:1px solid var(--border); border-radius:8px; padding:6px 10px; font-size:11px; }
+
+    #notification-center {
+      position: fixed;
+      top: var(--menu-h);
+      right: -360px;
+      width: 340px;
+      bottom: 0;
+      z-index: 19500;
+      background: rgba(255,255,255,.88);
+      color: #0f172a;
+      border-left: 1px solid rgba(255,255,255,.35);
+      backdrop-filter: blur(30px) saturate(180%);
+      transition: right .24s ease;
+      padding: 12px;
+      overflow: auto;
+    }
+    #notification-center.open { right: 0; }
+
+    #quick-note-corner {
+      position: fixed;
+      right: 0;
+      bottom: 0;
+      width: 28px;
+      height: 28px;
+      z-index: 20500;
+      background: transparent;
+    }
+
+    .aurora {
+      width: 86px;
+      height: 20px;
+      margin-left: 4px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #34d399, #22d3ee, #818cf8, #ec4899, #f59e0b);
+      background-size: 250% 100%;
+      animation: aurora 6s linear infinite;
+      opacity: .8;
+      filter: blur(.2px);
+    }
+    @keyframes aurora {
+      0% { background-position: 0% 0; }
+      100% { background-position: 250% 0; }
+    }
+
+    .auth-pill, .control-pill {
+      display:flex; align-items:center; gap:6px; padding:2px 6px;
+      border:1px solid rgba(255,255,255,.2);
+      border-radius:8px;
+      background: rgba(255,255,255,.12);
+    }
+    #avatar { width:18px; height:18px; border-radius:50%; border:1px solid rgba(255,255,255,.4); object-fit:cover; display:none; }
+
+    #control-center {
+      position: fixed;
+      top: 38px;
+      right: 10px;
+      width: 280px;
+      display: none;
+      z-index: 20500;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: rgba(255,255,255,.85);
+      color: #0f172a;
+      padding: 12px;
+      backdrop-filter: blur(30px) saturate(180%);
+      box-shadow: 0 20px 30px rgba(0,0,0,.25);
+      font-size: 12px;
+    }
+
+    #control-center .row { margin: 8px 0; display: flex; flex-direction: column; gap: 5px; }
+  </style>
 </head>
-<body oncontextmenu="return openCtx(event)">
+<body>
+  <div class="menu-bar" id="menu-bar">
+    <button class="menu-btn" id="apple-menu"></button>
+    <span id="active-app">Finder</span>
 
-<div class="menu-bar">
-    <span style="font-weight: 900; margin-right: 15px;"></span>
-    <b id="active-app-display">Finder</b>
-    <span style="margin-left: 20px;">File</span>
-    <span style="margin-left: 15px;">Edit</span>
-    <span id="clock" style="margin-left: auto; font-weight: 500;"></span>
-</div>
+    <button class="space-chip" data-space="Physics">Physics</button>
+    <button class="space-chip" data-space="Maths">Maths</button>
+    <button class="space-chip" data-space="Chemistry">Chemistry</button>
+    <button class="space-chip" data-space="Aptitude">Aptitude</button>
+    <button class="space-chip" data-space="English">English</button>
+    <button class="space-chip" data-space="Relax">Relax</button>
 
-<div id="desktop"></div>
+    <div class="auth-pill">
+      <img id="avatar" alt="avatar" />
+      <span id="auth-name">Guest</span>
+      <button class="menu-btn" id="auth-login">Login</button>
+      <button class="menu-btn" id="auth-logout" style="display:none;">Logout</button>
+    </div>
 
-<div id="ctx-menu">
-    <div class="ctx-item" onclick="createApp('note')">New Note App</div>
-    <div class="ctx-item" onclick="createApp('site')">New Website App</div>
-    <hr style="border: 0.5px solid rgba(0,0,0,0.1); margin: 5px 0;">
-    <div class="ctx-item">Change Wallpaper</div>
-</div>
+    <div class="control-pill">
+      <button class="menu-btn" id="control-toggle">☰ Control</button>
+    </div>
 
-<div class="window" id="notes-win" style="width: 800px; height: 550px; top: 100px; left: 150px;">
-    <div class="title-bar" onmousedown="focusWin('notes-win'); dragWin(this.parentElement)">
-        <div class="traffic-lights">
-            <div class="dot close" onclick="closeWin('notes-win')"></div>
-            <div class="dot min"></div>
-            <div class="dot max"></div>
+    <button class="menu-btn" id="sync-scroll-toggle">Sync Scroll: Off</button>
+    <button class="menu-btn" id="pomodoro-btn">🍅 Start 25:00</button>
+    <button class="menu-btn" id="clock"></button>
+    <div class="aurora" title="Siri Glow"></div>
+  </div>
+
+  <div id="top-edge-sensor"></div>
+
+  <div id="control-center">
+    <div class="row">
+      <label>Volume</label>
+      <input id="volume-slider" type="range" min="0" max="100" value="70" />
+    </div>
+    <div class="row">
+      <label>Brightness</label>
+      <input id="brightness-slider" type="range" min="60" max="130" value="100" />
+    </div>
+    <div class="row" style="display:flex; flex-direction:row; align-items:center; justify-content:space-between;">
+      <label>Wi-Fi</label>
+      <input id="wifi-toggle" type="checkbox" checked />
+    </div>
+    <div class="row" style="display:flex; flex-direction:row; align-items:center; justify-content:space-between;">
+      <label>Study Mode</label>
+      <input id="study-mode-toggle" type="checkbox" />
+    </div>
+    <div class="row" style="display:flex; flex-direction:row; align-items:center; justify-content:space-between;">
+      <label>Auto-hide Menu Bar</label>
+      <input id="autohide-toggle" type="checkbox" />
+    </div>
+    <div class="row">
+      <button class="btn" id="upload-wallpaper-btn">Upload Wallpaper</button>
+      <input id="upload-wallpaper-input" type="file" accept="image/*" style="display:none;" />
+    </div>
+  </div>
+
+  <div id="snap-hint">Snap: drag to left/right edge</div>
+
+  <aside id="notification-center">
+    <h3 style="margin:0 0 8px;">Notification Center</h3>
+    <div style="border:1px solid rgba(0,0,0,.12);border-radius:10px;padding:10px;margin-bottom:10px;">
+      <b id="widget-date"></b>
+      <p style="margin:6px 0 0;color:#475569;font-size:12px;">Stay consistent. Short, daily wins > random marathons.</p>
+    </div>
+    <div style="border:1px solid rgba(0,0,0,.12);border-radius:10px;padding:10px;margin-bottom:10px;">
+      <b>Study Widgets</b>
+      <ul style="margin:8px 0 0;padding-left:18px;color:#334155;font-size:12px;">
+        <li id="widget-notes-count">Notes: 0</li>
+        <li id="widget-space">Space: Physics</li>
+        <li id="widget-pomodoro">Pomodoro: idle</li>
+      </ul>
+    </div>
+  </aside>
+
+  <main id="desktop"></main>
+
+  <section class="window" id="browser-window" style="width:min(1120px,94vw);height:min(730px,84vh);left:66px;top:66px;">
+    <div class="title-bar" data-window="browser-window">
+      <div class="traffic">
+        <button class="dot close" data-close="browser-window"></button>
+        <button class="dot min" data-min="browser-window"></button>
+        <button class="dot max" data-max="browser-window"></button>
+      </div>
+      <span class="title">Browser</span>
+      <button class="btn" id="summarize-btn" style="margin-left:auto;">Summarize</button>
+    </div>
+    <div class="tabs" id="browser-tabs"></div>
+    <div class="title-bar" style="height:40px;cursor:default;">
+      <div class="browser-controls">
+        <input id="browser-url" placeholder="Enter URL or search" />
+        <button class="btn primary" id="browser-go">Go</button>
+        <button class="btn" id="browser-new-tab">+ Tab</button>
+        <button class="btn" id="browser-close-tab">× Tab</button>
+        <button class="btn" id="snip-ocr">OCR</button>
+      </div>
+    </div>
+    <iframe id="browser-frame" src="about:blank"></iframe>
+  </section>
+
+  <section class="window" id="notes-window" style="width:min(1120px,94vw);height:min(730px,84vh);left:110px;top:90px;">
+    <div class="title-bar" data-window="notes-window">
+      <div class="traffic">
+        <button class="dot close" data-close="notes-window"></button>
+        <button class="dot min" data-min="notes-window"></button>
+        <button class="dot max" data-max="notes-window"></button>
+      </div>
+      <span class="title">Notes</span>
+      <button class="btn" id="generate-flashcards" style="margin-left:auto;">Generate Flashcards</button>
+    </div>
+    <div class="notes-shell">
+      <aside class="notes-side">
+        <div class="notes-tools">
+          <button class="btn" id="new-note">New</button>
+          <button class="btn danger" id="delete-note">Delete</button>
+          <button class="btn" id="pin-note">Pin</button>
+          <button class="btn" id="snapshot-note">Snapshot</button>
         </div>
-        <input type="text" id="note-name" value="New Note" style="background:transparent; border:none; margin-left: 20px; font-weight: bold; font-size: 14px; outline:none;">
+        <div class="note-list" id="note-list"></div>
+      </aside>
+      <section class="notes-editor">
+        <input id="note-title" placeholder="Title" />
+        <textarea id="note-body" placeholder=""></textarea>
+        <div style="padding:0 10px 6px; font-size:11px; color:#475569;">Links: use [[Topic]] to create semantic links.</div>
+        <div class="timeline">
+          <span style="font-size:12px;">Time Machine</span>
+          <input id="version-range" type="range" min="0" max="0" value="0" step="1" />
+          <span id="version-label" style="font-size:11px;min-width:140px;"></span>
+          <button class="btn" id="restore-version">Restore</button>
+        </div>
+      </section>
     </div>
-    <div id="editor" style="flex:1; background: white;"></div>
-</div>
+  </section>
 
-<div class="window" id="safari-win" style="width: 1000px; height: 650px; top: 50px; left: 100px;">
-    <div class="title-bar" onmousedown="focusWin('safari-win'); dragWin(this.parentElement)">
-        <div class="traffic-lights"><div class="dot close" onclick="closeWin('safari-win')"></div><div class="dot min"></div><div class="dot max"></div></div>
-        <input type="text" id="safari-url" placeholder="Search or URL" style="flex:1; margin:0 40px; background:rgba(0,0,0,0.05); border:1px solid rgba(0,0,0,0.1); border-radius:6px; padding:2px 10px; text-align:center;">
+  <section class="window" id="scratch-window" style="width:min(900px,90vw);height:min(540px,70vh);left:140px;top:120px;">
+    <div class="title-bar" data-window="scratch-window">
+      <div class="traffic">
+        <button class="dot close" data-close="scratch-window"></button>
+        <button class="dot min" data-min="scratch-window"></button>
+        <button class="dot max" data-max="scratch-window"></button>
+      </div>
+      <span class="title">Math Scratchpad</span>
     </div>
-    <iframe id="safari-frame" src="https://duckduckgo.com" style="flex:1; border:none; background:white;"></iframe>
-</div>
+    <div class="scratchpad">
+      <textarea id="latex-input" placeholder="Type LaTeX, e.g. \\int_{a}^{b} x^2 \\, dx"></textarea>
+      <div id="latex-preview"></div>
+    </div>
+  </section>
 
-<div class="dock-container">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/3/30/macOS_Notes_icon.svg" class="dock-icon" onclick="openWin('notes-win')">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/5/52/Safari_browser_logo.svg" class="dock-icon" onclick="openWin('safari-win')">
-</div>
+  <section class="window" id="graph-window" style="width:min(840px,86vw);height:min(520px,66vh);left:180px;top:140px;">
+    <div class="title-bar" data-window="graph-window">
+      <div class="traffic">
+        <button class="dot close" data-close="graph-window"></button>
+        <button class="dot min" data-min="graph-window"></button>
+        <button class="dot max" data-max="graph-window"></button>
+      </div>
+      <span class="title">Knowledge Graph</span>
+    </div>
+    <div class="graph-toolbar"><button class="btn" id="graph-refresh">Refresh Graph</button></div>
+    <canvas id="graph-canvas" width="1200" height="800"></canvas>
+  </section>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, doc, setDoc, onSnapshot, collection, query } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  <section class="window" id="quick-note-window" style="width:340px;height:250px;right:20px;bottom:100px;left:auto;top:auto;">
+    <div class="title-bar" data-window="quick-note-window" style="cursor:default;">
+      <div class="traffic">
+        <button class="dot close" data-close="quick-note-window"></button>
+        <button class="dot min" data-min="quick-note-window"></button>
+        <button class="dot max" data-max="quick-note-window"></button>
+      </div>
+      <span class="title">Quick Note</span>
+      <button class="btn" id="quick-note-save" style="margin-left:auto;">Save to Notes</button>
+    </div>
+    <textarea id="quick-note-body" style="margin:10px;flex:1;border:1px solid rgba(0,0,0,.15);border-radius:8px;padding:10px;resize:none;font:inherit;"></textarea>
+  </section>
 
-    const firebaseConfig = { /* USE YOUR CONFIG FROM PREVIOUS STEP */ };
+  <section class="window" id="flashcard-window" style="width:420px;height:280px;left:220px;top:180px;">
+    <div class="title-bar" data-window="flashcard-window" style="cursor:default;">
+      <div class="traffic">
+        <button class="dot close" data-close="flashcard-window"></button>
+        <button class="dot min" data-min="flashcard-window"></button>
+        <button class="dot max" data-max="flashcard-window"></button>
+      </div>
+      <span class="title">Flashcards</span>
+    </div>
+    <div style="padding:16px;display:flex;flex-direction:column;height:100%;gap:10px;">
+      <div id="flashcard-front" style="flex:1;border:1px solid rgba(0,0,0,.12);border-radius:10px;background:white;padding:12px;overflow:auto;"></div>
+      <div id="flashcard-back" style="flex:1;border:1px solid rgba(0,0,0,.12);border-radius:10px;background:#f8fafc;padding:12px;overflow:auto;display:none;"></div>
+      <div style="display:flex;gap:8px;justify-content:end;">
+        <button class="btn" id="flashcard-flip">Flip</button>
+        <button class="btn" id="flashcard-prev">Prev</button>
+        <button class="btn" id="flashcard-next">Next</button>
+      </div>
+    </div>
+  </section>
+
+  <aside class="shelf" id="shelf"><small style="font-size:10px;opacity:.85;">Shelf</small></aside>
+
+  <div id="context-menu">
+    <button data-action="add-webapp">Add Website Shortcut</button>
+    <button data-action="add-note-shortcut">Add Current Note Shortcut</button>
+    <button data-action="open-scratch">Open Math Scratchpad</button>
+    <button data-action="open-graph">Open Knowledge Graph</button>
+    <button data-action="capture-selection">Capture Selected Text to Shelf</button>
+    <button data-action="change-wallpaper">Change Wallpaper</button>
+  </div>
+
+  <div class="launchpad" id="launchpad">
+    <div class="start-header">
+      <input id="start-search" placeholder="Search apps, notes, commands..." />
+      <button class="btn" id="start-new-note">New Note</button>
+      <button class="btn" id="start-open-graph">Graph</button>
+    </div>
+    <div class="start-column">
+      <div class="launch-grid" id="launch-grid"></div>
+      <div class="start-side">
+        <h4>Recent Notes</h4>
+        <div id="start-recent-notes"></div>
+        <h4 style="margin-top:12px;">Quick Study Links</h4>
+        <a class="start-link" data-quick-url="https://ncert.nic.in/">NCERT</a>
+        <a class="start-link" data-quick-url="https://jeemain.nta.nic.in/">JEE Main</a>
+        <a class="start-link" data-quick-url="https://aeee.amrita.edu/">AEEE</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="dock" id="dock">
+    <button id="dock-launch" title="Start">🚀</button>
+    <button id="dock-browser" title="Browser">🌐</button>
+    <button id="dock-notes" title="Notes">📝</button>
+    <button id="dock-scratch" title="Math Scratchpad">∫</button>
+    <button id="dock-graph" title="Knowledge Graph">🕸️</button>
+  </div>
+
+  <div class="modal-wrap" id="shortcut-modal-wrap">
+    <form class="modal" id="shortcut-form">
+      <h3 id="shortcut-title">Add Shortcut</h3>
+      <div class="row"><label>Name</label><input id="shortcut-name" required /></div>
+      <div class="row" id="shortcut-url-row"><label>Website URL</label><input id="shortcut-url" placeholder="https://..." /></div>
+      <div class="row"><label>Place in</label><select id="shortcut-location"><option value="desktop">Desktop</option><option value="start">Start Menu</option><option value="both">Desktop + Start</option></select></div>
+      <div class="actions"><button class="btn" type="button" id="shortcut-cancel">Cancel</button><button class="btn primary" type="submit">Save</button></div>
+    </form>
+  </div>
+
+  <div class="modal-wrap" id="ocr-modal-wrap">
+    <div class="modal">
+      <h3>Screen Snip OCR</h3>
+      <div class="row"><label>Upload screenshot/image</label><input id="ocr-file" type="file" accept="image/*" /></div>
+      <div class="row"><label>Extracted text</label><textarea id="ocr-output" rows="6"></textarea></div>
+      <div class="actions"><button class="btn" id="ocr-close">Close</button><button class="btn" id="ocr-run">Run OCR</button><button class="btn primary" id="ocr-to-note">Insert into note</button></div>
+    </div>
+  </div>
+
+  <div class="modal-wrap" id="summary-modal-wrap">
+    <div class="modal">
+      <h3>Quick Summary</h3>
+      <div id="summary-content" style="font-size:13px;line-height:1.5;color:#334155;"></div>
+      <div class="actions"><button class="btn" id="summary-close">Close</button></div>
+    </div>
+  </div>
+
+  <div class="palette" id="palette">
+    <input id="palette-input" placeholder="Type command (Ctrl+K / Cmd+Space)" />
+    <div class="palette-list" id="palette-list"></div>
+  </div>
+
+  <div id="quick-note-corner" title="Hot Corner: Quick Note"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-analytics.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAPzgwYDQQqR4y8aRcu8BmXfhYoLPXDuVM",
+      authDomain: "forclearpcm.firebaseapp.com",
+      projectId: "forclearpcm",
+      storageBucket: "forclearpcm.firebasestorage.app",
+      messagingSenderId: "313585574692",
+      appId: "1:313585574692:web:d4e1262ce22c7cd0bb89b1",
+      measurementId: "G-PW32DTYBP8"
+    };
+
     const app = initializeApp(firebaseConfig);
+    try { getAnalytics(app); } catch {}
+    const auth = getAuth(app);
     const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
 
-    const quill = new Quill('#editor', { theme: 'snow', modules: { toolbar: [['bold', 'italic'], ['image', 'code-block']] } });
-    
-    // Create Apps/Desktop Icons
-    window.createApp = async (type) => {
-        const name = prompt(`Enter ${type} name:`);
-        const target = type === 'site' ? prompt("Enter URL:") : "";
-        const id = "app_" + Date.now();
-        await setDoc(doc(db, "desktop_icons", id), { name, type, target, id });
-        document.getElementById('ctx-menu').style.display = 'none';
+    const SPACE_NAMES = ['Physics','Maths','Chemistry','Aptitude','English','Relax'];
+    const WALLPAPERS = [
+      'https://wallpapers.ispazio.net/wp-content/uploads/2024/06/macOS-Sequoia-Light.jpg',
+      'https://wallpapers.ispazio.net/wp-content/uploads/2024/06/macOS-Sequoia-Dark.jpg',
+      'https://images.unsplash.com/photo-1493246318656-5bfd4cfb29b8?auto=format&fit=crop&w=2200&q=80'
+    ];
+    const LOCAL_GUEST_KEY = 'studyOS.guest.v3';
+
+    const el = {
+      menuBar: document.getElementById('menu-bar'),
+      dock: document.getElementById('dock'),
+      topSensor: document.getElementById('top-edge-sensor'),
+      desktop: document.getElementById('desktop'),
+      launchpad: document.getElementById('launchpad'),
+      launchGrid: document.getElementById('launch-grid'),
+      activeApp: document.getElementById('active-app'),
+      avatar: document.getElementById('avatar'),
+      authName: document.getElementById('auth-name'),
+      authLogin: document.getElementById('auth-login'),
+      authLogout: document.getElementById('auth-logout'),
+      clock: document.getElementById('clock'),
+      notificationCenter: document.getElementById('notification-center'),
+      widgetDate: document.getElementById('widget-date'),
+      widgetNotesCount: document.getElementById('widget-notes-count'),
+      widgetSpace: document.getElementById('widget-space'),
+      widgetPomodoro: document.getElementById('widget-pomodoro'),
+      controlCenter: document.getElementById('control-center'),
+      controlToggle: document.getElementById('control-toggle'),
+      volumeSlider: document.getElementById('volume-slider'),
+      brightnessSlider: document.getElementById('brightness-slider'),
+      wifiToggle: document.getElementById('wifi-toggle'),
+      studyModeToggle: document.getElementById('study-mode-toggle'),
+      autohideToggle: document.getElementById('autohide-toggle'),
+      syncToggle: document.getElementById('sync-scroll-toggle'),
+      pomodoroBtn: document.getElementById('pomodoro-btn'),
+      shelf: document.getElementById('shelf'),
+      browserWindow: document.getElementById('browser-window'),
+      browserTabs: document.getElementById('browser-tabs'),
+      browserUrl: document.getElementById('browser-url'),
+      browserFrame: document.getElementById('browser-frame'),
+      notesWindow: document.getElementById('notes-window'),
+      noteList: document.getElementById('note-list'),
+      noteTitle: document.getElementById('note-title'),
+      noteBody: document.getElementById('note-body'),
+      versionRange: document.getElementById('version-range'),
+      versionLabel: document.getElementById('version-label'),
+      scratchWindow: document.getElementById('scratch-window'),
+      latexInput: document.getElementById('latex-input'),
+      latexPreview: document.getElementById('latex-preview'),
+      graphWindow: document.getElementById('graph-window'),
+      graphCanvas: document.getElementById('graph-canvas'),
+      quickNoteWindow: document.getElementById('quick-note-window'),
+      quickNoteBody: document.getElementById('quick-note-body'),
+      flashcardWindow: document.getElementById('flashcard-window'),
+      flashFront: document.getElementById('flashcard-front'),
+      flashBack: document.getElementById('flashcard-back'),
+      snapHint: document.getElementById('snap-hint')
     };
 
-    // Real-time Desktop Sync
-    onSnapshot(collection(db, "desktop_icons"), (snap) => {
-        const desktop = document.getElementById('desktop');
-        desktop.innerHTML = '';
-        snap.forEach(doc => {
-            const data = doc.data();
-            const icon = data.type === 'note' ? 'https://upload.wikimedia.org/wikipedia/commons/3/30/macOS_Notes_icon.svg' : 'https://upload.wikimedia.org/wikipedia/commons/5/52/Safari_browser_logo.svg';
-            desktop.innerHTML += `
-                <div class="shortcut" onclick="launchApp('${data.id}', '${data.type}', '${data.target}')">
-                    <img src="${icon}">
-                    <span>${data.name}</span>
-                </div>`;
-        });
-    });
+    let state = null;
+    let currentUser = null;
+    let pendingRestore = null;
+    let saveTimer = null;
+    let shortcutType = 'webapp';
+    let syncScrollEnabled = false;
+    let flashcards = [];
+    let flashIndex = 0;
+    let flashShowingBack = false;
 
-    window.launchApp = (id, type, target) => {
-        if(type === 'site') {
-            openWin('safari-win');
-            document.getElementById('safari-frame').src = target;
-        } else {
-            openWin('notes-win');
-            // Logic to load specific note content from Firebase based on id
+    function makeBase() {
+      return {
+        wallpaper: 0,
+        customWallpaper: null,
+        currentSpace: 'Physics',
+        notes: [{ id: crypto.randomUUID(), title: '', body: '', updatedAt: Date.now(), history: [] }],
+        selectedNoteId: null,
+        shortcuts: [
+          { id:'core-browser', name:'Browser', type:'browser', location:'both', core:true },
+          { id:'core-notes', name:'Notes', type:'notes', location:'both', core:true },
+          { id:'core-scratch', name:'Math Scratchpad', type:'scratch', location:'both', core:true },
+          { id:'core-graph', name:'Knowledge Graph', type:'graph', location:'both', core:true }
+        ],
+        shelf: [],
+        pomodoro: { mode:'focus', running:false, endAt:null, leftMs:25*60*1000, blockedKeywords:['youtube','instagram','reel'] },
+        syncScroll: false,
+        menuAutohide: false,
+        brightness: 100,
+        studyMode: false,
+        spaces: {}
+      };
+    }
+
+    function ensureSpaces(data) {
+      SPACE_NAMES.forEach(name => {
+        if (!data.spaces[name]) {
+          data.spaces[name] = {
+            browser: { visible:false, rect:{left:66,top:66,width:'min(1120px,94vw)',height:'min(730px,84vh)',snap:''}, tabs:[{id:crypto.randomUUID(),title:'New Tab',url:'about:blank'}], activeTabId:null },
+            notes: { visible:false, noteId:data.notes[0]?.id || null, rect:{left:110,top:90,width:'min(1120px,94vw)',height:'min(730px,84vh)',snap:''} },
+            scratch: { visible:false, rect:{left:140,top:120,width:'min(900px,90vw)',height:'min(540px,70vh)',snap:''}, latex:'' },
+            graph: { visible:false, rect:{left:180,top:140,width:'min(840px,86vw)',height:'min(520px,66vh)',snap:''} }
+          };
         }
-    };
-</script>
-
-<script>
-    // System Functionality
-    function openCtx(e) {
-        e.preventDefault();
-        const menu = document.getElementById('ctx-menu');
-        menu.style.display = 'block';
-        menu.style.left = e.pageX + 'px';
-        menu.style.top = e.pageY + 'px';
-        return false;
+        const b = data.spaces[name].browser;
+        if (!b.tabs?.length) b.tabs = [{id:crypto.randomUUID(),title:'New Tab',url:'about:blank'}];
+        if (!b.activeTabId || !b.tabs.some(t => t.id === b.activeTabId)) b.activeTabId = b.tabs[0].id;
+      });
     }
 
-    document.onclick = () => document.getElementById('ctx-menu').style.display = 'none';
-
-    function focusWin(id) {
-        document.querySelectorAll('.window').forEach(w => w.classList.remove('active'));
-        document.getElementById(id).style.display = 'flex';
-        document.getElementById(id).classList.add('active');
-        document.getElementById('active-app-display').innerText = id === 'notes-win' ? 'Notes' : 'Safari';
+    function normalize(loaded) {
+      const defaults = makeBase();
+      const merged = { ...defaults, ...(loaded || {}) };
+      merged.notes = (loaded?.notes?.length ? loaded.notes : defaults.notes).map(n => ({ ...n, history: n.history || [] }));
+      merged.shortcuts = loaded?.shortcuts?.length ? loaded.shortcuts : defaults.shortcuts;
+      merged.selectedNoteId = loaded?.selectedNoteId || merged.notes[0].id;
+      merged.shelf = loaded?.shelf || [];
+      merged.pomodoro = { ...defaults.pomodoro, ...(loaded?.pomodoro || {}) };
+      merged.syncScroll = !!loaded?.syncScroll;
+      merged.menuAutohide = !!loaded?.menuAutohide;
+      merged.brightness = loaded?.brightness || 100;
+      merged.studyMode = !!loaded?.studyMode;
+      ensureSpaces(merged);
+      return merged;
     }
 
-    function closeWin(id) { document.getElementById(id).style.display = 'none'; }
+    state = normalize(null);
 
-    function dragWin(el) {
-        let x = 0, y = 0;
-        el.onmousedown = (e) => {
-            if(e.target.tagName === 'INPUT') return;
-            x = e.clientX; y = e.clientY;
-            document.onmousemove = (e) => {
-                el.style.top = (el.offsetTop - (y - e.clientY)) + "px";
-                el.style.left = (el.offsetLeft - (x - e.clientX)) + "px";
-                x = e.clientX; y = e.clientY;
-            };
-            document.onmouseup = () => document.onmousemove = null;
+    async function loadStateFor(user) {
+      if (!user) {
+        try {
+          const raw = localStorage.getItem(LOCAL_GUEST_KEY);
+          return normalize(raw ? JSON.parse(raw) : null);
+        } catch { return normalize(null); }
+      }
+      const ref = doc(db, 'users', user.uid, 'desktop', 'state');
+      const snap = await getDoc(ref);
+      return normalize(snap.exists() ? snap.data()?.payload : null);
+    }
+
+    function queueSave() {
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(saveNow, 450);
+    }
+
+    async function saveNow() {
+      if (!state) return;
+      if (!currentUser) {
+        localStorage.setItem(LOCAL_GUEST_KEY, JSON.stringify(state));
+        return;
+      }
+      const ref = doc(db, 'users', currentUser.uid, 'desktop', 'state');
+      await setDoc(ref, { payload: state, uid: currentUser.uid, updatedAt: serverTimestamp() }, { merge: true });
+    }
+
+    function esc(v) {
+      return (v || '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
+    }
+
+    function setAuthUI(user) {
+      if (!user) {
+        el.authName.textContent = 'Guest';
+        el.avatar.style.display = 'none';
+        el.authLogin.style.display = 'inline-block';
+        el.authLogout.style.display = 'none';
+        return;
+      }
+      el.authName.textContent = user.displayName || user.email || 'Signed in';
+      el.authLogin.style.display = 'none';
+      el.authLogout.style.display = 'inline-block';
+      if (user.photoURL) {
+        el.avatar.src = user.photoURL;
+        el.avatar.style.display = 'inline-block';
+      } else el.avatar.style.display = 'none';
+    }
+
+    function getSpace() { return state.spaces[state.currentSpace]; }
+
+    function applyWallpaper() {
+      const base = state.customWallpaper ? state.customWallpaper : WALLPAPERS[state.wallpaper % WALLPAPERS.length];
+      document.body.style.backgroundImage = `radial-gradient(120% 120% at 50% 0%, rgba(255,255,255,.12), rgba(255,255,255,0)), url('${base}')`;
+    }
+
+    function applyBrightness() {
+      document.documentElement.style.filter = `brightness(${state.brightness}%)`;
+    }
+
+    function markSpaces() {
+      document.querySelectorAll('.space-chip').forEach(ch => ch.classList.toggle('active', ch.dataset.space === state.currentSpace));
+    }
+
+    function iconFor(type) {
+      if (type === 'browser' || type === 'webapp') return '🌐';
+      if (type === 'notes' || type === 'note-shortcut') return '📝';
+      if (type === 'scratch') return '∫';
+      if (type === 'graph') return '🕸️';
+      return '📦';
+    }
+
+    function isBlocked(shortcut) {
+      if (!state.pomodoro.running || state.pomodoro.mode !== 'focus') return false;
+      if (shortcut.type !== 'webapp') return false;
+      const hay = `${shortcut.name} ${shortcut.url || ''}`.toLowerCase();
+      return state.pomodoro.blockedKeywords.some(k => hay.includes(k));
+    }
+
+    function renderDesktop() {
+      el.desktop.innerHTML = '';
+      state.shortcuts.filter(s => s.location === 'desktop' || s.location === 'both').forEach(shortcut => {
+        const node = document.createElement('div');
+        node.className = 'icon';
+        node.style.opacity = isBlocked(shortcut) ? '.45' : '1';
+        node.innerHTML = `<div class="tile">${iconFor(shortcut.type)}</div><div class="label">${esc(shortcut.name)}</div>`;
+        node.onclick = () => launchShortcut(shortcut.id);
+        el.desktop.appendChild(node);
+      });
+    }
+
+    function renderStartMenu(filter='') {
+      const q = filter.trim().toLowerCase();
+      const shortcuts = state.shortcuts.filter(s => (s.location === 'start' || s.location === 'both') && (!q || s.name.toLowerCase().includes(q)));
+      const notes = [...state.notes].sort((a,b)=>b.updatedAt-a.updatedAt).slice(0,8);
+
+      el.launchGrid.innerHTML = shortcuts.map(s => `<div class="icon" data-launch="${s.id}"><div class="tile">${iconFor(s.type)}</div><div class="label">${esc(s.name)}</div></div>`).join('');
+      document.getElementById('start-recent-notes').innerHTML = notes.map(n => `<a class="start-link" data-open-note="${n.id}">${esc(n.title || 'Untitled')}</a>`).join('');
+
+      document.querySelectorAll('[data-launch]').forEach(n => n.onclick = () => launchShortcut(n.dataset.launch));
+      document.querySelectorAll('[data-open-note]').forEach(n => n.onclick = () => {
+        state.selectedNoteId = n.dataset.openNote;
+        openWindow('notes-window');
+        renderNotes();
+        queueSave();
+      });
+    }
+
+    function renderWidgets() {
+      el.widgetDate.textContent = new Date().toDateString();
+      el.widgetNotesCount.textContent = `Notes: ${state.notes.length}`;
+      el.widgetSpace.textContent = `Space: ${state.currentSpace}`;
+      el.widgetPomodoro.textContent = `Pomodoro: ${state.pomodoro.running ? 'running' : 'idle'} (${state.pomodoro.mode})`;
+    }
+
+    function renderShelf() {
+      [...el.shelf.querySelectorAll('.chip')].forEach(n => n.remove());
+      state.shelf.forEach(item => {
+        const chip = document.createElement('div');
+        chip.className = 'chip';
+        chip.draggable = true;
+        chip.textContent = item.text.slice(0, 20) || '...';
+        chip.title = item.text;
+        chip.ondragstart = e => e.dataTransfer.setData('text/plain', item.text);
+        chip.onclick = () => {
+          const note = state.notes.find(n => n.id === state.selectedNoteId);
+          if (!note) return;
+          note.body = `${note.body}${note.body ? '\n' : ''}${item.text}`;
+          note.updatedAt = Date.now();
+          renderNotes();
+          queueSave();
         };
+        el.shelf.appendChild(chip);
+      });
     }
 
-    setInterval(() => {
-        document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', weekday:'short', day:'numeric', month:'short'});
-    }, 1000);
-</script>
+    function addShelf(text) {
+      const t = (text || '').trim();
+      if (!t) return;
+      state.shelf.unshift({ id: crypto.randomUUID(), text: t, at: Date.now() });
+      state.shelf = state.shelf.slice(0,45);
+      renderShelf();
+      queueSave();
+    }
+
+    function setWindowRect(node, rect) {
+      if (!rect) return;
+      node.classList.remove('snap-left','snap-right');
+      if (rect.snap === 'left') node.classList.add('snap-left');
+      if (rect.snap === 'right') node.classList.add('snap-right');
+      if (rect.snap) return;
+      node.style.left = typeof rect.left === 'number' ? `${rect.left}px` : rect.left;
+      node.style.top = typeof rect.top === 'number' ? `${rect.top}px` : rect.top;
+      node.style.width = rect.width;
+      node.style.height = rect.height;
+    }
+
+    function persistWindow(id) {
+      const sp = getSpace();
+      const node = document.getElementById(id);
+      const rect = {
+        left: node.offsetLeft,
+        top: node.offsetTop,
+        width: node.style.width || `${node.offsetWidth}px`,
+        height: node.style.height || `${node.offsetHeight}px`,
+        snap: node.classList.contains('snap-left') ? 'left' : node.classList.contains('snap-right') ? 'right' : ''
+      };
+      if (id === 'browser-window') { sp.browser.rect = rect; sp.browser.visible = node.style.display === 'flex'; }
+      if (id === 'notes-window') { sp.notes.rect = rect; sp.notes.visible = node.style.display === 'flex'; sp.notes.noteId = state.selectedNoteId; }
+      if (id === 'scratch-window') { sp.scratch.rect = rect; sp.scratch.visible = node.style.display === 'flex'; sp.scratch.latex = el.latexInput.value; }
+      if (id === 'graph-window') { sp.graph.rect = rect; sp.graph.visible = node.style.display === 'flex'; }
+      queueSave();
+    }
+
+    function openWindow(id, persist=true) {
+      document.querySelectorAll('.window').forEach(w => w.classList.remove('active'));
+      const node = document.getElementById(id);
+      node.style.display = 'flex';
+      node.classList.add('active');
+      el.activeApp.textContent = id === 'browser-window' ? 'Browser' : id === 'notes-window' ? 'Notes' : id === 'scratch-window' ? 'Math Scratchpad' : id === 'graph-window' ? 'Knowledge Graph' : id === 'flashcard-window' ? 'Flashcards' : 'Quick Note';
+
+      const sp = getSpace();
+      if (id === 'browser-window') sp.browser.visible = true;
+      if (id === 'notes-window') sp.notes.visible = true;
+      if (id === 'scratch-window') sp.scratch.visible = true;
+      if (id === 'graph-window') sp.graph.visible = true;
+
+      if (persist) persistWindow(id);
+      if (!node.classList.contains('fullscreen')) el.dock.classList.remove('hidden-dock');
+      el.launchpad.style.display = 'none';
+    }
+
+    function closeWindow(id, persist=true) {
+      const node = document.getElementById(id);
+      node.style.display = 'none';
+      node.classList.remove('active','fullscreen');
+
+      const sp = getSpace();
+      if (id === 'browser-window') sp.browser.visible = false;
+      if (id === 'notes-window') sp.notes.visible = false;
+      if (id === 'scratch-window') sp.scratch.visible = false;
+      if (id === 'graph-window') sp.graph.visible = false;
+
+      el.dock.classList.remove('hidden-dock');
+      if (!document.querySelector('.window.active')) el.activeApp.textContent = 'Finder';
+      if (persist) persistWindow(id);
+    }
+
+    function minimizeWindow(id) { closeWindow(id); }
+
+    function maximizeWindow(id) {
+      const node = document.getElementById(id);
+      if (node.classList.contains('fullscreen')) {
+        const r = JSON.parse(node.dataset.restoreRect || '{}');
+        if (r.left != null) {
+          node.style.left = `${r.left}px`;
+          node.style.top = `${r.top}px`;
+          node.style.width = `${r.width}px`;
+          node.style.height = `${r.height}px`;
+        }
+        node.classList.remove('fullscreen');
+        el.dock.classList.remove('hidden-dock');
+      } else {
+        node.dataset.restoreRect = JSON.stringify({ left: node.offsetLeft, top: node.offsetTop, width: node.offsetWidth, height: node.offsetHeight });
+        node.classList.add('fullscreen');
+        if (state.menuAutohide) el.menuBar.classList.add('hidden-bar');
+        el.dock.classList.add('hidden-dock');
+      }
+      persistWindow(id);
+    }
+
+    function applySnap(id, side) {
+      const node = document.getElementById(id);
+      node.classList.remove('snap-left','snap-right');
+      if (side === 'left') node.classList.add('snap-left');
+      if (side === 'right') node.classList.add('snap-right');
+      persistWindow(id);
+    }
+
+    function parseWikiLinks(text) {
+      const links = [];
+      const re = /\[\[([^\]]+)\]\]/g;
+      let m;
+      while ((m = re.exec(text || ''))) links.push(m[1].trim());
+      return links.filter(Boolean);
+    }
+
+    function renderGraph() {
+      const cv = el.graphCanvas;
+      const ctx = cv.getContext('2d');
+      const notes = state.notes;
+      const map = new Map(notes.map(n => [n.title?.trim() || `Untitled-${n.id.slice(0,4)}`, n]));
+      const nodes = [...map.keys()].map((name, i) => ({ name, x: 120 + (i % 6) * 170, y: 120 + Math.floor(i / 6) * 140 }));
+      const edges = [];
+      notes.forEach(n => {
+        const from = n.title?.trim() || `Untitled-${n.id.slice(0,4)}`;
+        parseWikiLinks(n.body).forEach(to => { if (map.has(to)) edges.push([from,to]); });
+      });
+
+      ctx.clearRect(0,0,cv.width,cv.height);
+      ctx.fillStyle = '#f8fbff';
+      ctx.fillRect(0,0,cv.width,cv.height);
+      const byName = new Map(nodes.map(n => [n.name, n]));
+
+      ctx.strokeStyle = '#94a3b8';
+      ctx.lineWidth = 2;
+      edges.forEach(([a,b]) => {
+        const n1 = byName.get(a), n2 = byName.get(b);
+        if (!n1 || !n2) return;
+        ctx.beginPath();
+        ctx.moveTo(n1.x, n1.y);
+        ctx.lineTo(n2.x, n2.y);
+        ctx.stroke();
+      });
+
+      nodes.forEach(n => {
+        ctx.fillStyle = '#0a84ff';
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, 18, 0, Math.PI*2);
+        ctx.fill();
+        ctx.fillStyle = '#0f172a';
+        ctx.font = '12px -apple-system';
+        ctx.fillText(n.name.slice(0,22), n.x + 24, n.y + 4);
+      });
+    }
+
+    function refreshTimeMachine(note) {
+      const history = note.history || [];
+      el.versionRange.max = Math.max(0, history.length - 1);
+      el.versionRange.value = history.length ? String(history.length - 1) : '0';
+      pendingRestore = history.length ? history[history.length - 1] : null;
+      el.versionLabel.textContent = pendingRestore ? new Date(pendingRestore.at).toLocaleString() : 'No snapshots';
+    }
+
+    function snapshot(note) {
+      note.history = note.history || [];
+      const last = note.history[note.history.length - 1];
+      if (last && last.title === note.title && last.body === note.body) return;
+      note.history.push({ at: Date.now(), title: note.title, body: note.body });
+      if (note.history.length > 80) note.history = note.history.slice(-80);
+    }
+
+    function renderNotes() {
+      el.noteList.innerHTML = '';
+      [...state.notes].sort((a,b)=>b.updatedAt-a.updatedAt).forEach(note => {
+        const links = parseWikiLinks(note.body).length;
+        const row = document.createElement('div');
+        row.className = `note-item ${note.id === state.selectedNoteId ? 'active' : ''}`;
+        row.innerHTML = `<div>${esc(note.title || 'Untitled')}</div><small>${new Date(note.updatedAt).toLocaleString()} • links:${links}</small>`;
+        row.onclick = () => { state.selectedNoteId = note.id; getSpace().notes.noteId = note.id; renderNotes(); queueSave(); };
+        el.noteList.appendChild(row);
+      });
+
+      const note = state.notes.find(n => n.id === state.selectedNoteId) || state.notes[0];
+      if (!note) return;
+      state.selectedNoteId = note.id;
+      el.noteTitle.value = note.title;
+      el.noteBody.value = note.body;
+      refreshTimeMachine(note);
+      renderWidgets();
+    }
+
+    function updateCurrentNote() {
+      const note = state.notes.find(n => n.id === state.selectedNoteId);
+      if (!note) return;
+      note.title = el.noteTitle.value;
+      note.body = el.noteBody.value;
+      note.updatedAt = Date.now();
+      getSpace().notes.noteId = note.id;
+      renderNotes();
+      queueSave();
+    }
+
+    function renderBrowserTabs() {
+      const b = getSpace().browser;
+      el.browserTabs.innerHTML = '';
+      b.tabs.forEach(t => {
+        const n = document.createElement('div');
+        n.className = `tab ${t.id === b.activeTabId ? 'active' : ''}`;
+        n.textContent = t.title || 'Tab';
+        n.onclick = () => { b.activeTabId = t.id; loadActiveTab(); renderBrowserTabs(); queueSave(); };
+        el.browserTabs.appendChild(n);
+      });
+    }
+
+    function getActiveTab() {
+      const b = getSpace().browser;
+      return b.tabs.find(t => t.id === b.activeTabId) || b.tabs[0];
+    }
+
+    function loadActiveTab() {
+      const tab = getActiveTab();
+      if (!tab) return;
+      el.browserUrl.value = tab.url || 'about:blank';
+      el.browserFrame.src = tab.url || 'about:blank';
+    }
+
+    function navigate(urlRaw) {
+      let value = (urlRaw || '').trim();
+      if (!value) return;
+      if (!/^https?:\/\//i.test(value)) value = value.includes('.') && !value.includes(' ') ? `https://${value}` : `https://www.google.com/search?q=${encodeURIComponent(value)}`;
+      const tab = getActiveTab();
+      if (!tab) return;
+      tab.url = value;
+      tab.title = value.replace(/^https?:\/\//, '').slice(0,26);
+      el.browserUrl.value = value;
+      el.browserFrame.src = value;
+      renderBrowserTabs();
+      queueSave();
+    }
+
+    function launchShortcut(id) {
+      const s = state.shortcuts.find(x => x.id === id);
+      if (!s || isBlocked(s)) return;
+      if (s.type === 'browser' || s.type === 'webapp') { openWindow('browser-window'); if (s.url) navigate(s.url); }
+      else if (s.type === 'notes') openWindow('notes-window');
+      else if (s.type === 'scratch') openWindow('scratch-window');
+      else if (s.type === 'graph') { openWindow('graph-window'); renderGraph(); }
+      else if (s.type === 'note-shortcut') {
+        openWindow('notes-window');
+        const note = state.notes.find(n => n.id === s.noteId);
+        if (note) { state.selectedNoteId = note.id; renderNotes(); queueSave(); }
+      }
+    }
+
+    function applySpace() {
+      const sp = getSpace();
+      setWindowRect(el.browserWindow, sp.browser.rect);
+      setWindowRect(el.notesWindow, sp.notes.rect);
+      setWindowRect(el.scratchWindow, sp.scratch.rect);
+      setWindowRect(el.graphWindow, sp.graph.rect);
+
+      if (sp.notes.noteId && state.notes.some(n => n.id === sp.notes.noteId)) state.selectedNoteId = sp.notes.noteId;
+      el.latexInput.value = sp.scratch.latex || '';
+      renderLatex();
+
+      if (sp.browser.visible) openWindow('browser-window', false); else closeWindow('browser-window', false);
+      if (sp.notes.visible) openWindow('notes-window', false); else closeWindow('notes-window', false);
+      if (sp.scratch.visible) openWindow('scratch-window', false); else closeWindow('scratch-window', false);
+      if (sp.graph.visible) openWindow('graph-window', false); else closeWindow('graph-window', false);
+
+      renderBrowserTabs();
+      loadActiveTab();
+      renderNotes();
+      markSpaces();
+      renderWidgets();
+      queueSave();
+    }
+
+    function switchSpace(name) {
+      persistWindow('browser-window');
+      persistWindow('notes-window');
+      persistWindow('scratch-window');
+      persistWindow('graph-window');
+      state.currentSpace = name;
+      applySpace();
+    }
+
+    function renderLatex() {
+      const tex = el.latexInput.value.trim();
+      el.latexPreview.innerHTML = tex ? `\\[${tex}\\]` : '<em>Live preview appears here...</em>';
+      if (window.MathJax?.typesetPromise) MathJax.typesetPromise([el.latexPreview]);
+      getSpace().scratch.latex = el.latexInput.value;
+      queueSave();
+    }
+
+    function renderPomodoro() {
+      const p = state.pomodoro;
+      const ms = p.running ? Math.max(0, p.endAt - Date.now()) : p.leftMs;
+      const m = String(Math.floor(ms / 60000)).padStart(2,'0');
+      const s = String(Math.floor((ms % 60000) / 1000)).padStart(2,'0');
+      el.pomodoroBtn.textContent = `🍅 ${p.running ? 'Pause' : 'Start'} ${m}:${s}`;
+      renderWidgets();
+    }
+
+    function applyPomodoroEffects() {
+      const focus = state.pomodoro.running && state.pomodoro.mode === 'focus';
+      el.browserFrame.classList.toggle('grayscale', focus);
+      renderDesktop();
+      renderStartMenu(document.getElementById('start-search').value || '');
+    }
+
+    function togglePomodoro() {
+      const p = state.pomodoro;
+      if (!p.running) { p.running = true; p.endAt = Date.now() + p.leftMs; }
+      else { p.running = false; p.leftMs = Math.max(0, p.endAt - Date.now()); }
+      applyPomodoroEffects();
+      queueSave();
+    }
+
+    function finishPomodoroPhase() {
+      const p = state.pomodoro;
+      p.running = false;
+      p.mode = p.mode === 'focus' ? 'break' : 'focus';
+      p.leftMs = (p.mode === 'focus' ? 25 : 5) * 60 * 1000;
+      p.endAt = null;
+      applyPomodoroEffects();
+      queueSave();
+    }
+
+    function handleSyncScroll() {
+      if (!syncScrollEnabled) return;
+      if (!(el.browserWindow.classList.contains('snap-left') && el.notesWindow.classList.contains('snap-right'))) return;
+      const ratio = el.noteBody.scrollTop / Math.max(1, el.noteBody.scrollHeight - el.noteBody.clientHeight);
+      try {
+        const h = el.browserFrame.contentWindow?.document?.body?.scrollHeight;
+        if (!h) return;
+        const y = ratio * Math.max(0, h - el.browserFrame.clientHeight);
+        el.browserFrame.contentWindow.scrollTo(0, y);
+      } catch {}
+    }
+
+    function generateFlashcardsFromNote() {
+      const note = state.notes.find(n => n.id === state.selectedNoteId);
+      if (!note) return;
+      const terms = [];
+      const boldMatches = [...note.body.matchAll(/\*\*([^*]+)\*\*/g)].map(m => m[1].trim());
+      const latexMatches = [...note.body.matchAll(/\$\$?([^$]+)\$\$?/g)].map(m => m[1].trim());
+      const wikiLinks = parseWikiLinks(note.body);
+      boldMatches.forEach(t => terms.push({front: t, back: `Explain: ${t}`}));
+      latexMatches.forEach(t => terms.push({front: `Equation`, back: `\\(${t}\\)`}));
+      wikiLinks.forEach(t => terms.push({front: t, back: `Related concept from linked note` }));
+      flashcards = terms.length ? terms : [{front:'No patterns found', back:'Use **bold**, $equations$, or [[links]] in notes.'}];
+      flashIndex = 0;
+      flashShowingBack = false;
+      renderFlashcard();
+      openWindow('flashcard-window');
+    }
+
+    function renderFlashcard() {
+      const card = flashcards[flashIndex] || {front:'-', back:'-'};
+      el.flashFront.innerHTML = esc(card.front);
+      el.flashBack.innerHTML = card.back.includes('\\(') ? card.back : esc(card.back);
+      if (card.back.includes('\\(') && window.MathJax?.typesetPromise) MathJax.typesetPromise([el.flashBack]);
+      el.flashBack.style.display = flashShowingBack ? 'block' : 'none';
+    }
+
+    async function summarizeCurrentWindow() {
+      let text = '';
+      try {
+        text = el.browserFrame.contentWindow?.document?.body?.innerText?.slice(0, 6000) || '';
+      } catch {}
+
+      if (!text.trim()) {
+        text = prompt('Cannot access this page text directly (cross-origin). Paste the text to summarize:') || '';
+      }
+      if (!text.trim()) return;
+
+      const summary = localSummarize(text);
+      const formulas = (text.match(/([A-Za-z]\s*=\s*[^\n,;]+)/g) || []).slice(0,6);
+
+      const out = `
+        <b>3-point summary</b>
+        <ul>
+          ${summary.points.map(p => `<li>${esc(p)}</li>`).join('')}
+        </ul>
+        <b>Key formulas / expressions</b>
+        <ul>
+          ${(formulas.length ? formulas : ['No explicit formulas detected.']).map(f => `<li>${esc(f)}</li>`).join('')}
+        </ul>
+      `;
+      document.getElementById('summary-content').innerHTML = out;
+      document.getElementById('summary-modal-wrap').style.display = 'grid';
+    }
+
+    function localSummarize(text) {
+      const sentences = text
+        .replace(/\s+/g, ' ')
+        .split(/(?<=[.!?])\s+/)
+        .filter(Boolean)
+        .slice(0, 120);
+      const stop = new Set(['the','and','for','that','with','this','from','are','was','have','has','you','your','into','but','not','can','will','all','its']);
+      const freq = new Map();
+      sentences.join(' ').toLowerCase().match(/[a-z]{4,}/g)?.forEach(w => { if (!stop.has(w)) freq.set(w, (freq.get(w)||0)+1); });
+      const scored = sentences.map(s => {
+        const score = (s.toLowerCase().match(/[a-z]{4,}/g) || []).reduce((a,w)=>a+(freq.get(w)||0),0);
+        return {s, score};
+      }).sort((a,b)=>b.score-a.score).slice(0,3).map(x => x.s.trim());
+      return { points: scored.length ? scored : [sentences[0] || text.slice(0,180)] };
+    }
+
+    function runCommand(inputRaw) {
+      const input = (inputRaw || '').trim();
+      if (!input) return;
+      const l = input.toLowerCase();
+      if (l.startsWith('new ') && l.endsWith(' note')) {
+        const title = input.replace(/^new\s+/i,'').replace(/\s+note$/i,'');
+        const note = { id: crypto.randomUUID(), title, body:'', updatedAt:Date.now(), history:[] };
+        state.notes.unshift(note);
+        state.selectedNoteId = note.id;
+        renderNotes();
+        openWindow('notes-window');
+        queueSave();
+        return;
+      }
+      if (l.startsWith('visit ')) { openWindow('browser-window'); navigate(input.slice(6)); return; }
+      if (l.startsWith('switch to ')) {
+        const target = SPACE_NAMES.find(s => s.toLowerCase() === input.slice(10).trim().toLowerCase());
+        if (target) switchSpace(target);
+        return;
+      }
+      if (l === 'open notes') return openWindow('notes-window');
+      if (l === 'open browser') return openWindow('browser-window');
+      if (l === 'open scratchpad') return openWindow('scratch-window');
+      if (l === 'open graph') { openWindow('graph-window'); renderGraph(); return; }
+      if (l === 'start pomodoro') {
+        state.pomodoro.mode = 'focus';
+        state.pomodoro.leftMs = 25*60*1000;
+        state.pomodoro.running = false;
+        togglePomodoro();
+      }
+    }
+
+    function openShortcutModal(type) {
+      shortcutType = type;
+      document.getElementById('shortcut-form').reset();
+      document.getElementById('shortcut-url-row').style.display = type === 'webapp' ? 'flex' : 'none';
+      document.getElementById('shortcut-title').textContent = type === 'webapp' ? 'Add Website Shortcut' : 'Add Note Shortcut';
+      document.getElementById('shortcut-modal-wrap').style.display = 'grid';
+    }
+
+    function bindWindowDrag() {
+      const EDGE = 24;
+      document.querySelectorAll('.title-bar').forEach(bar => {
+        bar.addEventListener('mousedown', e => {
+          if (e.target.closest('button,input,select,label,textarea')) return;
+          const id = bar.dataset.window;
+          const node = document.getElementById(id);
+          const sx = e.clientX, sy = e.clientY;
+          const startL = node.offsetLeft, startT = node.offsetTop;
+          node.classList.remove('snap-left','snap-right');
+
+          const move = ev => {
+            node.style.left = `${Math.max(0, startL + ev.clientX - sx)}px`;
+            node.style.top = `${Math.max(34, startT + ev.clientY - sy)}px`;
+
+            if (ev.clientX <= EDGE) {
+              el.snapHint.style.display = 'block';
+              el.snapHint.textContent = 'Release to snap LEFT';
+            } else if (ev.clientX >= window.innerWidth - EDGE) {
+              el.snapHint.style.display = 'block';
+              el.snapHint.textContent = 'Release to snap RIGHT';
+            } else el.snapHint.style.display = 'none';
+          };
+
+          const up = ev => {
+            window.removeEventListener('mousemove', move);
+            window.removeEventListener('mouseup', up);
+            el.snapHint.style.display = 'none';
+            if (ev.clientX <= EDGE) applySnap(id, 'left');
+            else if (ev.clientX >= window.innerWidth - EDGE) applySnap(id, 'right');
+            else persistWindow(id);
+          };
+
+          window.addEventListener('mousemove', move);
+          window.addEventListener('mouseup', up);
+        });
+      });
+    }
+
+    function bindEvents() {
+      document.getElementById('dock-launch').onclick = () => {
+        el.launchpad.style.display = el.launchpad.style.display === 'block' ? 'none' : 'block';
+        renderStartMenu(document.getElementById('start-search').value || '');
+      };
+      document.getElementById('dock-browser').onclick = () => openWindow('browser-window');
+      document.getElementById('dock-notes').onclick = () => openWindow('notes-window');
+      document.getElementById('dock-scratch').onclick = () => openWindow('scratch-window');
+      document.getElementById('dock-graph').onclick = () => { openWindow('graph-window'); renderGraph(); };
+      document.getElementById('apple-menu').onclick = () => {
+        el.launchpad.style.display = el.launchpad.style.display === 'block' ? 'none' : 'block';
+        renderStartMenu(document.getElementById('start-search').value || '');
+      };
+
+      document.querySelectorAll('.space-chip').forEach(ch => ch.onclick = () => switchSpace(ch.dataset.space));
+      document.querySelectorAll('[data-close]').forEach(b => b.onclick = () => closeWindow(b.dataset.close));
+      document.querySelectorAll('[data-min]').forEach(b => b.onclick = () => minimizeWindow(b.dataset.min));
+      document.querySelectorAll('[data-max]').forEach(b => b.onclick = () => maximizeWindow(b.dataset.max));
+
+      document.querySelectorAll('.window').forEach(w => {
+        w.addEventListener('mousedown', () => {
+          document.querySelectorAll('.window').forEach(x => x.classList.remove('active'));
+          w.classList.add('active');
+        });
+      });
+
+      if (window.ResizeObserver) {
+        const ro = new ResizeObserver(entries => {
+          entries.forEach(entry => {
+            if (entry.target.classList.contains('window')) persistWindow(entry.target.id);
+          });
+        });
+        document.querySelectorAll('.window').forEach(w => ro.observe(w));
+      }
+
+      bindWindowDrag();
+
+      document.getElementById('browser-go').onclick = () => navigate(el.browserUrl.value);
+      el.browserUrl.addEventListener('keydown', e => e.key === 'Enter' && navigate(el.browserUrl.value));
+      document.getElementById('browser-new-tab').onclick = () => {
+        const b = getSpace().browser;
+        const t = { id: crypto.randomUUID(), title: 'New Tab', url: 'about:blank' };
+        b.tabs.push(t); b.activeTabId = t.id;
+        renderBrowserTabs(); loadActiveTab(); queueSave();
+      };
+      document.getElementById('browser-close-tab').onclick = () => {
+        const b = getSpace().browser;
+        if (b.tabs.length === 1) return;
+        b.tabs = b.tabs.filter(t => t.id !== b.activeTabId);
+        b.activeTabId = b.tabs[0].id;
+        renderBrowserTabs(); loadActiveTab(); queueSave();
+      };
+
+      document.getElementById('new-note').onclick = () => {
+        const n = { id: crypto.randomUUID(), title: '', body: '', updatedAt: Date.now(), history: [] };
+        state.notes.unshift(n);
+        state.selectedNoteId = n.id;
+        getSpace().notes.noteId = n.id;
+        renderNotes();
+        queueSave();
+      };
+
+      document.getElementById('delete-note').onclick = () => {
+        if (state.notes.length === 1) state.notes[0] = { id: crypto.randomUUID(), title: '', body: '', updatedAt: Date.now(), history: [] };
+        else {
+          state.notes = state.notes.filter(n => n.id !== state.selectedNoteId);
+          state.shortcuts = state.shortcuts.filter(s => s.type !== 'note-shortcut' || s.noteId !== state.selectedNoteId);
+        }
+        state.selectedNoteId = state.notes[0].id;
+        renderNotes(); renderDesktop(); renderStartMenu(document.getElementById('start-search').value || ''); queueSave();
+      };
+
+      document.getElementById('pin-note').onclick = () => {
+        const n = state.notes.find(x => x.id === state.selectedNoteId);
+        if (!n) return;
+        state.shortcuts.push({ id:'note-'+crypto.randomUUID(), name:n.title || 'Untitled Note', type:'note-shortcut', noteId:n.id, location:'both' });
+        renderDesktop(); renderStartMenu(document.getElementById('start-search').value || ''); queueSave();
+      };
+
+      document.getElementById('snapshot-note').onclick = () => {
+        const n = state.notes.find(x => x.id === state.selectedNoteId);
+        if (!n) return;
+        snapshot(n); refreshTimeMachine(n); queueSave();
+      };
+
+      el.noteTitle.addEventListener('input', updateCurrentNote);
+      el.noteBody.addEventListener('input', updateCurrentNote);
+      el.noteBody.addEventListener('scroll', handleSyncScroll);
+      el.noteBody.addEventListener('drop', e => {
+        e.preventDefault();
+        const text = e.dataTransfer.getData('text/plain');
+        if (!text) return;
+        el.noteBody.setRangeText(text, el.noteBody.selectionStart, el.noteBody.selectionEnd, 'end');
+        updateCurrentNote();
+      });
+
+      el.versionRange.addEventListener('input', () => {
+        const n = state.notes.find(x => x.id === state.selectedNoteId);
+        if (!n) return;
+        const idx = Number(el.versionRange.value);
+        pendingRestore = n.history[idx] || null;
+        el.versionLabel.textContent = pendingRestore ? new Date(pendingRestore.at).toLocaleString() : 'No snapshots';
+      });
+      document.getElementById('restore-version').onclick = () => {
+        if (!pendingRestore) return;
+        el.noteTitle.value = pendingRestore.title;
+        el.noteBody.value = pendingRestore.body;
+        updateCurrentNote();
+      };
+
+      el.latexInput.addEventListener('input', renderLatex);
+      document.getElementById('graph-refresh').onclick = renderGraph;
+
+      document.getElementById('summarize-btn').onclick = summarizeCurrentWindow;
+      document.getElementById('summary-close').onclick = () => document.getElementById('summary-modal-wrap').style.display = 'none';
+
+      document.getElementById('generate-flashcards').onclick = generateFlashcardsFromNote;
+      document.getElementById('flashcard-flip').onclick = () => { flashShowingBack = !flashShowingBack; renderFlashcard(); };
+      document.getElementById('flashcard-prev').onclick = () => { if (!flashcards.length) return; flashIndex = (flashIndex - 1 + flashcards.length) % flashcards.length; flashShowingBack = false; renderFlashcard(); };
+      document.getElementById('flashcard-next').onclick = () => { if (!flashcards.length) return; flashIndex = (flashIndex + 1) % flashcards.length; flashShowingBack = false; renderFlashcard(); };
+
+      document.getElementById('quick-note-save').onclick = () => {
+        const text = el.quickNoteBody.value.trim();
+        if (!text) return;
+        const n = { id: crypto.randomUUID(), title: 'Quick Capture', body: text, updatedAt: Date.now(), history: [] };
+        state.notes.unshift(n);
+        state.selectedNoteId = n.id;
+        el.quickNoteBody.value = '';
+        closeWindow('quick-note-window');
+        renderNotes(); renderDesktop(); renderStartMenu(document.getElementById('start-search').value || ''); queueSave();
+      };
+
+      const menu = document.getElementById('context-menu');
+      window.addEventListener('contextmenu', e => {
+        e.preventDefault();
+        menu.style.display = 'block';
+        menu.style.left = `${e.clientX}px`;
+        menu.style.top = `${e.clientY}px`;
+      });
+      window.addEventListener('click', () => menu.style.display = 'none');
+      menu.addEventListener('click', e => {
+        const action = e.target.closest('button')?.dataset.action;
+        if (!action) return;
+        if (action === 'add-webapp') openShortcutModal('webapp');
+        if (action === 'add-note-shortcut') openShortcutModal('note-shortcut');
+        if (action === 'open-scratch') openWindow('scratch-window');
+        if (action === 'open-graph') { openWindow('graph-window'); renderGraph(); }
+        if (action === 'capture-selection') addShelf(window.getSelection()?.toString() || '');
+        if (action === 'change-wallpaper') {
+          state.customWallpaper = null;
+          state.wallpaper = (state.wallpaper + 1) % WALLPAPERS.length;
+          applyWallpaper();
+          queueSave();
+        }
+      });
+
+      document.getElementById('shortcut-form').addEventListener('submit', e => {
+        e.preventDefault();
+        const name = document.getElementById('shortcut-name').value.trim();
+        const location = document.getElementById('shortcut-location').value;
+        if (!name) return;
+        if (shortcutType === 'webapp') {
+          const url = document.getElementById('shortcut-url').value.trim();
+          state.shortcuts.push({ id:'web-'+crypto.randomUUID(), name, type:'webapp', url, location });
+        } else state.shortcuts.push({ id:'note-'+crypto.randomUUID(), name, type:'note-shortcut', noteId: state.selectedNoteId, location });
+        document.getElementById('shortcut-modal-wrap').style.display = 'none';
+        renderDesktop(); renderStartMenu(document.getElementById('start-search').value || ''); queueSave();
+      });
+      document.getElementById('shortcut-cancel').onclick = () => document.getElementById('shortcut-modal-wrap').style.display = 'none';
+
+      document.getElementById('snip-ocr').onclick = () => document.getElementById('ocr-modal-wrap').style.display = 'grid';
+      document.getElementById('ocr-close').onclick = () => document.getElementById('ocr-modal-wrap').style.display = 'none';
+      document.getElementById('ocr-run').onclick = async () => {
+        const f = document.getElementById('ocr-file').files[0];
+        if (!f) return;
+        const out = document.getElementById('ocr-output');
+        out.value = 'Running OCR...';
+        const { data } = await Tesseract.recognize(f, 'eng');
+        out.value = data.text || '';
+      };
+      document.getElementById('ocr-to-note').onclick = () => {
+        const text = document.getElementById('ocr-output').value;
+        if (!text.trim()) return;
+        el.noteBody.value = `${el.noteBody.value}${el.noteBody.value ? '\n' : ''}${text}`;
+        updateCurrentNote();
+        document.getElementById('ocr-modal-wrap').style.display = 'none';
+      };
+
+      el.shelf.addEventListener('dragover', e => { e.preventDefault(); el.shelf.classList.add('drag-over'); });
+      el.shelf.addEventListener('dragleave', () => el.shelf.classList.remove('drag-over'));
+      el.shelf.addEventListener('drop', e => {
+        e.preventDefault();
+        el.shelf.classList.remove('drag-over');
+        addShelf(e.dataTransfer.getData('text/plain'));
+      });
+
+      el.launchpad.addEventListener('click', e => { if (e.target === el.launchpad) el.launchpad.style.display = 'none'; });
+      document.getElementById('start-search').addEventListener('input', e => renderStartMenu(e.target.value));
+      document.getElementById('start-new-note').onclick = () => document.getElementById('new-note').click();
+      document.getElementById('start-open-graph').onclick = () => { openWindow('graph-window'); renderGraph(); };
+      document.querySelectorAll('[data-quick-url]').forEach(a => a.onclick = () => { openWindow('browser-window'); navigate(a.dataset.quickUrl); });
+
+      const palette = document.getElementById('palette');
+      const paletteInput = document.getElementById('palette-input');
+      function openPalette() {
+        palette.style.display = 'block';
+        document.getElementById('palette-list').innerHTML = ['New Physics Note','Visit ncert.nic.in','Switch to Aptitude','Open graph','Start Pomodoro'].map(v => `<div class="palette-item">${v}</div>`).join('');
+        paletteInput.value = '';
+        paletteInput.focus();
+      }
+      function closePalette() { palette.style.display = 'none'; }
+      document.addEventListener('keydown', e => {
+        if ((e.ctrlKey && e.key.toLowerCase() === 'k') || (e.metaKey && e.code === 'Space')) { e.preventDefault(); openPalette(); }
+        if (e.key === 'Escape') {
+          closePalette();
+          document.getElementById('shortcut-modal-wrap').style.display = 'none';
+          document.getElementById('ocr-modal-wrap').style.display = 'none';
+          document.getElementById('summary-modal-wrap').style.display = 'none';
+          el.controlCenter.style.display = 'none';
+        }
+      });
+      paletteInput.addEventListener('keydown', e => { if (e.key === 'Enter') { runCommand(paletteInput.value); closePalette(); } });
+
+      document.getElementById('quick-note-corner').addEventListener('mouseenter', () => {
+        openWindow('quick-note-window');
+        el.quickNoteBody.focus();
+      });
+
+      el.controlToggle.onclick = () => {
+        el.controlCenter.style.display = el.controlCenter.style.display === 'block' ? 'none' : 'block';
+      };
+
+      el.brightnessSlider.oninput = () => {
+        state.brightness = Number(el.brightnessSlider.value);
+        applyBrightness();
+        queueSave();
+      };
+
+      el.studyModeToggle.onchange = () => {
+        state.studyMode = el.studyModeToggle.checked;
+        state.pomodoro.mode = state.studyMode ? 'focus' : state.pomodoro.mode;
+        queueSave();
+      };
+
+      el.autohideToggle.onchange = () => {
+        state.menuAutohide = el.autohideToggle.checked;
+        if (!state.menuAutohide) el.menuBar.classList.remove('hidden-bar');
+        queueSave();
+      };
+
+      el.topSensor.addEventListener('mouseenter', () => {
+        if (state.menuAutohide) el.menuBar.classList.remove('hidden-bar');
+      });
+      document.addEventListener('mousemove', e => {
+        if (state.menuAutohide && e.clientY > 40 && !el.menuBar.matches(':hover') && !el.controlCenter.matches(':hover')) {
+          el.menuBar.classList.add('hidden-bar');
+        }
+      });
+
+      el.syncToggle.onclick = () => {
+        syncScrollEnabled = !syncScrollEnabled;
+        state.syncScroll = syncScrollEnabled;
+        el.syncToggle.textContent = `Sync Scroll: ${syncScrollEnabled ? 'On' : 'Off'}`;
+        queueSave();
+      };
+
+      el.pomodoroBtn.onclick = togglePomodoro;
+      el.clock.onclick = () => {
+        el.notificationCenter.classList.toggle('open');
+      };
+
+      el.authLogin.onclick = async () => { await signInWithPopup(auth, provider); };
+      el.authLogout.onclick = async () => { await signOut(auth); };
+
+      document.getElementById('upload-wallpaper-btn').onclick = () => document.getElementById('upload-wallpaper-input').click();
+      document.getElementById('upload-wallpaper-input').onchange = e => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const fr = new FileReader();
+        fr.onload = () => {
+          state.customWallpaper = fr.result;
+          applyWallpaper();
+          queueSave();
+        };
+        fr.readAsDataURL(file);
+      };
+
+      setInterval(() => {
+        if (!state) return;
+        const p = state.pomodoro;
+        if (p.running && p.endAt && Date.now() >= p.endAt) finishPomodoroPhase();
+        renderPomodoro();
+        el.clock.textContent = new Date().toLocaleString([], { weekday:'short', hour:'2-digit', minute:'2-digit', day:'numeric', month:'short' });
+      }, 1000);
+
+      setInterval(() => {
+        if (!state) return;
+        state.notes.forEach(snapshot);
+        const n = state.notes.find(x => x.id === state.selectedNoteId);
+        if (n) refreshTimeMachine(n);
+        queueSave();
+      }, 30 * 60 * 1000);
+    }
+
+    async function bootstrap(user) {
+      currentUser = user;
+      setAuthUI(user);
+      state = await loadStateFor(user);
+      syncScrollEnabled = !!state.syncScroll;
+      el.syncToggle.textContent = `Sync Scroll: ${syncScrollEnabled ? 'On' : 'Off'}`;
+      el.autohideToggle.checked = !!state.menuAutohide;
+      el.studyModeToggle.checked = !!state.studyMode;
+      el.brightnessSlider.value = String(state.brightness || 100);
+      applyWallpaper();
+      applyBrightness();
+      markSpaces();
+      renderDesktop();
+      renderStartMenu('');
+      renderShelf();
+      renderNotes();
+      applySpace();
+      applyPomodoroEffects();
+      renderWidgets();
+      openWindow('notes-window');
+    }
+
+    bindEvents();
+    onAuthStateChanged(auth, user => bootstrap(user));
+  </script>
 </body>
 </html>
