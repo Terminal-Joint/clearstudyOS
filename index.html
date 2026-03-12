@@ -3,242 +3,101 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>StudyOS 11</title>
+  <title>StudyOS 11 Ultimate</title>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     :root {
       --taskbar-h: 64px;
-      --glass: rgba(18, 25, 46, 0.45);
-      --glass-soft: rgba(255,255,255,0.12);
-      --line: rgba(255,255,255,0.2);
-      --text: #f6f8ff;
-      --text-dim: #cfd8ff;
+      --glass-opacity: 0.46;
       --accent: #5b8cff;
-      --ok: #2ec27e;
-      --warn: #f0b429;
-      --danger: #ff6b6b;
+      --text: #f5f7ff;
+      --line: rgba(255,255,255,.20);
+      --bg-url: url('https://images.unsplash.com/photo-1526778548025-fa2f459cd5ce?q=80&w=2070&auto=format&fit=crop');
     }
     * { box-sizing: border-box; }
-    html, body {
-      margin: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      font-family: "SF Pro Display", "SF Pro Text", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color: var(--text);
-    }
+    html, body { margin:0; width:100%; height:100%; overflow:hidden; font-family:"SF Pro Display","Inter",-apple-system,"Segoe UI",sans-serif; color:var(--text); }
     body {
       background:
-        radial-gradient(120% 120% at 10% 10%, rgba(95, 137, 255, 0.4), transparent 45%),
-        radial-gradient(100% 100% at 90% 20%, rgba(148, 88, 255, 0.35), transparent 50%),
-        radial-gradient(100% 100% at 50% 100%, rgba(0, 186, 255, 0.25), transparent 40%),
-        url('https://images.unsplash.com/photo-1639322537231-2f206e06af84?q=80&w=1932&auto=format&fit=crop');
-      background-size: cover;
-      background-position: center;
+        radial-gradient(100% 100% at 20% 10%, rgba(98,125,255,.35), transparent 50%),
+        radial-gradient(120% 100% at 80% 20%, rgba(172,80,255,.25), transparent 45%),
+        var(--bg-url) center/cover no-repeat;
     }
-    .glass {
-      background: var(--glass);
-      backdrop-filter: blur(18px) saturate(140%);
-      -webkit-backdrop-filter: blur(18px) saturate(140%);
-      border: 1px solid var(--line);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
-    }
+    .glass { background: rgba(14,20,40,var(--glass-opacity)); backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%); border:1px solid var(--line); box-shadow:0 10px 30px rgba(0,0,0,.35); }
+    .btn { border:1px solid var(--line); background:rgba(255,255,255,.12); color:var(--text); border-radius:10px; padding:8px 10px; font:inherit; cursor:pointer; }
+    .btn.primary { background:var(--accent); border-color:transparent; }
+    .field { border:1px solid var(--line); background:rgba(255,255,255,.12); color:var(--text); border-radius:10px; padding:8px 10px; font:inherit; }
 
-    #desktop {
-      position: absolute;
-      inset: 12px 12px calc(var(--taskbar-h) + 12px) 12px;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(98px, 1fr));
-      grid-auto-rows: 110px;
-      gap: 10px;
-      align-content: start;
-      overflow: auto;
-    }
-    .icon {
-      width: 92px;
-      justify-self: center;
-      text-align: center;
-      padding: 6px;
-      border-radius: 14px;
-      cursor: pointer;
-    }
-    .icon:hover { background: rgba(255,255,255,0.16); }
-    .tile {
-      width: 58px;
-      height: 58px;
-      border-radius: 16px;
-      margin: 0 auto;
-      display: grid;
-      place-items: center;
-      font-size: 28px;
-      background: rgba(255,255,255,0.15);
-      border: 1px solid rgba(255,255,255,0.4);
-    }
-    .label { margin-top: 7px; font-size: 12px; text-shadow: 0 2px 6px rgba(0,0,0,.6); }
+    #desktop { position:absolute; inset:10px 10px calc(var(--taskbar-h) + 10px) 10px; display:grid; grid-template-columns:repeat(auto-fill,minmax(98px,1fr)); grid-auto-rows:110px; gap:8px; align-content:start; overflow:auto; }
+    .icon { width:92px; justify-self:center; text-align:center; border-radius:12px; padding:6px; cursor:pointer; }
+    .icon:hover { background:rgba(255,255,255,.14); }
+    .tile { width:56px; height:56px; margin:0 auto; border-radius:14px; border:1px solid rgba(255,255,255,.4); background:rgba(255,255,255,.14); display:grid; place-items:center; font-size:28px; }
+    .label { margin-top:6px; font-size:12px; text-shadow:0 2px 6px rgba(0,0,0,.6); }
 
-    #taskbar {
-      position: fixed;
-      left: 12px;
-      right: 12px;
-      bottom: 10px;
-      height: var(--taskbar-h);
-      border-radius: 16px;
-      z-index: 2000;
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      align-items: center;
-      padding: 0 14px;
-    }
-    #tb-left, #tb-right { display: flex; align-items: center; gap: 8px; }
-    #tb-center { display: flex; gap: 8px; align-items: center; justify-content: center; }
-    .tb-btn {
-      border: 1px solid transparent;
-      background: transparent;
-      color: var(--text);
-      border-radius: 12px;
-      min-width: 40px;
-      height: 40px;
-      padding: 0 10px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-    .tb-btn:hover, .tb-btn.active { background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.25); }
-    .pill { padding: 7px 10px; border-radius: 10px; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2); font-size: 12px; }
+    #taskbar { position:fixed; left:12px; right:12px; bottom:10px; height:var(--taskbar-h); border-radius:16px; z-index:6000; display:grid; grid-template-columns:1fr auto 1fr; align-items:center; padding:0 12px; }
+    #tb-left,#tb-center,#tb-right{display:flex;align-items:center;gap:8px;} #tb-center{justify-content:center;} #tb-right{justify-content:flex-end;}
+    .tb-btn { border:1px solid transparent; background:transparent; color:var(--text); border-radius:11px; height:40px; min-width:40px; padding:0 10px; cursor:pointer; }
+    .tb-btn:hover{ background:rgba(255,255,255,.16); border-color:rgba(255,255,255,.2); }
+    .pill { border:1px solid var(--line); border-radius:10px; background:rgba(255,255,255,.12); padding:6px 10px; font-size:12px; }
 
-    #start-menu {
-      position: fixed;
-      left: 50%;
-      transform: translateX(-50%);
-      bottom: 84px;
-      width: min(760px, 95vw);
-      border-radius: 18px;
-      padding: 14px;
-      z-index: 2100;
-      display: none;
-    }
-    #start-search { width: 100%; padding: 11px 12px; border-radius: 12px; border: 1px solid var(--line); background: rgba(255,255,255,.15); color: white; }
-    #start-grid { margin-top: 12px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
-    .start-item { border: 1px solid var(--line); border-radius: 12px; padding: 9px; text-align: center; background: rgba(255,255,255,.08); cursor: pointer; font-size: 12px; }
-    .start-item:hover { background: rgba(255,255,255,.17); }
+    #start-menu { position:fixed; left:50%; transform:translateX(-50%); bottom:84px; width:min(860px,95vw); border-radius:18px; padding:12px; z-index:6200; display:none; }
+    #start-search { width:100%; margin-bottom:10px; }
+    #spaces { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
+    .space-chip { border:1px solid var(--line); background:rgba(255,255,255,.1); color:var(--text); border-radius:999px; padding:6px 10px; cursor:pointer; font-size:12px; }
+    .space-chip.active { background:var(--accent); border-color:transparent; }
+    #start-grid { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:8px; }
+    .start-item { border:1px solid var(--line); background:rgba(255,255,255,.08); border-radius:12px; padding:10px; text-align:center; cursor:pointer; font-size:12px; }
 
-    .window {
-      position: absolute;
-      display: none;
-      flex-direction: column;
-      min-width: 360px;
-      min-height: 260px;
-      width: min(980px, 92vw);
-      height: min(720px, 84vh);
-      left: 90px;
-      top: 72px;
-      border-radius: 18px;
-      overflow: hidden;
-      z-index: 100;
-    }
-    .window.active { z-index: 800; }
-    .titlebar {
-      height: 48px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 0 12px;
-      cursor: move;
-      border-bottom: 1px solid var(--line);
-      background: rgba(255,255,255,0.08);
-    }
-    .ctrl { width: 11px; height: 11px; border-radius: 50%; border: 0; cursor: pointer; }
-    .close { background: #ff5f57; }
-    .min { background: #febc2e; }
-    .max { background: #28c840; }
-    .title { font-weight: 700; font-size: 14px; color: white; }
-    .grow { flex: 1; }
+    .window { position:absolute; display:none; flex-direction:column; min-width:360px; min-height:260px; width:min(980px,92vw); height:min(720px,84vh); left:90px; top:70px; border-radius:18px; overflow:hidden; z-index:300; resize:both; }
+    .window.active { z-index:900; }
+    .titlebar { height:46px; display:flex; align-items:center; gap:8px; padding:0 12px; border-bottom:1px solid var(--line); background:rgba(255,255,255,.08); cursor:move; }
+    .ctrl { width:11px; height:11px; border-radius:50%; border:0; cursor:pointer; }
+    .close{background:#ff5f57}.min{background:#febc2e}.max{background:#28c840}
+    .toolbar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:10px; border-bottom:1px solid var(--line); background:rgba(255,255,255,.07); }
+    .app-body { flex:1; min-height:0; overflow:auto; padding:10px; }
 
-    .toolbar { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,.06); }
-    .toolbar input, .toolbar select, .toolbar textarea, .field {
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 8px 10px;
-      background: rgba(255,255,255,.1);
-      color: white;
-      font: inherit;
-      outline: none;
-    }
-    .btn {
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      background: rgba(255,255,255,.12);
-      color: white;
-      padding: 8px 10px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-    .btn.primary { background: var(--accent); border-color: transparent; }
-
-    .app-body { flex: 1; min-height: 0; overflow: auto; padding: 12px; }
-    .split { display: grid; grid-template-columns: 280px 1fr; gap: 10px; height: 100%; }
-    .panel { border: 1px solid var(--line); border-radius: 14px; background: rgba(255,255,255,.07); min-height: 0; }
-
-    /* Notes */
-    #notes-list { overflow: auto; max-height: 100%; }
-    .note-item { padding: 10px; border-bottom: 1px solid rgba(255,255,255,.14); cursor: pointer; }
-    .note-item.active { background: rgba(91, 140, 255, 0.28); }
-    #note-title, #note-content { width: 100%; }
-    #note-content { min-height: 320px; resize: vertical; }
-
-    /* Dashboard */
-    .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-    .card { border: 1px solid var(--line); border-radius: 14px; background: rgba(255,255,255,.08); padding: 12px; }
-    .card b { font-size: 22px; }
-
-    /* Planner */
-    .task-row { display: grid; grid-template-columns: 28px 1fr auto auto; gap: 8px; align-items: center; padding: 9px; border-bottom: 1px solid rgba(255,255,255,.12); }
-
-    /* Flashcards */
-    .flash-card { min-height: 260px; border-radius: 16px; border: 1px solid var(--line); background: rgba(255,255,255,.08); padding: 16px; display: grid; place-items: center; text-align: center; }
-
-    /* Quiz */
-    .quiz-q { border: 1px solid var(--line); border-radius: 12px; padding: 10px; margin-bottom: 10px; background: rgba(255,255,255,.06); }
-
-    /* Focus */
-    .timer { font-size: 60px; font-weight: 800; letter-spacing: 2px; }
-
-    @media (max-width: 980px) {
-      .cards { grid-template-columns: repeat(2, 1fr); }
-      .split { grid-template-columns: 1fr; }
-      #start-grid { grid-template-columns: repeat(3, 1fr); }
-    }
+    .cards { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+    .card { border:1px solid var(--line); border-radius:14px; background:rgba(255,255,255,.08); padding:12px; }
+    .card b { font-size:24px; }
+    .split { display:grid; grid-template-columns:270px 1fr; gap:10px; height:100%; }
+    .panel { border:1px solid var(--line); border-radius:14px; background:rgba(255,255,255,.07); }
+    .note-item,.book-item,.task-row{padding:10px;border-bottom:1px solid rgba(255,255,255,.14);} .note-item.active{background:rgba(91,140,255,.25)}
+    .task-row{display:grid;grid-template-columns:28px 1fr auto auto;gap:8px;align-items:center;}
+    #browser-frame,#pdf-frame{width:100%;height:100%;border:0;border-radius:10px;background:white;}
+    #assistant-messages{height:300px;overflow:auto;border:1px solid var(--line);border-radius:12px;padding:10px;background:rgba(255,255,255,.06)}
+    .msg{margin:8px 0;padding:8px 10px;border-radius:10px;max-width:90%}.msg.user{margin-left:auto;background:rgba(91,140,255,.35)}.msg.ai{background:rgba(255,255,255,.14)}
+    @media (max-width: 980px){ .cards{grid-template-columns:repeat(2,1fr)} #start-grid{grid-template-columns:repeat(3,1fr)} .split{grid-template-columns:1fr;} }
   </style>
 </head>
 <body>
   <main id="desktop"></main>
 
   <aside id="start-menu" class="glass">
-    <input id="start-search" placeholder="Search apps and commands..." />
+    <input id="start-search" class="field" placeholder="Search apps, websites, commands..." />
+    <div id="spaces"></div>
     <div id="start-grid"></div>
   </aside>
 
   <section id="dashboard-window" class="window glass">
     <div class="titlebar" data-window="dashboard-window">
       <button class="ctrl close" data-close="dashboard-window"></button><button class="ctrl min" data-close="dashboard-window"></button><button class="ctrl max" data-max="dashboard-window"></button>
-      <span class="title">Dashboard</span><span class="grow"></span>
-      <button id="daily-sync" class="btn">Sync now</button>
+      <b>Dashboard</b><div style="margin-left:auto"></div><button class="btn" id="sync-now">Sync</button>
     </div>
     <div class="app-body">
       <div class="cards">
-        <div class="card"><div>Today Focus</div><b id="metric-today-min">0m</b></div>
-        <div class="card"><div>Study Streak</div><b id="metric-streak">0d</b></div>
-        <div class="card"><div>Tasks Done</div><b id="metric-tasks">0</b></div>
-        <div class="card"><div>Quiz Accuracy</div><b id="metric-quiz">0%</b></div>
+        <div class="card"><div>Today Minutes</div><b id="m-today">0m</b></div>
+        <div class="card"><div>Streak</div><b id="m-streak">0d</b></div>
+        <div class="card"><div>Tasks Done</div><b id="m-tasks">0</b></div>
+        <div class="card"><div>Quiz Accuracy</div><b id="m-quiz">0%</b></div>
       </div>
-      <div class="panel" style="margin-top:12px;padding:12px;">
+      <div class="panel" style="margin-top:10px;padding:12px;">
         <h3 style="margin:0 0 8px;">Learning Coach</h3>
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-          <label>Daily Goal Minutes <input type="number" class="field" id="daily-goal" min="30" max="480" step="5" style="width:110px;"></label>
-          <button class="btn primary" id="save-goal">Save goal</button>
-          <button class="btn" id="open-focus">Start focus session</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <label>Goal <input id="daily-goal" type="number" class="field" min="30" max="600" style="width:110px"></label>
+          <button class="btn primary" id="save-goal">Save Goal</button>
+          <button class="btn" id="open-focus">Open Focus Timer</button>
         </div>
-        <div id="coach-text" style="margin-top:8px;color:var(--text-dim);"></div>
+        <div id="coach-text" style="margin-top:8px;opacity:.9;"></div>
       </div>
     </div>
   </section>
@@ -246,79 +105,99 @@
   <section id="notes-window" class="window glass" style="left:120px;top:84px;">
     <div class="titlebar" data-window="notes-window">
       <button class="ctrl close" data-close="notes-window"></button><button class="ctrl min" data-close="notes-window"></button><button class="ctrl max" data-max="notes-window"></button>
-      <span class="title">Notes</span><span class="grow"></span>
-      <button class="btn" id="note-new">New</button>
-      <button class="btn" id="note-delete">Delete</button>
-      <button class="btn primary" id="flashcards-from-note">Generate Flashcards</button>
+      <b>Notes</b><div style="margin-left:auto"></div>
+      <button class="btn" id="note-new">New</button><button class="btn" id="note-delete">Delete</button><button class="btn" id="note-save">Save Note</button><button class="btn primary" id="note-cards">Flashcards</button>
     </div>
     <div class="app-body split">
       <aside class="panel" id="notes-list"></aside>
       <section class="panel" style="padding:10px;display:flex;flex-direction:column;gap:8px;">
-        <input id="note-title" class="field" placeholder="Note title" />
-        <textarea id="note-content" class="field" placeholder="Write with markdown, formulas like $F=ma$, and structured concepts."></textarea>
+        <input id="note-title" class="field" placeholder="Title" />
+        <textarea id="note-content" class="field" style="min-height:360px;resize:vertical;" placeholder="Type notes, formulas, and key:value pairs for flashcards."></textarea>
       </section>
     </div>
   </section>
 
-  <section id="planner-window" class="window glass" style="left:160px;top:104px;width:min(760px,92vw);height:min(640px,78vh);">
-    <div class="titlebar" data-window="planner-window">
-      <button class="ctrl close" data-close="planner-window"></button><button class="ctrl min" data-close="planner-window"></button><button class="ctrl max" data-max="planner-window"></button>
-      <span class="title">Planner</span>
-    </div>
+  <section id="planner-window" class="window glass" style="left:150px;top:96px;width:min(760px,92vw);height:min(640px,78vh);">
+    <div class="titlebar" data-window="planner-window"><button class="ctrl close" data-close="planner-window"></button><button class="ctrl min" data-close="planner-window"></button><button class="ctrl max" data-max="planner-window"></button><b>Planner</b></div>
     <div class="toolbar">
-      <input id="task-title" placeholder="Task" style="flex:1;">
-      <input id="task-subject" placeholder="Subject" style="width:140px;">
-      <input id="task-due" type="date">
-      <button class="btn primary" id="task-add">Add Task</button>
+      <input id="task-title" class="field" placeholder="Task" style="flex:1;"><input id="task-subject" class="field" placeholder="Subject" style="width:140px;"><input id="task-due" class="field" type="date"><button class="btn primary" id="task-add">Add</button>
     </div>
     <div class="app-body panel" id="task-list"></div>
   </section>
 
-  <section id="flashcards-window" class="window glass" style="left:180px;top:120px;width:min(700px,90vw);height:min(560px,76vh);">
-    <div class="titlebar" data-window="flashcards-window">
-      <button class="ctrl close" data-close="flashcards-window"></button><button class="ctrl min" data-close="flashcards-window"></button><button class="ctrl max" data-max="flashcards-window"></button>
-      <span class="title">Flashcards</span>
-      <span class="grow"></span>
-      <button class="btn" id="card-prev">Prev</button>
-      <button class="btn" id="card-flip">Flip</button>
-      <button class="btn" id="card-next">Next</button>
+  <section id="browser-window" class="window glass" style="left:180px;top:88px;width:min(1100px,94vw);height:min(740px,86vh);">
+    <div class="titlebar" data-window="browser-window"><button class="ctrl close" data-close="browser-window"></button><button class="ctrl min" data-close="browser-window"></button><button class="ctrl max" data-max="browser-window"></button><b>Study Browser</b></div>
+    <div class="toolbar">
+      <input id="browser-url" class="field" placeholder="Enter URL or search" style="flex:1;">
+      <button class="btn primary" id="browser-go">Go</button>
+      <button class="btn" id="install-webapp">Install as App</button>
     </div>
+    <div class="app-body" style="padding:10px;"><iframe id="browser-frame" src="https://www.wikipedia.org"></iframe></div>
+  </section>
+
+  <section id="assistant-window" class="window glass" style="left:200px;top:110px;width:min(780px,92vw);height:min(650px,82vh);">
+    <div class="titlebar" data-window="assistant-window"><button class="ctrl close" data-close="assistant-window"></button><button class="ctrl min" data-close="assistant-window"></button><button class="ctrl max" data-max="assistant-window"></button><b>AI Assistant</b></div>
+    <div class="app-body" style="display:flex;flex-direction:column;gap:8px;">
+      <div id="assistant-messages"></div>
+      <textarea id="assistant-input" class="field" placeholder="Ask your study question..." style="min-height:90px;"></textarea>
+      <div style="display:flex;gap:8px;"><button class="btn primary" id="assistant-send">Send</button><button class="btn" id="assistant-clear">Clear</button></div>
+    </div>
+  </section>
+
+  <section id="flashcards-window" class="window glass" style="left:220px;top:120px;width:min(700px,90vw);height:min(560px,76vh);">
+    <div class="titlebar" data-window="flashcards-window"><button class="ctrl close" data-close="flashcards-window"></button><button class="ctrl min" data-close="flashcards-window"></button><button class="ctrl max" data-max="flashcards-window"></button><b>Flashcards</b><div style="margin-left:auto"></div><button class="btn" id="card-prev">Prev</button><button class="btn" id="card-flip">Flip</button><button class="btn" id="card-next">Next</button></div>
     <div class="app-body" style="display:flex;flex-direction:column;gap:10px;">
-      <div id="flash-card" class="flash-card">No cards yet. Generate from Notes.</div>
-      <div style="display:flex;gap:8px;justify-content:center;">
-        <button class="btn" data-rate="again">Again</button>
-        <button class="btn" data-rate="hard">Hard</button>
-        <button class="btn primary" data-rate="good">Good</button>
-        <button class="btn" data-rate="easy">Easy</button>
-      </div>
-      <div id="card-meta" style="text-align:center;color:var(--text-dim);"></div>
+      <div id="flash-card" class="panel" style="min-height:260px;display:grid;place-items:center;padding:14px;text-align:center;"></div>
+      <div style="display:flex;gap:8px;justify-content:center;"><button class="btn" data-rate="again">Again</button><button class="btn" data-rate="hard">Hard</button><button class="btn primary" data-rate="good">Good</button><button class="btn" data-rate="easy">Easy</button></div>
+      <div id="card-meta" style="text-align:center;opacity:.9;"></div>
     </div>
   </section>
 
-  <section id="quiz-window" class="window glass" style="left:220px;top:80px;width:min(780px,92vw);height:min(620px,80vh);">
-    <div class="titlebar" data-window="quiz-window">
-      <button class="ctrl close" data-close="quiz-window"></button><button class="ctrl min" data-close="quiz-window"></button><button class="ctrl max" data-max="quiz-window"></button>
-      <span class="title">Adaptive Quiz</span><span class="grow"></span>
-      <button class="btn" id="quiz-generate">Generate Quiz</button>
-      <button class="btn primary" id="quiz-submit">Submit</button>
+  <section id="pdf-window" class="window glass" style="left:140px;top:100px;width:min(1080px,94vw);height:min(740px,86vh);">
+    <div class="titlebar" data-window="pdf-window"><button class="ctrl close" data-close="pdf-window"></button><button class="ctrl min" data-close="pdf-window"></button><button class="ctrl max" data-max="pdf-window"></button><b>Bookshelf & PDF Reader</b></div>
+    <div class="toolbar">
+      <input type="file" id="pdf-upload" class="field" accept="application/pdf">
+      <input id="book-title" class="field" placeholder="Book title" style="width:180px;">
+      <button class="btn primary" id="add-book">Add to Shelf</button>
     </div>
+    <div class="app-body split">
+      <aside class="panel" id="bookshelf" style="overflow:auto;"></aside>
+      <section class="panel" style="padding:8px;"><iframe id="pdf-frame"></iframe></section>
+    </div>
+  </section>
+
+  <section id="focus-window" class="window glass" style="left:250px;top:120px;width:min(560px,92vw);height:min(500px,72vh);">
+    <div class="titlebar" data-window="focus-window"><button class="ctrl close" data-close="focus-window"></button><button class="ctrl min" data-close="focus-window"></button><button class="ctrl max" data-max="focus-window"></button><b>Focus Timer</b></div>
+    <div class="app-body" style="display:grid;place-items:center;gap:10px;">
+      <div id="focus-timer" style="font-size:58px;font-weight:800;">25:00</div>
+      <div style="display:flex;gap:8px;"><button class="btn primary" id="focus-start">Start</button><button class="btn" id="focus-pause">Pause</button><button class="btn" id="focus-reset">Reset</button></div>
+      <div id="focus-state" style="opacity:.9;">Ready</div>
+    </div>
+  </section>
+
+  <section id="settings-window" class="window glass" style="left:180px;top:95px;width:min(820px,92vw);height:min(660px,82vh);">
+    <div class="titlebar" data-window="settings-window"><button class="ctrl close" data-close="settings-window"></button><button class="ctrl min" data-close="settings-window"></button><button class="ctrl max" data-max="settings-window"></button><b>Settings</b></div>
+    <div class="app-body" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="panel" style="padding:10px;display:flex;flex-direction:column;gap:8px;">
+        <h4 style="margin:0;">Desktop Customization</h4>
+        <label>Wallpaper URL <input id="set-wallpaper" class="field" placeholder="https://..." /></label>
+        <label>Accent color <input id="set-accent" class="field" type="color" /></label>
+        <label>Glass Opacity <input id="set-glass" class="field" type="range" min="20" max="80" /></label>
+        <button class="btn primary" id="apply-theme">Apply Theme</button>
+      </div>
+      <div class="panel" style="padding:10px;display:flex;flex-direction:column;gap:8px;">
+        <h4 style="margin:0;">AI Assistant (Online)</h4>
+        <label>Endpoint <input id="ai-endpoint" class="field" placeholder="https://api.openai.com/v1/chat/completions" /></label>
+        <label>Model <input id="ai-model" class="field" placeholder="gpt-4o-mini" /></label>
+        <label>API Key <input id="ai-key" class="field" type="password" placeholder="sk-..." /></label>
+        <button class="btn" id="save-ai-settings">Save AI Settings</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="quiz-window" class="window glass" style="left:240px;top:86px;width:min(780px,92vw);height:min(620px,80vh);">
+    <div class="titlebar" data-window="quiz-window"><button class="ctrl close" data-close="quiz-window"></button><button class="ctrl min" data-close="quiz-window"></button><button class="ctrl max" data-max="quiz-window"></button><b>Adaptive Quiz</b><div style="margin-left:auto"></div><button class="btn" id="quiz-generate">Generate</button><button class="btn primary" id="quiz-submit">Submit</button></div>
     <div class="app-body" id="quiz-body"></div>
-  </section>
-
-  <section id="focus-window" class="window glass" style="left:260px;top:120px;width:min(560px,92vw);height:min(500px,72vh);">
-    <div class="titlebar" data-window="focus-window">
-      <button class="ctrl close" data-close="focus-window"></button><button class="ctrl min" data-close="focus-window"></button><button class="ctrl max" data-max="focus-window"></button>
-      <span class="title">Focus Timer</span>
-    </div>
-    <div class="app-body" style="display:grid;place-items:center;gap:12px;">
-      <div class="timer" id="focus-timer">25:00</div>
-      <div style="display:flex;gap:8px;">
-        <button class="btn primary" id="focus-start">Start</button>
-        <button class="btn" id="focus-pause">Pause</button>
-        <button class="btn" id="focus-reset">Reset</button>
-      </div>
-      <div id="focus-state" style="color:var(--text-dim);">Ready</div>
-    </div>
   </section>
 
   <div id="taskbar" class="glass">
@@ -332,11 +211,13 @@
       <button class="tb-btn" data-open="dashboard-window">📊</button>
       <button class="tb-btn" data-open="notes-window">📝</button>
       <button class="tb-btn" data-open="planner-window">📅</button>
-      <button class="tb-btn" data-open="flashcards-window">🗂️</button>
-      <button class="tb-btn" data-open="quiz-window">🧠</button>
-      <button class="tb-btn" data-open="focus-window">⏱️</button>
+      <button class="tb-btn" data-open="browser-window">🌐</button>
+      <button class="tb-btn" data-open="assistant-window">🤖</button>
+      <button class="tb-btn" data-open="pdf-window">📚</button>
+      <button class="tb-btn" data-open="settings-window">⚙️</button>
     </div>
     <div id="tb-right">
+      <div class="pill" id="space-pill">Space: Physics</div>
       <div class="pill" id="status-pill">Saved</div>
       <div class="pill" id="clock-pill"></div>
     </div>
@@ -364,33 +245,46 @@
     const provider = new GoogleAuthProvider();
     const db = getFirestore(app);
 
-    const LOCAL_KEY = 'studyos11-guest-state';
-    const APPS = [
-      { id:'dashboard-window', name:'Dashboard', icon:'📊' },
-      { id:'notes-window', name:'Notes', icon:'📝' },
-      { id:'planner-window', name:'Planner', icon:'📅' },
-      { id:'flashcards-window', name:'Flashcards', icon:'🗂️' },
-      { id:'quiz-window', name:'Adaptive Quiz', icon:'🧠' },
-      { id:'focus-window', name:'Focus Timer', icon:'⏱️' }
+    const LOCAL_KEY = 'studyos11-ultimate-guest';
+    const SPACES = ['Physics','Chemistry','Mathematics','Aptitude'];
+    const CORE_APPS = [
+      { id:'dashboard-window', name:'Dashboard', icon:'📊', type:'core' },
+      { id:'notes-window', name:'Notes', icon:'📝', type:'core' },
+      { id:'planner-window', name:'Planner', icon:'📅', type:'core' },
+      { id:'browser-window', name:'Browser', icon:'🌐', type:'core' },
+      { id:'assistant-window', name:'AI Assistant', icon:'🤖', type:'core' },
+      { id:'flashcards-window', name:'Flashcards', icon:'🗂️', type:'core' },
+      { id:'quiz-window', name:'Quiz', icon:'🧠', type:'core' },
+      { id:'pdf-window', name:'Bookshelf', icon:'📚', type:'core' },
+      { id:'focus-window', name:'Focus', icon:'⏱️', type:'core' },
+      { id:'settings-window', name:'Settings', icon:'⚙️', type:'core' }
     ];
 
     const el = {
       desktop: document.getElementById('desktop'),
       startMenu: document.getElementById('start-menu'),
-      startGrid: document.getElementById('start-grid'),
       startSearch: document.getElementById('start-search'),
+      startGrid: document.getElementById('start-grid'),
+      spaces: document.getElementById('spaces'),
+      userPill: document.getElementById('user-pill'),
       status: document.getElementById('status-pill'),
       clock: document.getElementById('clock-pill'),
-      userPill: document.getElementById('user-pill'),
+      spacePill: document.getElementById('space-pill'),
       noteList: document.getElementById('notes-list'),
       noteTitle: document.getElementById('note-title'),
       noteContent: document.getElementById('note-content'),
       taskList: document.getElementById('task-list'),
+      browserUrl: document.getElementById('browser-url'),
+      browserFrame: document.getElementById('browser-frame'),
+      assistantMessages: document.getElementById('assistant-messages'),
+      assistantInput: document.getElementById('assistant-input'),
       flashCard: document.getElementById('flash-card'),
       cardMeta: document.getElementById('card-meta'),
-      quizBody: document.getElementById('quiz-body'),
+      bookshelf: document.getElementById('bookshelf'),
+      pdfFrame: document.getElementById('pdf-frame'),
       focusTimer: document.getElementById('focus-timer'),
-      focusState: document.getElementById('focus-state')
+      focusState: document.getElementById('focus-state'),
+      quizBody: document.getElementById('quiz-body')
     };
 
     let currentUser = null;
@@ -398,53 +292,71 @@
     let flashIndex = 0;
     let flashBack = false;
     let quiz = [];
-    let focusInterval = null;
 
-    function baseState() {
+    function baseSpace() {
       return {
-        notes: [{ id: crypto.randomUUID(), title: 'Welcome', content: 'This is your study brain.\n\nWrite concepts and equations like $F=ma$.', updatedAt: Date.now() }],
+        notes: [{ id: crypto.randomUUID(), title: 'Welcome', content: 'Start learning in this subject space.', updatedAt: Date.now() }],
         selectedNoteId: null,
         tasks: [],
         flashcards: [],
+        books: [],
         quizHistory: [],
-        analytics: { dailyGoalMin: 120, studyMinutesByDay: {}, completedFocusSessions: 0 },
-        focus: { running: false, endAt: null, leftMs: 25 * 60 * 1000 },
+        browser: { url: 'https://www.wikipedia.org' },
         windows: {}
       };
     }
 
-    function normalize(loaded) {
+    function baseState() {
+      const spaces = {};
+      SPACES.forEach(s => spaces[s] = baseSpace());
+      return {
+        currentSpace: 'Physics',
+        spaces,
+        installedApps: [],
+        analytics: { dailyGoalMin: 120, minutesByDay: {}, completedFocus: 0 },
+        focus: { running: false, endAt: null, leftMs: 25 * 60 * 1000 },
+        theme: { wallpaper: '', accent: '#5b8cff', glass: 46 },
+        ai: { endpoint: '', model: 'gpt-4o-mini', apiKey: '' },
+        assistant: { messages: [] }
+      };
+    }
+
+    function normalize(raw) {
       const b = baseState();
-      const s = { ...b, ...(loaded || {}) };
-      s.notes = (loaded?.notes?.length ? loaded.notes : b.notes).map(n => ({ ...n, updatedAt: n.updatedAt || Date.now() }));
-      s.selectedNoteId = loaded?.selectedNoteId && s.notes.some(n => n.id === loaded.selectedNoteId) ? loaded.selectedNoteId : s.notes[0].id;
-      s.tasks = loaded?.tasks || [];
-      s.flashcards = loaded?.flashcards || [];
-      s.quizHistory = loaded?.quizHistory || [];
-      s.analytics = { ...b.analytics, ...(loaded?.analytics || {}) };
-      s.analytics.studyMinutesByDay = loaded?.analytics?.studyMinutesByDay || {};
-      s.focus = { ...b.focus, ...(loaded?.focus || {}) };
-      s.windows = loaded?.windows || {};
+      const s = { ...b, ...(raw || {}) };
+      s.spaces = s.spaces || {};
+      SPACES.forEach(name => {
+        const sp = { ...baseSpace(), ...(s.spaces[name] || {}) };
+        sp.notes = (sp.notes?.length ? sp.notes : baseSpace().notes).map(n => ({ ...n, updatedAt: n.updatedAt || Date.now() }));
+        sp.selectedNoteId = sp.selectedNoteId && sp.notes.some(n => n.id === sp.selectedNoteId) ? sp.selectedNoteId : sp.notes[0].id;
+        sp.tasks = sp.tasks || [];
+        sp.flashcards = sp.flashcards || [];
+        sp.books = sp.books || [];
+        sp.quizHistory = sp.quizHistory || [];
+        sp.browser = { url: 'https://www.wikipedia.org', ...(sp.browser || {}) };
+        sp.windows = sp.windows || {};
+        s.spaces[name] = sp;
+      });
+      s.installedApps = s.installedApps || [];
+      s.analytics = { ...b.analytics, ...(s.analytics || {}) };
+      s.analytics.minutesByDay = s.analytics.minutesByDay || {};
+      s.focus = { ...b.focus, ...(s.focus || {}) };
+      s.theme = { ...b.theme, ...(s.theme || {}) };
+      s.ai = { ...b.ai, ...(s.ai || {}) };
+      s.assistant = { messages: s.assistant?.messages || [] };
+      if (!SPACES.includes(s.currentSpace)) s.currentSpace = SPACES[0];
       return s;
     }
 
     let state = normalize(null);
 
-    function dayKey(ts = Date.now()) { return new Date(ts).toISOString().slice(0, 10); }
-    function markMinutes(min) {
-      const k = dayKey();
-      state.analytics.studyMinutesByDay[k] = Number(state.analytics.studyMinutesByDay[k] || 0) + Math.max(0, min);
-    }
+    const getSpace = () => state.spaces[state.currentSpace];
+    const dayKey = (ts=Date.now()) => new Date(ts).toISOString().slice(0,10);
+    function markMinutes(m) { const k = dayKey(); state.analytics.minutesByDay[k] = Number(state.analytics.minutesByDay[k] || 0) + Math.max(0,m); }
     function streakDays() {
-      let days = 0;
-      const d = new Date();
-      d.setHours(0,0,0,0);
-      while (true) {
-        const key = d.toISOString().slice(0, 10);
-        if ((state.analytics.studyMinutesByDay[key] || 0) <= 0) break;
-        days++; d.setDate(d.getDate() - 1);
-      }
-      return days;
+      let n=0; const d = new Date(); d.setHours(0,0,0,0);
+      while (true) { const k = d.toISOString().slice(0,10); if ((state.analytics.minutesByDay[k] || 0) <= 0) break; n++; d.setDate(d.getDate()-1); }
+      return n;
     }
 
     async function loadState(user) {
@@ -458,74 +370,98 @@
     }
 
     async function saveNow() {
-      if (!state) return;
       el.status.textContent = 'Saving...';
       if (!currentUser) {
         localStorage.setItem(LOCAL_KEY, JSON.stringify(state));
-        el.status.textContent = 'Saved (local)';
+        el.status.textContent = 'Saved local';
         return;
       }
       const ref = doc(db, 'users', currentUser.uid, 'studyos', 'state');
-      await setDoc(ref, { payload: state, uid: currentUser.uid, updatedAt: serverTimestamp() }, { merge: true });
-      el.status.textContent = 'Saved (Firebase)';
+      await setDoc(ref, { payload: state, updatedAt: serverTimestamp(), uid: currentUser.uid }, { merge: true });
+      el.status.textContent = 'Saved Firebase';
     }
 
-    function queueSave() {
-      clearTimeout(saveTimer);
-      saveTimer = setTimeout(saveNow, 350);
+    const queueSave = () => { clearTimeout(saveTimer); saveTimer = setTimeout(saveNow, 350); };
+
+    function allApps() {
+      return [...CORE_APPS, ...state.installedApps.map(a => ({ ...a, id: `webapp-${a.id}`, type:'webapp' }))];
+    }
+
+    function applyTheme() {
+      document.documentElement.style.setProperty('--accent', state.theme.accent || '#5b8cff');
+      document.documentElement.style.setProperty('--glass-opacity', String((Number(state.theme.glass || 46))/100));
+      if (state.theme.wallpaper) document.documentElement.style.setProperty('--bg-url', `url('${state.theme.wallpaper}')`);
+    }
+
+    function renderSpaces() {
+      el.spaces.innerHTML = SPACES.map(s => `<button class="space-chip ${s===state.currentSpace?'active':''}" data-space="${s}">${s}</button>`).join('');
+      [...el.spaces.querySelectorAll('[data-space]')].forEach(n => n.onclick = () => {
+        persistWindowRects();
+        state.currentSpace = n.dataset.space;
+        renderAll();
+        queueSave();
+      });
+      el.spacePill.textContent = `Space: ${state.currentSpace}`;
     }
 
     function renderDesktop() {
-      el.desktop.innerHTML = APPS.map(a => `
-        <div class="icon" data-open="${a.id}">
-          <div class="tile">${a.icon}</div>
-          <div class="label">${a.name}</div>
-        </div>
-      `).join('');
-      [...document.querySelectorAll('[data-open]')].forEach(n => n.onclick = () => openWindow(n.dataset.open));
+      el.desktop.innerHTML = allApps().map(a => `<div class="icon" data-open="${a.id}"><div class="tile">${a.icon || '🌐'}</div><div class="label">${a.name}</div></div>`).join('');
+      [...el.desktop.querySelectorAll('[data-open]')].forEach(n => n.onclick = () => launchApp(n.dataset.open));
     }
 
     function renderStart(filter='') {
       const q = filter.trim().toLowerCase();
-      el.startGrid.innerHTML = APPS.filter(a => !q || a.name.toLowerCase().includes(q)).map(a => `<div class="start-item" data-open="${a.id}">${a.icon}<div>${a.name}</div></div>`).join('');
-      [...el.startGrid.querySelectorAll('[data-open]')].forEach(n => n.onclick = () => { openWindow(n.dataset.open); el.startMenu.style.display = 'none'; });
+      el.startGrid.innerHTML = allApps().filter(a => !q || a.name.toLowerCase().includes(q)).map(a => `<div class="start-item" data-open="${a.id}">${a.icon || '🌐'}<div>${a.name}</div></div>`).join('');
+      [...el.startGrid.querySelectorAll('[data-open]')].forEach(n => n.onclick = () => { launchApp(n.dataset.open); el.startMenu.style.display='none'; });
+    }
+
+    function launchApp(id) {
+      if (id.startsWith('webapp-')) {
+        openWindow('browser-window');
+        const app = state.installedApps.find(a => `webapp-${a.id}` === id);
+        if (app) navigateBrowser(app.url);
+        return;
+      }
+      openWindow(id);
     }
 
     function openWindow(id) {
       document.querySelectorAll('.window').forEach(w => w.classList.remove('active'));
-      const w = document.getElementById(id);
-      w.style.display = 'flex';
-      w.classList.add('active');
-      const rect = state.windows[id];
-      if (rect) {
-        w.style.left = rect.left; w.style.top = rect.top; w.style.width = rect.width; w.style.height = rect.height;
-      }
+      const node = document.getElementById(id);
+      if (!node) return;
+      node.style.display = 'flex';
+      node.classList.add('active');
+      const rect = getSpace().windows[id];
+      if (rect) { node.style.left = rect.left; node.style.top = rect.top; node.style.width = rect.width; node.style.height = rect.height; }
     }
 
     function closeWindow(id) {
-      const w = document.getElementById(id);
-      w.style.display = 'none';
-      w.classList.remove('active');
+      const node = document.getElementById(id);
+      if (!node) return;
+      node.style.display = 'none';
+      node.classList.remove('active');
       saveWindowRect(id);
     }
 
     function saveWindowRect(id) {
       const w = document.getElementById(id);
-      state.windows[id] = { left: w.style.left || `${w.offsetLeft}px`, top: w.style.top || `${w.offsetTop}px`, width: w.style.width || `${w.offsetWidth}px`, height: w.style.height || `${w.offsetHeight}px` };
-      queueSave();
+      if (!w) return;
+      getSpace().windows[id] = {
+        left: w.style.left || `${w.offsetLeft}px`, top: w.style.top || `${w.offsetTop}px`,
+        width: w.style.width || `${w.offsetWidth}px`, height: w.style.height || `${w.offsetHeight}px`
+      };
     }
+    function persistWindowRects(){ document.querySelectorAll('.window').forEach(w => saveWindowRect(w.id)); }
 
-    function bindWindowDrag() {
+    function bindWindowUX() {
       document.querySelectorAll('.titlebar').forEach(bar => {
         bar.addEventListener('mousedown', e => {
-          if (e.target.closest('button,input,select,textarea')) return;
-          const id = bar.dataset.window;
-          const w = document.getElementById(id);
-          const sx = e.clientX, sy = e.clientY, sl = w.offsetLeft, st = w.offsetTop;
+          if (e.target.closest('button,input,textarea,select')) return;
+          const id = bar.dataset.window, w = document.getElementById(id);
+          const sx=e.clientX, sy=e.clientY, sl=w.offsetLeft, st=w.offsetTop;
           const move = ev => { w.style.left = `${Math.max(0, sl + ev.clientX - sx)}px`; w.style.top = `${Math.max(0, st + ev.clientY - sy)}px`; };
-          const up = () => { window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up); saveWindowRect(id); };
-          window.addEventListener('mousemove', move);
-          window.addEventListener('mouseup', up);
+          const up = () => { window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up); saveWindowRect(id); queueSave(); };
+          window.addEventListener('mousemove', move); window.addEventListener('mouseup', up);
         });
       });
       document.querySelectorAll('[data-close]').forEach(b => b.onclick = () => closeWindow(b.dataset.close));
@@ -533,174 +469,182 @@
         const id = b.dataset.max, w = document.getElementById(id);
         if (w.dataset.full === '1') {
           const r = JSON.parse(w.dataset.restore || '{}');
-          if (r.left) { w.style.left = r.left; w.style.top = r.top; w.style.width = r.width; w.style.height = r.height; }
+          if (r.left) { w.style.left=r.left; w.style.top=r.top; w.style.width=r.width; w.style.height=r.height; }
           w.dataset.full = '0';
         } else {
           w.dataset.restore = JSON.stringify({ left:w.style.left||`${w.offsetLeft}px`, top:w.style.top||`${w.offsetTop}px`, width:w.style.width||`${w.offsetWidth}px`, height:w.style.height||`${w.offsetHeight}px` });
-          w.style.left = '8px'; w.style.top = '8px'; w.style.width = 'calc(100vw - 16px)'; w.style.height = 'calc(100vh - var(--taskbar-h) - 24px)';
-          w.dataset.full = '1';
+          w.style.left='8px'; w.style.top='8px'; w.style.width='calc(100vw - 16px)'; w.style.height='calc(100vh - var(--taskbar-h) - 20px)';
+          w.dataset.full='1';
         }
-        saveWindowRect(id);
+        saveWindowRect(id); queueSave();
       });
     }
+
+    function esc(v=''){ return v.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;'); }
 
     function renderNotes() {
-      const notes = [...state.notes].sort((a,b) => b.updatedAt - a.updatedAt);
-      el.noteList.innerHTML = notes.map(n => `<div class="note-item ${n.id===state.selectedNoteId?'active':''}" data-note="${n.id}"><div>${escapeHtml(n.title||'Untitled')}</div><small>${new Date(n.updatedAt).toLocaleString()}</small></div>`).join('');
-      [...el.noteList.querySelectorAll('[data-note]')].forEach(n => n.onclick = () => {
-        state.selectedNoteId = n.dataset.note;
-        const note = state.notes.find(x => x.id === state.selectedNoteId);
-        el.noteTitle.value = note?.title || '';
-        el.noteContent.value = note?.content || '';
-        renderNotes();
-      });
-      const current = state.notes.find(n => n.id === state.selectedNoteId) || state.notes[0];
-      if (current) {
-        state.selectedNoteId = current.id;
-        el.noteTitle.value = current.title || '';
-        el.noteContent.value = current.content || '';
-      }
+      const sp = getSpace();
+      const notes = [...sp.notes].sort((a,b)=>b.updatedAt-a.updatedAt);
+      el.noteList.innerHTML = notes.map(n => `<div class="note-item ${n.id===sp.selectedNoteId?'active':''}" data-note="${n.id}"><div>${esc(n.title||'Untitled')}</div><small>${new Date(n.updatedAt).toLocaleString()}</small></div>`).join('');
+      [...el.noteList.querySelectorAll('[data-note]')].forEach(n => n.onclick = () => { sp.selectedNoteId=n.dataset.note; renderNotes(); });
+      const cur = sp.notes.find(n => n.id === sp.selectedNoteId) || sp.notes[0];
+      if (!cur) return;
+      sp.selectedNoteId = cur.id;
+      el.noteTitle.value = cur.title || '';
+      el.noteContent.value = cur.content || '';
     }
 
-    function updateCurrentNote() {
-      const n = state.notes.find(x => x.id === state.selectedNoteId);
-      if (!n) return;
-      n.title = el.noteTitle.value;
-      n.content = el.noteContent.value;
-      n.updatedAt = Date.now();
+    function saveCurrentNote() {
+      const sp = getSpace();
+      const cur = sp.notes.find(n => n.id === sp.selectedNoteId);
+      if (!cur) return;
+      cur.title = el.noteTitle.value;
+      cur.content = el.noteContent.value;
+      cur.updatedAt = Date.now();
       markMinutes(2);
       renderNotes();
       queueSave();
-    }
-
-    function addTask() {
-      const title = document.getElementById('task-title').value.trim();
-      if (!title) return;
-      state.tasks.unshift({ id: crypto.randomUUID(), title, subject: document.getElementById('task-subject').value.trim(), due: document.getElementById('task-due').value || '', done:false, createdAt: Date.now() });
-      document.getElementById('task-title').value = '';
-      renderTasks();
-      queueSave();
+      el.status.textContent = 'Note saved';
     }
 
     function renderTasks() {
-      el.taskList.innerHTML = state.tasks.map(t => `
+      const sp = getSpace();
+      el.taskList.innerHTML = sp.tasks.map(t => `
         <div class="task-row">
-          <input type="checkbox" data-toggle="${t.id}" ${t.done ? 'checked' : ''}>
-          <div><div>${escapeHtml(t.title)}</div><small style="color:var(--text-dim)">${escapeHtml(t.subject || 'General')} ${t.due ? `• ${t.due}` : ''}</small></div>
-          <span class="pill">${t.done ? 'Done' : 'Open'}</span>
+          <input type="checkbox" data-toggle="${t.id}" ${t.done?'checked':''}>
+          <div><div>${esc(t.title)}</div><small>${esc(t.subject || 'General')} ${t.due ? `• ${t.due}` : ''}</small></div>
+          <span>${t.done ? '✅' : '⏳'}</span>
           <button class="btn" data-del="${t.id}">Delete</button>
         </div>
       `).join('');
       [...el.taskList.querySelectorAll('[data-toggle]')].forEach(n => n.onchange = () => {
-        const t = state.tasks.find(x => x.id === n.dataset.toggle);
-        if (!t) return;
-        t.done = n.checked;
-        if (t.done) markMinutes(5);
-        renderTasks();
-        queueSave();
+        const t = sp.tasks.find(x => x.id===n.dataset.toggle); if (!t) return; t.done=n.checked; if (t.done) markMinutes(5); renderTasks(); queueSave();
       });
-      [...el.taskList.querySelectorAll('[data-del]')].forEach(n => n.onclick = () => {
-        state.tasks = state.tasks.filter(x => x.id !== n.dataset.del);
-        renderTasks();
-        queueSave();
-      });
+      [...el.taskList.querySelectorAll('[data-del]')].forEach(n => n.onclick = () => { sp.tasks=sp.tasks.filter(x=>x.id!==n.dataset.del); renderTasks(); queueSave(); });
     }
 
-    function generateFlashcardsFromCurrentNote() {
-      const n = state.notes.find(x => x.id === state.selectedNoteId);
-      if (!n) return;
-      const lines = n.content.split('\n').map(x => x.trim()).filter(Boolean);
-      const cards = [];
-      lines.forEach(line => {
-        if (line.includes(':')) {
-          const [front, ...rest] = line.split(':');
-          const back = rest.join(':').trim();
-          if (front.trim() && back) cards.push({ id: crypto.randomUUID(), front: front.trim(), back, dueAt: Date.now(), ease: 2.5, intervalDays: 1 });
-        }
-      });
-      if (!cards.length) cards.push({ id: crypto.randomUUID(), front: n.title || 'Note summary', back: n.content.slice(0, 220) || 'Add more structured notes with key:value format.', dueAt: Date.now(), ease: 2.5, intervalDays: 1 });
-      state.flashcards.unshift(...cards);
-      flashIndex = 0; flashBack = false;
-      renderFlashcards();
-      openWindow('flashcards-window');
-      markMinutes(5);
+    function navigateBrowser(inputRaw) {
+      let v = (inputRaw || '').trim();
+      if (!v) return;
+      if (!/^https?:\/\//i.test(v)) v = v.includes('.') && !v.includes(' ') ? `https://${v}` : `https://www.google.com/search?q=${encodeURIComponent(v)}`;
+      getSpace().browser.url = v;
+      el.browserUrl.value = v;
+      el.browserFrame.src = v;
       queueSave();
     }
 
-    function dueCards() {
-      const now = Date.now();
-      return state.flashcards.filter(c => (c.dueAt || 0) <= now);
+    async function askAI() {
+      const q = el.assistantInput.value.trim();
+      if (!q) return;
+      state.assistant.messages.push({ role:'user', text:q, at:Date.now() });
+      renderAssistant();
+      el.assistantInput.value='';
+
+      if (!state.ai.endpoint || !state.ai.apiKey) {
+        state.assistant.messages.push({ role:'ai', text:'Online AI is not configured. Open Settings → AI Assistant, set endpoint/model/API key.', at:Date.now() });
+        renderAssistant(); queueSave(); return;
+      }
+
+      try {
+        const resp = await fetch(state.ai.endpoint, {
+          method:'POST',
+          headers:{ 'Content-Type':'application/json', 'Authorization':`Bearer ${state.ai.apiKey}` },
+          body: JSON.stringify({ model: state.ai.model || 'gpt-4o-mini', messages: state.assistant.messages.slice(-12).map(m => ({ role: m.role === 'ai' ? 'assistant' : m.role, content: m.text })) })
+        });
+        const data = await resp.json();
+        const text = data?.choices?.[0]?.message?.content || data?.output_text || 'No response from model.';
+        state.assistant.messages.push({ role:'ai', text, at:Date.now() });
+      } catch (e) {
+        state.assistant.messages.push({ role:'ai', text:`AI request failed: ${e?.message || 'unknown error'}`, at:Date.now() });
+      }
+      markMinutes(3);
+      renderAssistant();
+      queueSave();
     }
 
+    function renderAssistant() {
+      el.assistantMessages.innerHTML = state.assistant.messages.slice(-40).map(m => `<div class="msg ${m.role==='user'?'user':'ai'}">${esc(m.text)}</div>`).join('');
+      el.assistantMessages.scrollTop = el.assistantMessages.scrollHeight;
+    }
+
+    function generateFlashcardsFromNote() {
+      saveCurrentNote();
+      const sp = getSpace();
+      const cur = sp.notes.find(n => n.id === sp.selectedNoteId);
+      if (!cur) return;
+      const lines = cur.content.split('\n').map(x=>x.trim()).filter(Boolean);
+      const cards = [];
+      lines.forEach(line => {
+        if (line.includes(':')) {
+          const [f, ...rest] = line.split(':');
+          const b = rest.join(':').trim();
+          if (f.trim() && b) cards.push({ id: crypto.randomUUID(), front:f.trim(), back:b, ease:2.5, interval:1, dueAt:Date.now() });
+        }
+      });
+      if (!cards.length) cards.push({ id:crypto.randomUUID(), front:cur.title || 'Summary', back:cur.content.slice(0,220) || 'Add key:value format for cards.', ease:2.5, interval:1, dueAt:Date.now() });
+      sp.flashcards.unshift(...cards);
+      flashIndex=0; flashBack=false;
+      renderFlashcards();
+      openWindow('flashcards-window');
+      markMinutes(3);
+      queueSave();
+    }
+
+    function dueCards() { return getSpace().flashcards.filter(c => (c.dueAt || 0) <= Date.now()); }
     function renderFlashcards() {
       const cards = dueCards();
-      if (!cards.length) {
-        el.flashCard.innerHTML = 'No due cards right now. Great job 🎉';
-        el.cardMeta.textContent = `Total cards: ${state.flashcards.length}`;
-        return;
-      }
+      if (!cards.length) { el.flashCard.textContent = 'No due cards. Great progress 🎉'; el.cardMeta.textContent = `Total cards: ${getSpace().flashcards.length}`; return; }
       flashIndex = ((flashIndex % cards.length) + cards.length) % cards.length;
       const c = cards[flashIndex];
-      el.flashCard.innerHTML = flashBack ? escapeHtml(c.back) : `<b>${escapeHtml(c.front)}</b>`;
+      el.flashCard.innerHTML = flashBack ? esc(c.back) : `<b>${esc(c.front)}</b>`;
       if (window.MathJax?.typesetPromise) MathJax.typesetPromise([el.flashCard]);
-      el.cardMeta.textContent = `Card ${flashIndex + 1}/${cards.length} • Ease ${Number(c.ease || 2.5).toFixed(2)}`;
+      el.cardMeta.textContent = `Card ${flashIndex+1}/${cards.length} • Ease ${Number(c.ease || 2.5).toFixed(2)}`;
     }
-
-    function reviewCard(rating) {
-      const cards = dueCards();
-      if (!cards.length) return;
-      const c = cards[flashIndex];
-      if (!c) return;
-      const map = { again: 0.5, hard: 1, good: 2, easy: 3 };
-      const mult = map[rating] || 2;
-      c.ease = Math.max(1.3, (c.ease || 2.5) + (rating === 'easy' ? 0.15 : rating === 'again' ? -0.2 : 0.05));
-      c.intervalDays = Math.max(1, Math.round((c.intervalDays || 1) * mult * c.ease / 2));
-      c.dueAt = Date.now() + c.intervalDays * 24 * 60 * 60 * 1000;
+    function reviewCard(rate) {
+      const cards = dueCards(); if (!cards.length) return;
+      const c = cards[flashIndex]; if (!c) return;
+      const mult = ({again:.5,hard:1,good:2,easy:3})[rate] || 2;
+      c.ease = Math.max(1.3, (c.ease || 2.5) + (rate==='easy'?0.15:rate==='again'?-0.2:0.05));
+      c.interval = Math.max(1, Math.round((c.interval || 1) * mult * c.ease / 2));
+      c.dueAt = Date.now() + c.interval * 24 * 60 * 60 * 1000;
       flashBack = false;
       markMinutes(1);
       renderFlashcards();
       queueSave();
     }
 
-    function makeQuiz() {
-      const text = state.notes.map(n => `${n.title}. ${n.content}`).join('\n');
-      const chunks = text.split(/[.!?\n]/).map(x => x.trim()).filter(x => x.length > 25).slice(0, 8);
-      quiz = chunks.slice(0, 5).map((s, i) => {
-        const distract = chunks[(i + 1) % chunks.length] || 'None';
-        const options = [s, distract, s.split(' ').slice(0, 5).join(' ') + ' ...', 'Insufficient data'];
-        for (let j = options.length - 1; j > 0; j--) {
-          const k = Math.floor(Math.random() * (j + 1));
-          [options[j], options[k]] = [options[k], options[j]];
-        }
-        return { q: `Which option best matches your note idea?`, a: s, options };
+    function renderBooks() {
+      const sp = getSpace();
+      el.bookshelf.innerHTML = sp.books.map(b => `<div class="book-item" data-book="${b.id}"><div>${esc(b.title)}</div><small>${new Date(b.addedAt).toLocaleDateString()}</small></div>`).join('') || '<div class="book-item">No books yet.</div>';
+      [...el.bookshelf.querySelectorAll('[data-book]')].forEach(n => n.onclick = () => {
+        const b = sp.books.find(x => x.id === n.dataset.book);
+        if (b?.dataUrl) el.pdfFrame.src = b.dataUrl;
       });
-      renderQuiz();
     }
 
     function renderQuiz() {
-      if (!quiz.length) {
-        el.quizBody.innerHTML = '<div class="panel" style="padding:12px;">No quiz yet. Click Generate Quiz.</div>';
-        return;
-      }
-      el.quizBody.innerHTML = quiz.map((q, i) => `
-        <div class="quiz-q">
-          <b>Q${i+1}. ${q.q}</b>
-          <div style="margin-top:8px;display:grid;gap:6px;">
-            ${q.options.map((op, oi) => `<label><input type="radio" name="q-${i}" value="${oi}"> ${escapeHtml(op)}</label>`).join('')}
-          </div>
-        </div>
-      `).join('');
+      if (!quiz.length) { el.quizBody.innerHTML = '<div class="panel" style="padding:10px;">No quiz yet. Click Generate.</div>'; return; }
+      el.quizBody.innerHTML = quiz.map((q,i)=>`<div class="panel" style="padding:10px;margin-bottom:8px;"><b>Q${i+1}. ${esc(q.q)}</b><div style="margin-top:8px;display:grid;gap:6px;">${q.options.map((op,oi)=>`<label><input type="radio" name="q-${i}" value="${oi}"> ${esc(op)}</label>`).join('')}</div></div>`).join('');
     }
-
+    function makeQuiz() {
+      const text = getSpace().notes.map(n => `${n.title}. ${n.content}`).join('\n');
+      const parts = text.split(/[.!?\n]/).map(x=>x.trim()).filter(x=>x.length>20).slice(0,12);
+      quiz = parts.slice(0,5).map((s,i)=>{
+        const d = parts[(i+1)%parts.length] || 'No matching statement';
+        const options = [s, d, s.split(' ').slice(0,6).join(' ')+' ...', 'Insufficient data'];
+        for (let j=options.length-1;j>0;j--){ const k=Math.floor(Math.random()*(j+1)); [options[j],options[k]]=[options[k],options[j]]; }
+        return { q:'Select the best matching statement from your notes.', a:s, options };
+      });
+      renderQuiz();
+    }
     function submitQuiz() {
       if (!quiz.length) return;
       let score = 0;
-      quiz.forEach((q, i) => {
-        const picked = document.querySelector(`input[name="q-${i}"]:checked`);
-        if (!picked) return;
-        if (q.options[Number(picked.value)] === q.a) score += 1;
+      quiz.forEach((q,i)=>{
+        const p = document.querySelector(`input[name="q-${i}"]:checked`);
+        if (p && q.options[Number(p.value)] === q.a) score++;
       });
-      state.quizHistory.unshift({ score, total: quiz.length, at: Date.now() });
+      getSpace().quizHistory.unshift({ score, total: quiz.length, at: Date.now() });
       markMinutes(10);
       alert(`Quiz score: ${score}/${quiz.length}`);
       queueSave();
@@ -709,13 +653,13 @@
 
     function renderFocus() {
       const ms = state.focus.running ? Math.max(0, state.focus.endAt - Date.now()) : state.focus.leftMs;
-      const m = String(Math.floor(ms / 60000)).padStart(2, '0');
-      const s = String(Math.floor((ms % 60000) / 1000)).padStart(2, '0');
+      const m = String(Math.floor(ms / 60000)).padStart(2,'0');
+      const s = String(Math.floor((ms % 60000)/1000)).padStart(2,'0');
       el.focusTimer.textContent = `${m}:${s}`;
-      if (ms === 0 && state.focus.running) {
+      if (state.focus.running && ms === 0) {
         state.focus.running = false;
-        state.focus.leftMs = 25 * 60 * 1000;
-        state.analytics.completedFocusSessions += 1;
+        state.focus.leftMs = 25*60*1000;
+        state.analytics.completedFocus += 1;
         markMinutes(25);
         el.focusState.textContent = 'Session complete ✅';
         queueSave();
@@ -723,123 +667,149 @@
     }
 
     function renderDashboard() {
-      const today = Number(state.analytics.studyMinutesByDay[dayKey()] || 0);
+      const sp = getSpace();
+      const today = Number(state.analytics.minutesByDay[dayKey()] || 0);
       const streak = streakDays();
-      const done = state.tasks.filter(t => t.done).length;
-      const totalQ = state.quizHistory.reduce((a, x) => a + x.total, 0) || 1;
-      const scoreQ = state.quizHistory.reduce((a, x) => a + x.score, 0);
-      document.getElementById('metric-today-min').textContent = `${today}m`;
-      document.getElementById('metric-streak').textContent = `${streak}d`;
-      document.getElementById('metric-tasks').textContent = String(done);
-      document.getElementById('metric-quiz').textContent = `${Math.round((scoreQ / totalQ) * 100)}%`;
+      const tasksDone = sp.tasks.filter(t=>t.done).length;
+      const tQ = sp.quizHistory.reduce((a,x)=>a+x.total,0) || 1;
+      const sQ = sp.quizHistory.reduce((a,x)=>a+x.score,0);
+      document.getElementById('m-today').textContent = `${today}m`;
+      document.getElementById('m-streak').textContent = `${streak}d`;
+      document.getElementById('m-tasks').textContent = String(tasksDone);
+      document.getElementById('m-quiz').textContent = `${Math.round((sQ/tQ)*100)}%`;
       document.getElementById('daily-goal').value = state.analytics.dailyGoalMin;
-      const remain = Math.max(0, state.analytics.dailyGoalMin - today);
-      document.getElementById('coach-text').textContent = remain === 0
-        ? 'Daily goal achieved. Keep your review streak alive with flashcards.'
-        : `You need ${remain} more minutes to hit your goal today. Recommended: 1 focus session + 10 card reviews.`;
-    }
-
-    function escapeHtml(v='') {
-      return v.replaceAll('&', '&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
+      const left = Math.max(0, state.analytics.dailyGoalMin - today);
+      document.getElementById('coach-text').textContent = left ? `Need ${left} more minutes today. Try: 1 focus + 10 cards.` : 'Goal achieved. Great work!';
     }
 
     function bindEvents() {
-      document.getElementById('tb-start').onclick = () => {
-        el.startMenu.style.display = el.startMenu.style.display === 'block' ? 'none' : 'block';
-        renderStart(el.startSearch.value);
-      };
+      document.getElementById('tb-start').onclick = () => { el.startMenu.style.display = el.startMenu.style.display === 'block' ? 'none' : 'block'; renderStart(el.startSearch.value); };
       el.startSearch.oninput = () => renderStart(el.startSearch.value);
-      [...document.querySelectorAll('.tb-btn[data-open]')].forEach(n => n.onclick = () => openWindow(n.dataset.open));
+      [...document.querySelectorAll('.tb-btn[data-open]')].forEach(n => n.onclick = () => launchApp(n.dataset.open));
 
       document.getElementById('btn-login').onclick = async () => signInWithPopup(auth, provider);
       document.getElementById('btn-logout').onclick = async () => signOut(auth);
-      document.getElementById('daily-sync').onclick = saveNow;
+      document.getElementById('sync-now').onclick = saveNow;
 
-      document.getElementById('note-new').onclick = () => {
-        const n = { id: crypto.randomUUID(), title: '', content: '', updatedAt: Date.now() };
-        state.notes.unshift(n); state.selectedNoteId = n.id;
-        renderNotes(); queueSave();
+      document.getElementById('note-new').onclick = () => { const sp=getSpace(); const n={id:crypto.randomUUID(),title:'',content:'',updatedAt:Date.now()}; sp.notes.unshift(n); sp.selectedNoteId=n.id; renderNotes(); queueSave(); };
+      document.getElementById('note-delete').onclick = () => { const sp=getSpace(); if (sp.notes.length===1) return; sp.notes=sp.notes.filter(n=>n.id!==sp.selectedNoteId); sp.selectedNoteId=sp.notes[0].id; renderNotes(); queueSave(); };
+      document.getElementById('note-save').onclick = saveCurrentNote;
+      el.noteTitle.addEventListener('input', saveCurrentNote);
+      el.noteContent.addEventListener('input', saveCurrentNote);
+      document.getElementById('note-cards').onclick = generateFlashcardsFromNote;
+
+      document.getElementById('task-add').onclick = () => {
+        const t = document.getElementById('task-title').value.trim(); if (!t) return;
+        getSpace().tasks.unshift({ id:crypto.randomUUID(), title:t, subject:document.getElementById('task-subject').value.trim(), due:document.getElementById('task-due').value || '', done:false, at:Date.now() });
+        document.getElementById('task-title').value=''; renderTasks(); queueSave();
       };
-      document.getElementById('note-delete').onclick = () => {
-        if (state.notes.length === 1) return;
-        state.notes = state.notes.filter(n => n.id !== state.selectedNoteId);
-        state.selectedNoteId = state.notes[0].id;
-        renderNotes(); queueSave();
+
+      document.getElementById('browser-go').onclick = () => navigateBrowser(el.browserUrl.value);
+      el.browserUrl.addEventListener('keydown', e => e.key==='Enter' && navigateBrowser(el.browserUrl.value));
+      document.getElementById('install-webapp').onclick = () => {
+        const url = (el.browserUrl.value || '').trim(); if (!url) return;
+        const name = prompt('App name?', new URL(url).hostname.replace('www.',''));
+        if (!name) return;
+        state.installedApps.push({ id:crypto.randomUUID(), name, url, icon:'🌐' });
+        renderDesktop(); renderStart(el.startSearch.value); queueSave();
       };
-      el.noteTitle.addEventListener('input', updateCurrentNote);
-      el.noteContent.addEventListener('input', updateCurrentNote);
-      document.getElementById('flashcards-from-note').onclick = generateFlashcardsFromCurrentNote;
 
-      document.getElementById('task-add').onclick = addTask;
+      document.getElementById('assistant-send').onclick = askAI;
+      document.getElementById('assistant-clear').onclick = () => { state.assistant.messages = []; renderAssistant(); queueSave(); };
 
-      document.getElementById('card-prev').onclick = () => { flashIndex--; flashBack = false; renderFlashcards(); };
-      document.getElementById('card-next').onclick = () => { flashIndex++; flashBack = false; renderFlashcards(); };
-      document.getElementById('card-flip').onclick = () => { flashBack = !flashBack; renderFlashcards(); };
+      document.getElementById('card-prev').onclick = () => { flashIndex--; flashBack=false; renderFlashcards(); };
+      document.getElementById('card-next').onclick = () => { flashIndex++; flashBack=false; renderFlashcards(); };
+      document.getElementById('card-flip').onclick = () => { flashBack=!flashBack; renderFlashcards(); };
       [...document.querySelectorAll('[data-rate]')].forEach(n => n.onclick = () => reviewCard(n.dataset.rate));
 
-      document.getElementById('quiz-generate').onclick = makeQuiz;
-      document.getElementById('quiz-submit').onclick = submitQuiz;
+      document.getElementById('add-book').onclick = async () => {
+        const file = document.getElementById('pdf-upload').files?.[0];
+        if (!file) return;
+        const title = document.getElementById('book-title').value.trim() || file.name.replace(/\.pdf$/i,'');
+        const dataUrl = await new Promise((resolve,reject)=>{ const fr = new FileReader(); fr.onload=()=>resolve(fr.result); fr.onerror=reject; fr.readAsDataURL(file); });
+        const sp = getSpace();
+        sp.books.unshift({ id:crypto.randomUUID(), title, dataUrl, addedAt:Date.now() });
+        renderBooks(); el.pdfFrame.src = dataUrl; queueSave();
+      };
 
       document.getElementById('focus-start').onclick = () => {
         if (state.focus.running) return;
         state.focus.running = true;
         state.focus.endAt = Date.now() + state.focus.leftMs;
-        el.focusState.textContent = 'Focus in progress...';
-        queueSave();
+        el.focusState.textContent = 'Focusing...'; queueSave();
       };
       document.getElementById('focus-pause').onclick = () => {
         if (!state.focus.running) return;
         state.focus.running = false;
         state.focus.leftMs = Math.max(0, state.focus.endAt - Date.now());
-        el.focusState.textContent = 'Paused';
-        queueSave();
+        el.focusState.textContent = 'Paused'; queueSave();
       };
       document.getElementById('focus-reset').onclick = () => {
-        state.focus.running = false;
-        state.focus.leftMs = 25 * 60 * 1000;
-        state.focus.endAt = null;
-        el.focusState.textContent = 'Ready';
-        renderFocus();
-        queueSave();
+        state.focus.running=false; state.focus.leftMs=25*60*1000; state.focus.endAt=null; el.focusState.textContent='Ready'; renderFocus(); queueSave();
       };
 
-      document.getElementById('save-goal').onclick = () => {
-        const goal = Number(document.getElementById('daily-goal').value || 120);
-        state.analytics.dailyGoalMin = Math.max(30, Math.min(480, goal));
-        renderDashboard();
-        queueSave();
-      };
+      document.getElementById('quiz-generate').onclick = makeQuiz;
+      document.getElementById('quiz-submit').onclick = submitQuiz;
+
+      document.getElementById('save-goal').onclick = () => { state.analytics.dailyGoalMin = Math.max(30, Math.min(600, Number(document.getElementById('daily-goal').value || 120))); renderDashboard(); queueSave(); };
       document.getElementById('open-focus').onclick = () => openWindow('focus-window');
 
-      document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') el.startMenu.style.display = 'none';
-      });
+      document.getElementById('apply-theme').onclick = () => {
+        state.theme.wallpaper = document.getElementById('set-wallpaper').value.trim();
+        state.theme.accent = document.getElementById('set-accent').value;
+        state.theme.glass = Number(document.getElementById('set-glass').value || 46);
+        applyTheme(); queueSave();
+      };
+      document.getElementById('save-ai-settings').onclick = () => {
+        state.ai.endpoint = document.getElementById('ai-endpoint').value.trim();
+        state.ai.model = document.getElementById('ai-model').value.trim() || 'gpt-4o-mini';
+        state.ai.apiKey = document.getElementById('ai-key').value.trim();
+        queueSave();
+      };
+
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') el.startMenu.style.display='none'; });
+    }
+
+    function renderSettingsValues() {
+      document.getElementById('set-wallpaper').value = state.theme.wallpaper || '';
+      document.getElementById('set-accent').value = state.theme.accent || '#5b8cff';
+      document.getElementById('set-glass').value = String(state.theme.glass || 46);
+      document.getElementById('ai-endpoint').value = state.ai.endpoint || '';
+      document.getElementById('ai-model').value = state.ai.model || 'gpt-4o-mini';
+      document.getElementById('ai-key').value = state.ai.apiKey || '';
     }
 
     function renderAll() {
+      applyTheme();
+      renderSpaces();
       renderDesktop();
-      renderStart();
+      renderStart(el.startSearch.value || '');
       renderNotes();
       renderTasks();
-      renderFlashcards();
+      renderBooks();
       renderQuiz();
-      renderFocus();
+      renderFlashcards();
+      renderAssistant();
       renderDashboard();
+      renderSettingsValues();
+      el.browserUrl.value = getSpace().browser.url;
+      el.browserFrame.src = getSpace().browser.url;
+      el.spacePill.textContent = `Space: ${state.currentSpace}`;
     }
 
     function setAuthUI(user) {
       if (!user) {
         el.userPill.textContent = 'Guest';
-        document.getElementById('btn-login').style.display = 'inline-block';
-        document.getElementById('btn-logout').style.display = 'none';
-        return;
+        document.getElementById('btn-login').style.display='inline-block';
+        document.getElementById('btn-logout').style.display='none';
+      } else {
+        el.userPill.textContent = user.displayName || user.email || 'User';
+        document.getElementById('btn-login').style.display='none';
+        document.getElementById('btn-logout').style.display='inline-block';
       }
-      el.userPill.textContent = user.displayName || user.email || 'User';
-      document.getElementById('btn-login').style.display = 'none';
-      document.getElementById('btn-logout').style.display = 'inline-block';
     }
 
-    bindWindowDrag();
+    bindWindowUX();
     bindEvents();
     openWindow('dashboard-window');
     openWindow('notes-window');
@@ -855,7 +825,7 @@
       setAuthUI(user);
       state = await loadState(user);
       renderAll();
-      el.status.textContent = user ? 'Loaded (Firebase)' : 'Loaded (local)';
+      el.status.textContent = user ? 'Loaded Firebase' : 'Loaded local';
     });
   </script>
 </body>
