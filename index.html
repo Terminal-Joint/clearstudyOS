@@ -2,142 +2,195 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>StudyOS - Mac Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyOS - JEE/AEEE Edition</title>
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     
     <style>
-        :root { --accent: #007AFF; --bg: url('https://wallpaperaccess.com/full/1385413.jpg'); }
-        body, html { margin: 0; height: 100%; overflow: hidden; font-family: -apple-system, sans-serif; }
-        
-        .desktop {
-            background: var(--bg) no-repeat center center fixed;
+        :root {
+            --dock-bg: rgba(255, 255, 255, 0.2);
+            --win-bg: rgba(255, 255, 255, 0.75);
+            --accent: #007AFF;
+        }
+
+        body, html {
+            margin: 0; height: 100vh; overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+            background: url('https://raw.githubusercontent.com/pajasevi/Boring-Wallpaper/main/wallpaper.jpg') no-repeat center center fixed;
             background-size: cover;
-            width: 100vw; height: 100vh;
+        }
+
+        /* Top Menu Bar */
+        .menu-bar {
+            height: 28px; width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            display: flex; align-items: center;
+            padding: 0 15px; box-sizing: border-box;
+            color: white; font-size: 13px; font-weight: 600;
+            z-index: 1000;
+        }
+
+        /* Desktop Area */
+        .desktop {
+            width: 100%; height: calc(100vh - 28px);
             position: relative;
         }
 
-        /* Mac-style Window */
+        /* macOS Window Style */
         .window {
             position: absolute;
-            width: 600px; height: 400px;
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(20px);
+            background: var(--win-bg);
+            backdrop-filter: blur(30px);
             border-radius: 12px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-            display: flex; flex-direction: column;
-            overflow: hidden;
-            resize: both;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+            border: 0.5px solid rgba(255,255,255,0.3);
+            display: none; flex-direction: column;
+            overflow: hidden; min-width: 300px; min-height: 200px;
         }
 
         .title-bar {
-            background: rgba(230, 230, 230, 0.9);
-            padding: 10px; cursor: move;
-            display: flex; align-items: center;
+            height: 38px; display: flex; align-items: center;
+            padding: 0 15px; cursor: move;
+            border-bottom: 0.5px solid rgba(0,0,0,0.1);
         }
 
-        .dots { display: flex; gap: 8px; }
-        .dot { width: 12px; height: 12px; border-radius: 50%; }
-        .red { background: #FF5F56; } .yellow { background: #FFBD2E; } .green { background: #27C93F; }
+        .controls { display: flex; gap: 8px; }
+        .circle { width: 12px; height: 12px; border-radius: 50%; border: 0.5px solid rgba(0,0,0,0.1); }
+        .close { background: #FF5F56; } .min { background: #FFBD2E; } .max { background: #27C93F; }
 
-        .content { flex: 1; padding: 15px; overflow-y: auto; }
-        
-        /* Sidebar/Dock Area */
-        .dock {
+        .app-content { flex: 1; padding: 15px; overflow: auto; }
+
+        /* The Dock */
+        .dock-container {
             position: absolute; bottom: 10px; left: 50%;
             transform: translateX(-50%);
-            background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(15px);
-            padding: 10px 20px; border-radius: 20px;
-            display: flex; gap: 15px; border: 1px solid rgba(255,255,255,0.2);
+            background: var(--dock-bg);
+            backdrop-filter: blur(25px);
+            padding: 8px; border-radius: 20px;
+            display: flex; gap: 10px; align-items: center;
+            border: 1px solid rgba(255,255,255,0.2);
+            z-index: 1000;
         }
 
-        .icon { width: 50px; height: 50px; cursor: pointer; transition: 0.2s; }
-        .icon:hover { transform: scale(1.2) translateY(-10px); }
+        .dock-icon {
+            width: 50px; height: 50px; border-radius: 12px;
+            cursor: pointer; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background-size: cover;
+        }
+        .dock-icon:hover { transform: scale(1.3) translateY(-10px); }
 
-        textarea { width: 100%; height: 80%; border: none; background: transparent; font-size: 16px; outline: none; }
-        iframe { width: 100%; height: 100%; border: none; }
+        /* App Specific Styles */
+        textarea#noteEditor {
+            width: 100%; height: 60%; border: none; background: transparent;
+            font-size: 16px; outline: none; resize: none;
+        }
+        #latexPreview { margin-top: 15px; border-top: 1px dashed #ccc; padding-top: 10px; }
+        iframe { width: 100%; height: 100%; border: none; background: white; border-radius: 8px; }
     </style>
 </head>
 <body>
 
-<div class="desktop" id="desktop">
-    
-    <div class="window" style="top: 50px; left: 50px;" id="notesWin">
-        <div class="title-bar" onmousedown="dragElement(this.parentElement)">
-            <div class="dots"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div>
-            <span style="margin-left: 20px; font-weight: 600; color: #333;">Notes (Supports LaTeX)</span>
-        </div>
-        <div class="content">
-            <textarea id="noteInput" placeholder="Type formulas here, e.g., $$x = \frac{-b \pm \sqrt{b^2-4ac}}{2a}$$"></textarea>
-            <button onclick="renderMath()">Render LaTeX</button>
-            <div id="mathPreview"></div>
-        </div>
+    <div class="menu-bar">
+        <span style="margin-right: 20px;"></span>
+        <span style="margin-right: 15px;">StudyOS</span>
+        <span id="current-time" style="margin-left: auto;"></span>
     </div>
 
-    <div class="window" style="top: 100px; left: 400px; width: 800px; height: 500px;">
-        <div class="title-bar" onmousedown="dragElement(this.parentElement)">
-            <div class="dots"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div>
-            <input type="text" id="urlBar" placeholder="https://google.com" style="margin-left: 15px; width: 70%; border-radius: 5px; border: 1px solid #ccc;">
-            <button onclick="navigate()">Go</button>
+    <div class="desktop" id="desktop">
+        
+        <div class="window" id="notes-app" style="width: 500px; height: 600px; top: 50px; left: 50px;">
+            <div class="title-bar" onmousedown="dragWin(this.parentElement)">
+                <div class="controls"><div class="circle close" onclick="closeApp('notes-app')"></div><div class="circle min"></div><div class="circle max"></div></div>
+                <span style="margin-left: 20px; font-weight: 500; font-size: 13px;">Latex Notes</span>
+            </div>
+            <div class="app-content">
+                <textarea id="noteEditor" placeholder="Type LaTeX here... \nExample: $$E=mc^2$$"></textarea>
+                <button onclick="renderLatex()" style="background: var(--accent); color: white; border: none; border-radius: 5px; padding: 5px 10px;">Render & Save</button>
+                <div id="latexPreview"></div>
+            </div>
         </div>
-        <div class="content" style="padding:0;">
-            <iframe id="browserFrame" src="https://www.wikipedia.org"></iframe>
+
+        <div class="window" id="browser-app" style="width: 800px; height: 500px; top: 100px; left: 400px;">
+            <div class="title-bar" onmousedown="dragWin(this.parentElement)">
+                <div class="controls"><div class="circle close" onclick="closeApp('browser-app')"></div><div class="circle min"></div><div class="circle max"></div></div>
+                <input type="text" id="browser-url" placeholder="Search or URL" style="margin-left: 15px; width: 70%; border-radius: 4px; border: 1px solid #ccc; font-size: 12px; padding: 2px 8px;">
+            </div>
+            <div class="app-content" style="padding:0;">
+                <iframe id="main-frame" src="https://www.wikipedia.org"></iframe>
+            </div>
         </div>
+
     </div>
 
-    <div class="dock">
-        <img class="icon" src="https://cdn-icons-png.flaticon.com/512/5968/5968292.png" onclick="alert('Open Notes')">
-        <img class="icon" src="https://cdn-icons-png.flaticon.com/512/888/888846.png" onclick="alert('Open Chrome')">
-        <img class="icon" src="https://cdn-icons-png.flaticon.com/512/1091/1091916.png" onclick="document.getElementById('fileInput').click()">
+    <div class="dock-container">
+        <div class="dock-icon" style="background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/macOS_Notes_icon.svg/1024px-macOS_Notes_icon.svg.png')" onclick="openApp('notes-app')"></div>
+        <div class="dock-icon" style="background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Google_Chrome_icon_%282022%29.svg/1024px-Google_Chrome_icon_%282022%29.svg.png')" onclick="openApp('browser-app')"></div>
+        <div class="dock-icon" style="background-image: url('https://cdn-icons-png.flaticon.com/512/1091/1091916.png')" onclick="alert('Upload logic goes here')"></div>
     </div>
-    <input type="file" id="fileInput" style="display:none">
-</div>
 
-<script>
-    // Dragging Logic
-    function dragElement(elmnt) {
-        var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-        elmnt.onmousedown = dragMouseDown;
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        function dragMouseDown(e) {
-            e.preventDefault();
-            pos3 = e.clientX;
-            pos4 = e.clientY;
-            document.onmouseup = closeDragElement;
-            document.onmousemove = elementDrag;
+        const firebaseConfig = {
+            apiKey: "AIzaSyAPzgwYDQQqR4y8aRcu8BmXfhYoLPXDuVM",
+            authDomain: "forclearpcm.firebaseapp.com",
+            projectId: "forclearpcm",
+            storageBucket: "forclearpcm.firebasestorage.app",
+            messagingSenderId: "313585574692",
+            appId: "1:313585574692:web:d4e1262ce22c7cd0bb89b1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Auto-Load Notes from Firebase
+        window.addEventListener('load', async () => {
+            const docRef = doc(db, "study", "notes");
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                document.getElementById('noteEditor').value = docSnap.data().content;
+                renderLatex();
+            }
+        });
+
+        // Save Notes to Firebase
+        window.renderLatex = async () => {
+            const content = document.getElementById('noteEditor').value;
+            document.getElementById('latexPreview').innerHTML = content;
+            MathJax.typeset();
+            
+            await setDoc(doc(db, "study", "notes"), { content: content });
+            console.log("Synced to Cloud");
+        };
+    </script>
+
+    <script>
+        // Window Management Logic
+        function openApp(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeApp(id) { document.getElementById(id).style.display = 'none'; }
+
+        function dragWin(elmnt) {
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            elmnt.onmousedown = (e) => {
+                pos3 = e.clientX; pos4 = e.clientY;
+                document.onmouseup = () => { document.onmouseup = null; document.onmousemove = null; };
+                document.onmousemove = (e) => {
+                    pos1 = pos3 - e.clientX; pos2 = pos4 - e.clientY;
+                    pos3 = e.clientX; pos4 = e.clientY;
+                    elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+                    elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+                };
+            };
         }
 
-        function elementDrag(e) {
-            e.preventDefault();
-            pos1 = pos3 - e.clientX;
-            pos2 = pos4 - e.clientY;
-            pos3 = e.clientX;
-            pos4 = e.clientY;
-            elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-            elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
-        }
-
-        function closeDragElement() {
-            document.onmouseup = null;
-            document.onmousemove = null;
-        }
-    }
-
-    // LaTeX Rendering
-    function renderMath() {
-        const input = document.getElementById('noteInput').value;
-        const preview = document.getElementById('mathPreview');
-        preview.innerHTML = input;
-        MathJax.typeset();
-    }
-
-    // Browser Navigation
-    function navigate() {
-        const url = document.getElementById('urlBar').value;
-        document.getElementById('browserFrame').src = url;
-    }
-</script>
-
+        // Clock Update
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('current-time').innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }, 1000);
+    </script>
 </body>
 </html>
