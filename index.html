@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -249,25 +250,27 @@
     #context-menu button:hover { background: rgba(10,132,255,.12); }
 
     .launchpad {
-      position: fixed;
-      inset: 0;
-      display: none;
-      z-index: 17000;
-      padding: 60px 40px 115px;
-      background: rgba(17,24,39,.75);
-      backdrop-filter: blur(20px);
+      position: fixed; inset: 0; display: none; z-index: 8000; padding: 60px 40px 115px;
+      background: rgba(17,24,39,.74); backdrop-filter: blur(20px);
     }
-    .start-header { display:flex; gap:10px; margin-bottom:12px; }
-    #start-search { flex:1; border:1px solid rgba(255,255,255,.35); border-radius:10px; padding:10px; background: rgba(255,255,255,.18); color:#fff; outline:none; }
-    .start-column { display:grid; grid-template-columns:1fr 280px; gap:14px; height: calc(100% - 46px); }
-    .launch-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(112px,1fr)); gap:14px; overflow:auto; }
-    .start-side { border:1px solid rgba(255,255,255,.25); border-radius:12px; background: rgba(255,255,255,.14); padding:10px; overflow:auto; }
-    .start-side h4 { margin:4px 0 8px; font-size:12px; }
-    .start-link { display:block; color:#fff; text-decoration:none; margin:4px 0; font-size:12px; cursor:pointer; }
+    .start-header { display:flex; gap:10px; margin-bottom: 12px; }
+    #start-search { flex:1; border:1px solid rgba(255,255,255,.35); border-radius: 10px; padding: 10px; background: rgba(255,255,255,.18); color: white; outline: none; }
+    .start-column { display:grid; grid-template-columns: 1fr 280px; gap: 14px; height: calc(100% - 46px); }
+    .launch-grid { display:grid; grid-template-columns: repeat(auto-fill,minmax(112px,1fr)); gap: 14px; overflow:auto; }
+    .start-side { border:1px solid rgba(255,255,255,.25); border-radius: 12px; background: rgba(255,255,255,.14); padding: 10px; overflow:auto; }
+    .start-side h4 { margin: 4px 0 8px; font-size: 12px; }
+    .start-link { display:block; color:#fff; opacity:.95; text-decoration:none; margin:4px 0; font-size:12px; cursor:pointer; }
 
-    .modal-wrap { position:fixed; inset:0; display:none; z-index:22000; place-items:center; background: rgba(2,6,23,.45); backdrop-filter: blur(8px); }
-    .modal { width:min(560px,94vw); background:#fff; color:#0f172a; border:1px solid rgba(0,0,0,.1); border-radius:14px; padding:16px; box-shadow: 0 24px 50px rgba(0,0,0,.3); }
-    .modal h3 { margin:0 0 10px; }
+    .modal-wrap {
+      position: fixed; inset: 0; display: none; z-index: 13000; place-items: center;
+      background: rgba(2,6,23,.45); backdrop-filter: blur(8px);
+    }
+    .modal {
+      width: min(560px, 94vw); background: white; color: #0f172a;
+      border: 1px solid rgba(0,0,0,.1); border-radius: 14px; padding: 16px;
+      box-shadow: 0 24px 50px rgba(0,0,0,.3);
+    }
+    .modal h3 { margin: 0 0 10px; }
     .row { display:flex; flex-direction:column; gap:6px; margin:10px 0; font-size:13px; }
     .modal input,.modal textarea,.modal select { border:1px solid rgba(0,0,0,.15); border-radius:8px; padding:8px; font:inherit; }
     .actions { display:flex; justify-content:end; gap:8px; margin-top:12px; }
