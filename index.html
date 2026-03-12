@@ -1654,20 +1654,28 @@ let pdfPage = 1;
 let pdfScale = 1.5;
 
 function getPDFCanvas(){
+
   const canvas = document.getElementById("pdf-canvas");
+
   if(!canvas) return null;
+
   return {
     canvas,
     ctx: canvas.getContext("2d")
   };
+
 }
 
+async function loadPDF(url){
 
-async function loadPDF(url) {
   const loadingTask = pdfjsLib.getDocument(url);
+
   pdfDoc = await loadingTask.promise;
+
   pdfPage = 1;
+
   renderPage();
+
 }
 
 async function renderPage(){
@@ -1703,9 +1711,10 @@ document.getElementById("pdf-next").onclick = () => {
 
   if(!pdfDoc) return;
 
-  if (pdfPage >= pdfDoc.numPages) return;
+  if(pdfPage >= pdfDoc.numPages) return;
 
   pdfPage++;
+
   renderPage();
 
 };
@@ -1714,20 +1723,28 @@ document.getElementById("pdf-prev").onclick = () => {
 
   if(!pdfDoc) return;
 
-  if (pdfPage <= 1) return;
+  if(pdfPage <= 1) return;
 
   pdfPage--;
+
   renderPage();
 
 };
-    document.getElementById("pdf-zoom-in").onclick = () => {
+    
+document.getElementById("pdf-zoom-in").onclick = () => {
+
   pdfScale += 0.2;
+
   renderPage();
+
 };
 
 document.getElementById("pdf-zoom-out").onclick = () => {
+
   pdfScale = Math.max(0.6, pdfScale - 0.2);
+
   renderPage();
+
 };
     
   </script>
