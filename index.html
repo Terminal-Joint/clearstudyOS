@@ -1654,31 +1654,7 @@
       }, 4000);
     }
 
-    function applySpace() {
-      const sp = getSpace();
-      setWindowRect(el.browserWindow, sp.browser.rect);
-      setWindowRect(el.notesWindow, sp.notes.rect);
-      setWindowRect(el.scratchWindow, sp.scratch.rect);
-      setWindowRect(el.graphWindow, sp.graph.rect);
-
-      if (sp.notes.noteId && state.notes.some(n => n.id === sp.notes.noteId)) state.selectedNoteId = sp.notes.noteId;
-      el.latexInput.value = sp.scratch.latex || '';
-      const tex = el.latexInput.value.trim();
-      el.latexPreview.innerHTML = tex ? `\\[${tex}\\]` : '<em>Live preview appears here...</em>';
-      if (window.MathJax?.typesetPromise) MathJax.typesetPromise([el.latexPreview]);
-
-      if (sp.browser.visible) openWindow('browser-window', false); else closeWindow('browser-window', false);
-      if (sp.notes.visible) openWindow('notes-window', false); else closeWindow('notes-window', false);
-      if (sp.scratch.visible) openWindow('scratch-window', false); else closeWindow('scratch-window', false);
-      if (sp.graph.visible) openWindow('graph-window', false); else closeWindow('graph-window', false);
-
-      renderBrowserTabs();
-      loadActiveTab();
-      renderNotes();
-      markSpaces();
-      renderWidgets();
-      queueSave();
-    }
+    
 
     function switchSpace(name) {
       persistWindow('browser-window');
