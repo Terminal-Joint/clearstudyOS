@@ -440,7 +440,10 @@
     <div class="titlebar" data-window="notes-window"><div class="title">Notes</div><div class="w-controls"><button class="ctrl min" data-close="notes-window">—</button><button class="ctrl max" data-max="notes-window">▢</button><button class="ctrl close" data-close="notes-window">✕</button></div></div>
     <div class="toolbar"><button class="btn" id="note-new">New</button><button class="btn" id="note-delete">Delete</button><button class="btn primary" id="note-save">Save</button><button class="btn" id="note-highlight">Highlight Selection</button><button class="btn" id="pin-to-vault">Pin to Vault</button></div>
     <div class="app-body split">
-      <aside class="panel" id="notes-list" style="overflow:auto;"></aside>
+      <aside class="panel" style="display:grid;grid-template-rows:1fr 220px;min-height:0;">
+        <div id="notes-list" style="overflow:auto;"></div>
+        <div id="notes-highlights" style="overflow:auto;border-top:1px solid rgba(255,255,255,.14);"></div>
+      </aside>
       <section class="panel" style="display:flex;flex-direction:column;gap:8px;padding:8px;">
         <input id="note-title" class="field" placeholder="Title">
         <textarea id="note-content" class="field" style="min-height:320px;resize:vertical;" placeholder="Your study notes..."></textarea>
@@ -525,6 +528,8 @@
     <button class="btn primary" id="annot-exit">Exit Draw</button>
   </div>
 
+  <div id="toast" style="position:fixed;right:14px;top:14px;z-index:13000;display:none;max-width:380px;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:rgba(13,20,37,.9);color:#fff;"></div>
+
   <div id="taskbar" class="glass">
     <div id="tb-left"><button class="tb-btn" id="tb-start" title="Start">⊞</button><button class="tb-btn" id="tb-show-desktop" title="Show desktop">🖥️</button><button class="tb-btn" id="tb-annot" title="Draw on screen">✏️</button></div>
     <div id="tb-center">
@@ -579,12 +584,21 @@
       desktop: $('desktop'), startMenu: $('start-menu'), startSearch: $('start-search'), startGrid: $('start-grid'),
       spaces: $('spaces'), recommendedList: $('recommended-list'), quickNotePop: $('quick-note-pop'), quickNoteText: $('quick-note-text'),
       notesList: $('notes-list'), noteTitle: $('note-title'), noteContent: $('note-content'), taskList: $('task-list'),
+      notesHighlights: $('notes-highlights'),
       browserTabs: $('browser-tabs'), browserUrl: $('browser-url'), browserFrame: $('browser-frame'),
       bookshelf: $('bookshelf'), pdfFrame: $('pdf-frame'),
       studioCanvas: $('studio-canvas'), studioStickies: $('studio-stickies'), vaultList: $('vault-list'),
       status: $('status-pill'), clock: $('clock-pill'), spacePill: $('space-pill'),
       annotOverlay: $('annot-overlay'), annotCanvas: $('annot-canvas'), annotTools: $('annot-tools')
+      ,toast: $('toast')
     };
+
+    function showToast(msg, ms=2400) {
+      el.toast.textContent = msg;
+      el.toast.style.display = 'block';
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(() => el.toast.style.display = 'none', ms);
+    }
 
     let currentUser = null;
     let saveTimer = null;
@@ -712,14 +726,19 @@
     async function saveNow() {
       if (!state) return;
       el.status.textContent = 'Saving...';
-      if (!currentUser) {
-        localStorage.setItem(LOCAL_KEY, JSON.stringify(state));
-        el.status.textContent = 'Saved local';
-        return;
+      try {
+        if (!currentUser) {
+          localStorage.setItem(LOCAL_KEY, JSON.stringify(state));
+          el.status.textContent = 'Saved local';
+          return;
+        }
+        const ref = doc(db, 'users', currentUser.uid, 'studyos', 'state');
+        await setDoc(ref, { payload: state, uid: currentUser.uid, updatedAt: serverTimestamp() }, { merge: true });
+        el.status.textContent = 'Saved Firebase';
+      } catch (err) {
+        el.status.textContent = 'Save failed';
+        showToast(`Save failed: ${err?.message || 'unknown error'}`, 4200);
       }
-      const ref = doc(db, 'users', currentUser.uid, 'studyos', 'state');
-      await setDoc(ref, { payload: state, uid: currentUser.uid, updatedAt: serverTimestamp() }, { merge: true });
-      el.status.textContent = 'Saved Firebase';
     }
 
     function queueSave() {
@@ -978,6 +997,19 @@
       sp.selectedNoteId = cur.id;
       el.noteTitle.value = cur.title || '';
       el.noteContent.value = cur.content || '';
+      renderHighlightsPanel();
+    }
+
+    function renderHighlightsPanel() {
+      const sp = getSpace();
+      el.notesHighlights.innerHTML = `<div style="padding:8px;font-weight:700;">Highlights</div>` + ((sp.highlights || []).slice(0, 12).map(h => `<div class="note-item" data-highlight="${h.id}"><div>${esc(h.text.slice(0,90))}</div><small>${esc(h.source)} • ${new Date(h.at).toLocaleString()}</small></div>`).join('') || '<div class="note-item">No highlights yet.</div>');
+      [...el.notesHighlights.querySelectorAll('[data-highlight]')].forEach(n => n.onclick = () => {
+        const h = sp.highlights.find(x => x.id === n.dataset.highlight);
+        if (!h) return;
+        const insert = `\n\n[HIGHLIGHT • ${h.source}]\n${h.text}\n`;
+        el.noteContent.value = `${el.noteContent.value}${insert}`;
+        saveCurrentNote();
+      });
     }
 
     function saveCurrentNote() {
@@ -1503,7 +1535,7 @@
       $('set-click-close').onchange = e => { state.prefs.clickClose = e.target.checked; queueSave(); };
       $('set-open-start').onchange = e => { state.prefs.openStartOnLoad = e.target.checked; queueSave(); };
       $('set-snap').onchange = e => { state.prefs.snap = e.target.checked; queueSave(); };
-      $('set-homepage').onchange = e => { state.prefs.homepage = e.target.value.trim() || 'https://www.google.com'; queueSave(); };
+      $('set-homepage').onchange = e => { state.prefs.homepage = e.target.value.trim() || 'https://www.wikipedia.org'; queueSave(); };
 
       document.addEventListener('click', e => {
         if (!state.prefs.clickClose) return;
@@ -1587,6 +1619,13 @@
       document.querySelectorAll('.window').forEach(w => { w.style.display='none'; w.classList.remove('active'); });
       activeWindowId = '';
       setActiveTaskbar('');
+    });
+
+    window.addEventListener('error', e => {
+      showToast(`Runtime error: ${e.message}`);
+    });
+    window.addEventListener('unhandledrejection', e => {
+      showToast(`Async error: ${e.reason?.message || e.reason || 'unknown'}`);
     });
   </script>
 </body>
