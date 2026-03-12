@@ -433,7 +433,7 @@
         <div id="study-activity" style="margin-top:8px;display:grid;gap:5px;font-size:12px;"></div>
       </div>
     </div>
-    <div class="app-body panel" id="task-list"></div>
+    <div class="app-body panel" id="dashboard-task-list"></div>
   </section>
 
   <section id="notes-window" class="window" style="left:100px;top:70px;">
@@ -1627,7 +1627,7 @@
     window.addEventListener('unhandledrejection', e => {
       showToast(`Async error: ${e.reason?.message || e.reason || 'unknown'}`);
     });
-      };
+      
   </script>
 </body>
 </html>
