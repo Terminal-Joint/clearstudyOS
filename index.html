@@ -2,120 +2,122 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>macOS StudyOS</title>
+    <title>macOS StudyOS - Pro Edition</title>
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
         :root {
-            --apple-blue: #007AFF;
-            --glass: rgba(255, 255, 255, 0.7);
-            --border: rgba(255, 255, 255, 0.3);
+            --mac-radius: 12px;
+            --glass: rgba(255, 255, 255, 0.75);
+            --accent: #007AFF;
         }
 
         body, html { 
             margin: 0; padding: 0; height: 100vh; width: 100vw;
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
             overflow: hidden;
-            background: url('https://help.apple.com/assets/6656209581E0F57C6C0A1950/6656209881E0F57C6C0A195F/en_US/62f689c836d07466547190f890989f66.png') no-repeat center center fixed;
-            background-size: cover;
+            background: url('https://help.apple.com/assets/6656209581E0F57C6C0A1950/6656209881E0F57C6C0A195F/en_US/62f689c836d07466547190f890989f66.png') center/cover;
         }
 
-        /* Top Bar */
-        .menu-bar {
-            height: 30px; width: 100%; background: rgba(0,0,0,0.2);
-            backdrop-filter: blur(25px); color: white; display: flex;
-            align-items: center; padding: 0 20px; font-size: 14px; position: fixed; top: 0; z-index: 9999;
+        /* Top Menu Bar */
+        .system-bar {
+            height: 30px; width: 100%; background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(30px); color: white; display: flex;
+            align-items: center; padding: 0 20px; font-size: 13px; position: fixed; top: 0; z-index: 10000;
         }
 
-        /* Desktop Icons */
-        .desktop-icons {
-            position: absolute; top: 50px; right: 20px; display: flex; flex-direction: column; gap: 20px; align-items: center;
+        /* Launchpad (Start Menu) */
+        #launchpad {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(50px); z-index: 9000; display: none;
+            flex-direction: column; align-items: center; padding-top: 100px;
+            color: white;
         }
-        .desktop-icon {
-            width: 60px; text-align: center; color: white; font-size: 12px; cursor: pointer; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-        }
-        .desktop-icon img { width: 50px; height: 50px; border-radius: 12px; margin-bottom: 5px; }
+        .lp-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px; text-align: center; }
+        .lp-item { cursor: pointer; transition: 0.3s; width: 100px; }
+        .lp-item:hover { transform: scale(1.1); }
+        .lp-item img { width: 80px; height: 80px; border-radius: 18px; margin-bottom: 10px; }
 
-        /* Window Styling */
+        /* Window System */
         .window {
-            position: absolute; background: var(--glass); backdrop-filter: blur(40px);
-            border-radius: 12px; box-shadow: 0 30px 60px rgba(0,0,0,0.4);
-            border: 1px solid var(--border); display: none; flex-direction: column; 
-            min-width: 400px; min-height: 300px; z-index: 100;
+            position: absolute; background: var(--glass); backdrop-filter: blur(50px);
+            border-radius: var(--mac-radius); box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+            display: none; flex-direction: column; border: 0.5px solid rgba(255,255,255,0.4);
         }
+        .window.active { z-index: 5000; box-shadow: 0 50px 100px rgba(0,0,0,0.5); }
+        .title-bar { height: 40px; display: flex; align-items: center; padding: 0 15px; cursor: default; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; }
 
-        .title-bar {
-            height: 40px; display: flex; align-items: center; padding: 0 15px; cursor: move;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-        }
+        /* Notes App Interface */
+        .notes-app-body { display: flex; height: 100%; background: white; border-radius: 0 0 12px 12px; }
+        .notes-list { width: 220px; background: #f5f5f5; border-right: 1px solid #ddd; padding: 15px; overflow-y: auto; }
+        .note-entry { padding: 10px; border-radius: 8px; margin-bottom: 5px; cursor: pointer; font-size: 13px; }
+        .note-entry:hover { background: #e0e0e0; }
+        .note-entry.selected { background: var(--accent); color: white; }
+        .editor-area { flex: 1; display: flex; flex-direction: column; }
+        #note-title-input { border: none; padding: 20px; font-size: 24px; font-weight: 700; outline: none; }
+        #note-body-input { flex: 1; border: none; padding: 0 20px 20px; font-size: 16px; outline: none; resize: none; }
 
-        .controls { display: flex; gap: 8px; }
-        .dot { width: 12px; height: 12px; border-radius: 50%; border: 0.5px solid rgba(0,0,0,0.1); cursor: pointer; }
-        .close { background: #FF5F56; } .min { background: #FFBD2E; } .max { background: #27C93F; }
-
-        /* App Content */
-        .content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        #notes-editor {
-            flex: 1; border: none; outline: none; padding: 20px; font-size: 18px; line-height: 1.5;
-            background: transparent; resize: none; color: #1d1d1f;
-        }
-
-        /* The Dock */
+        /* Dock */
         .dock {
-            position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%);
-            background: rgba(255,255,255,0.25); backdrop-filter: blur(30px);
-            padding: 10px 15px; border-radius: 22px; display: flex; gap: 15px;
-            border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%);
+            background: rgba(255,255,255,0.3); backdrop-filter: blur(30px);
+            padding: 8px 12px; border-radius: 22px; display: flex; gap: 15px; z-index: 8000;
         }
-        .dock-item {
-            width: 50px; height: 50px; cursor: pointer; transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .dock-item:hover { transform: scale(1.3) translateY(-10px); }
-
-        iframe { width: 100%; height: 100%; border: none; background: white; }
+        .dock-app { width: 50px; height: 50px; cursor: pointer; transition: 0.2s; }
+        .dock-app:hover { transform: scale(1.3) translateY(-10px); }
     </style>
 </head>
 <body>
 
-<div class="menu-bar">
-    <span style="font-weight: 800;"></span>&nbsp;&nbsp; <b>Notes</b> &nbsp; File &nbsp; Edit &nbsp; View &nbsp; Window
+<div class="system-bar">
+    <span onclick="toggleLaunchpad()" style="cursor:pointer"></span>&nbsp;&nbsp; 
+    <b id="active-app-name">Finder</b>
     <span id="clock" style="margin-left: auto;"></span>
 </div>
 
-<div class="desktop-icons">
-    <div class="desktop-icon" onclick="openApp('notes-win')">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/3/30/macOS_Notes_icon.svg" alt="Notes">
-        <div>JEE Notes</div>
+<div id="launchpad" onclick="toggleLaunchpad()">
+    <div class="lp-grid" onclick="event.stopPropagation()">
+        <div class="lp-item" onclick="openApp('notes-win'); toggleLaunchpad()">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/3/30/macOS_Notes_icon.svg">
+            <div>Notes</div>
+        </div>
+        <div class="lp-item" onclick="openApp('safari-win'); toggleLaunchpad()">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/52/Safari_browser_logo.svg">
+            <div>Safari</div>
+        </div>
+    </div>
+    <div style="margin-top: 50px; width: 80%; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 20px;">
+        <h3>Recent Study Notes</h3>
+        <div id="lp-notes-list" class="lp-grid" style="grid-template-columns: repeat(6, 1fr);"></div>
     </div>
 </div>
 
-<div class="window" id="notes-win" style="top: 100px; left: 100px; width: 600px; height: 500px;">
-    <div class="title-bar" onmousedown="dragWindow(this.parentElement)">
-        <div class="controls"><div class="dot close" onclick="closeApp('notes-win')"></div><div class="dot min"></div><div class="dot max"></div></div>
-        <span style="margin-left: 20px; font-size: 13px; font-weight: 600; color: #444;">Study Notes</span>
-    </div>
-    <div class="content">
-        <textarea id="notes-editor" placeholder="Write your Physics/Maths formulas here..."></textarea>
-    </div>
-</div>
-
-<div class="window" id="safari-win" style="top: 150px; left: 400px; width: 800px; height: 600px;">
-    <div class="title-bar" onmousedown="dragWindow(this.parentElement)">
-        <div class="controls"><div class="dot close" onclick="closeApp('safari-win')"></div><div class="dot min"></div><div class="dot max"></div></div>
-        <input type="text" id="url-bar" value="https://en.wikipedia.org" style="margin-left: 20px; width: 70%; border-radius: 6px; border: 1px solid #ccc; padding: 2px 10px;">
-    </div>
-    <div class="content">
-        <iframe id="browser-frame" src="https://en.wikipedia.org"></iframe>
+<div id="desktop">
+    <div class="window" id="notes-win" style="width: 900px; height: 600px; top: 80px; left: 100px;">
+        <div class="title-bar" onmousedown="focusWin('notes-win'); dragWin(this.parentElement)">
+            <div class="dot" style="background:#FF5F56" onclick="closeApp('notes-win')"></div>
+            <div class="dot" style="background:#FFBD2E"></div>
+            <div class="dot" style="background:#27C93F"></div>
+            <button onclick="createNewNote()" style="margin-left:auto; background:var(--accent); color:white; border:none; border-radius:5px; padding:2px 10px;">+ New Note</button>
+        </div>
+        <div class="notes-app-body">
+            <div class="notes-list" id="sidebar-notes"></div>
+            <div class="editor-area">
+                <input type="text" id="note-title-input" placeholder="Untitled Note">
+                <textarea id="note-body-input" placeholder="Start writing..."></textarea>
+            </div>
+        </div>
     </div>
 </div>
 
 <div class="dock">
-    <img class="dock-item" src="https://upload.wikimedia.org/wikipedia/commons/3/30/macOS_Notes_icon.svg" onclick="openApp('notes-win')">
-    <img class="dock-item" src="https://upload.wikimedia.org/wikipedia/commons/5/52/Safari_browser_logo.svg" onclick="openApp('safari-win')">
+    <img class="dock-app" src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" onclick="toggleLaunchpad()" title="Launchpad">
+    <img class="dock-app" src="https://upload.wikimedia.org/wikipedia/commons/3/30/macOS_Notes_icon.svg" onclick="openApp('notes-win')">
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyAPzgwYDQQqR4y8aRcu8BmXfhYoLPXDuVM",
@@ -128,44 +130,85 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const editor = document.getElementById('notes-editor');
+    let currentNoteId = null;
 
-    // Load Notes
-    window.addEventListener('DOMContentLoaded', async () => {
-        const snap = await getDoc(doc(db, "study", "main_notes"));
-        if (snap.exists()) editor.value = snap.data().text;
+    // REAL-TIME SYNC
+    onSnapshot(collection(db, "study_notes"), (snapshot) => {
+        const sidebar = document.getElementById('sidebar-notes');
+        const lpNotes = document.getElementById('lp-notes-list');
+        sidebar.innerHTML = '';
+        lpNotes.innerHTML = '';
+
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            const div = document.createElement('div');
+            div.className = `note-entry ${doc.id === currentNoteId ? 'selected' : ''}`;
+            div.innerText = data.title || "Untitled";
+            div.onclick = () => loadNote(doc.id, data);
+            sidebar.appendChild(div);
+
+            // Add to Start Menu (Launchpad)
+            const lpItem = document.createElement('div');
+            lpItem.className = 'lp-item';
+            lpItem.innerHTML = `<div style="background:#fff; color:#333; padding:20px; border-radius:10px;">DOC</div><div style="font-size:12px">${data.title}</div>`;
+            lpItem.onclick = () => { loadNote(doc.id, data); openApp('notes-win'); };
+            lpNotes.appendChild(lpItem);
+        });
     });
 
-    // Auto-Save every 2 seconds if changed
-    let timeout = null;
-    editor.addEventListener('input', () => {
-        clearTimeout(timeout);
-        timeout = setTimeout(async () => {
-            await setDoc(doc(db, "study", "main_notes"), { text: editor.value });
-            console.log("Cloud Synced");
-        }, 2000);
-    });
+    window.loadNote = (id, data) => {
+        currentNoteId = id;
+        document.getElementById('note-title-input').value = data.title;
+        document.getElementById('note-body-input').value = data.body;
+        document.querySelectorAll('.note-entry').forEach(el => el.classList.remove('selected'));
+    };
+
+    window.createNewNote = () => {
+        const id = "note_" + Date.now();
+        currentNoteId = id;
+        saveCurrentNote();
+    };
+
+    async function saveCurrentNote() {
+        if (!currentNoteId) return;
+        const title = document.getElementById('note-title-input').value;
+        const body = document.getElementById('note-body-input').value;
+        await setDoc(doc(db, "study_notes", currentNoteId), { title, body, updated: Date.now() });
+    }
+
+    // Auto-save on typing
+    document.getElementById('note-title-input').addEventListener('input', saveCurrentNote);
+    document.getElementById('note-body-input').addEventListener('input', saveCurrentNote);
 </script>
 
 <script>
-    function openApp(id) { 
-        const win = document.getElementById(id);
-        win.style.display = 'flex';
-        win.style.zIndex = Math.floor(Date.now() / 1000);
+    function toggleLaunchpad() {
+        const lp = document.getElementById('launchpad');
+        lp.style.display = lp.style.display === 'flex' ? 'none' : 'flex';
     }
+
+    function openApp(id) { 
+        document.getElementById(id).style.display = 'flex'; 
+        focusWin(id);
+    }
+    
     function closeApp(id) { document.getElementById(id).style.display = 'none'; }
 
-    function dragWindow(el) {
-        let x = 0, y = 0, nx = 0, ny = 0;
+    function focusWin(id) {
+        document.querySelectorAll('.window').forEach(w => w.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.getElementById('active-app-name').innerText = id.split('-')[0].toUpperCase();
+    }
+
+    function dragWin(el) {
+        let nx = 0, ny = 0;
         el.onmousedown = (e) => {
-            if(e.target.tagName === 'INPUT') return;
-            el.style.zIndex = Math.floor(Date.now() / 1000);
+            if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'BUTTON') return;
             nx = e.clientX; ny = e.clientY;
             document.onmousemove = (e) => {
-                x = nx - e.clientX; y = ny - e.clientY;
+                el.style.top = (el.offsetTop - (ny - e.clientY)) + "px";
+                el.style.left = (el.offsetLeft - (nx - e.clientX)) + "px";
                 nx = e.clientX; ny = e.clientY;
-                el.style.top = (el.offsetTop - y) + "px";
-                el.style.left = (el.offsetLeft - x) + "px";
             };
             document.onmouseup = () => { document.onmousemove = null; };
         };
@@ -175,6 +218,5 @@
         document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
     }, 1000);
 </script>
-
 </body>
 </html>
