@@ -429,6 +429,7 @@
           <button class="btn" id="open-desktop-from-dashboard">Show Desktop</button>
         </div>
         <div id="coach-text" style="margin-top:8px;opacity:.9;"></div>
+        <div id="study-activity" style="margin-top:8px;display:grid;gap:5px;font-size:12px;"></div>
       </div>
     </div>
     <div class="app-body panel" id="task-list"></div>
@@ -436,7 +437,7 @@
 
   <section id="notes-window" class="window" style="left:100px;top:70px;">
     <div class="titlebar" data-window="notes-window"><div class="title">Notes</div><div class="w-controls"><button class="ctrl min" data-close="notes-window">—</button><button class="ctrl max" data-max="notes-window">▢</button><button class="ctrl close" data-close="notes-window">✕</button></div></div>
-    <div class="toolbar"><button class="btn" id="note-new">New</button><button class="btn" id="note-delete">Delete</button><button class="btn primary" id="note-save">Save</button><button class="btn" id="pin-to-vault">Pin to Vault</button></div>
+    <div class="toolbar"><button class="btn" id="note-new">New</button><button class="btn" id="note-delete">Delete</button><button class="btn primary" id="note-save">Save</button><button class="btn" id="note-highlight">Highlight Selection</button><button class="btn" id="pin-to-vault">Pin to Vault</button></div>
     <div class="app-body split">
       <aside class="panel" id="notes-list" style="overflow:auto;"></aside>
       <section class="panel" style="display:flex;flex-direction:column;gap:8px;padding:8px;">
@@ -457,13 +458,13 @@
     <div id="browser-top">
       <div id="browser-tabs"></div>
     </div>
-    <div class="toolbar"><button class="btn" id="browser-new-tab">+ Tab</button><input id="browser-url" class="field" style="flex:1;" placeholder="Search Google or enter URL"><button class="btn primary" id="browser-go">Go</button><button class="btn" id="browser-open-external">Open External</button><button class="btn" id="install-webapp">Install App</button></div>
+    <div class="toolbar"><button class="btn" id="browser-new-tab">+ Tab</button><input id="browser-url" class="field" style="flex:1;" placeholder="Search Google or enter URL"><button class="btn primary" id="browser-go">Go</button><button class="btn" id="browser-highlight">Save Highlight</button><button class="btn" id="browser-open-external">Open External</button><button class="btn" id="install-webapp">Install App</button><button class="btn" id="uninstall-webapp">Uninstall App</button></div>
     <div class="app-body" style="padding:8px;"><iframe id="browser-frame" src="https://www.google.com" referrerpolicy="no-referrer"></iframe></div>
   </section>
 
   <section id="pdf-window" class="window" style="left:150px;top:80px;width:min(1080px,94vw);height:min(730px,86vh);">
     <div class="titlebar" data-window="pdf-window"><div class="title">Bookshelf + PDF</div><div class="w-controls"><button class="ctrl min" data-close="pdf-window">—</button><button class="ctrl max" data-max="pdf-window">▢</button><button class="ctrl close" data-close="pdf-window">✕</button></div></div>
-    <div class="toolbar"><input id="pdf-upload" type="file" class="field" accept="application/pdf"><input id="book-title" class="field" placeholder="Book title" style="width:180px;"><button class="btn primary" id="add-book">Add Book</button></div>
+    <div class="toolbar"><input id="pdf-upload" type="file" class="field" accept="application/pdf"><input id="book-title" class="field" placeholder="Book title" style="width:180px;"><button class="btn primary" id="add-book">Add Book</button><button class="btn" id="pdf-highlight">Save Highlight</button></div>
     <div class="app-body split"><aside class="panel" id="bookshelf" style="overflow:auto;"></aside><section class="panel" style="padding:8px;"><iframe id="pdf-frame"></iframe></section></div>
   </section>
 
@@ -586,6 +587,7 @@
 
     let currentUser = null;
     let saveTimer = null;
+    let activeWindowId = '';
 
     function baseSpace(name='Physics') {
       return {
@@ -596,6 +598,8 @@
         books: [],
         studio: { drawing:'', stickies:[] },
         vault: [],
+        highlights: [],
+        analytics: { appMinutes: {}, events: [] },
         browser: { tabs:[{ id: crypto.randomUUID(), title:'Google', url:'https://www.google.com' }], activeTabId:null },
         quickNotes: [],
         apps: CORE_APPS.map(a => ({ id: a.id, name: a.name, icon: a.icon, type:'core' })),
@@ -644,6 +648,8 @@
         sp.books = sp.books || [];
         sp.studio = { drawing: sp.studio?.drawing || '', stickies: sp.studio?.stickies || [] };
         sp.vault = sp.vault || [];
+        sp.highlights = sp.highlights || [];
+        sp.analytics = { appMinutes: sp.analytics?.appMinutes || {}, events: sp.analytics?.events || [] };
         sp.quickNotes = sp.quickNotes || [];
         sp.apps = sp.apps?.length ? sp.apps : base.apps;
         const tabs = sp.browser?.tabs?.length ? sp.browser.tabs : [{ id: crypto.randomUUID(), title:'Google', url:(s.prefs?.homepage || 'https://www.google.com') }];
@@ -663,11 +669,32 @@
     const getSpace = () => state.spaces[state.currentSpace];
 
     function dayKey(ts=Date.now()) { return new Date(ts).toISOString().slice(0,10); }
+    function logStudyEvent(type, payload={}) {
+      const sp = getSpace();
+      sp.analytics.events.unshift({ type, payload, at: Date.now() });
+      sp.analytics.events = sp.analytics.events.slice(0, 300);
+    }
+    function addAppMinutes(appId, minutes=1) {
+      if (!appId) return;
+      const sp = getSpace();
+      sp.analytics.appMinutes[appId] = Number(sp.analytics.appMinutes[appId] || 0) + minutes;
+    }
+    function addHighlight(source, text, meta='') {
+      const t = (text || '').trim();
+      if (!t) return;
+      const sp = getSpace();
+      sp.highlights.unshift({ id: crypto.randomUUID(), source, text: t, meta, at: Date.now() });
+      sp.highlights = sp.highlights.slice(0, 400);
+      logStudyEvent('highlight', { source });
+      queueSave();
+    }
+
     function totalTodayMinutes() {
       const sp = getSpace();
       const today = dayKey();
       const mins = sp.tasks.filter(t => t.done && dayKey(t.doneAt || t.at) === today).length * 5
-        + sp.quickNotes.filter(n => dayKey(n.at) === today).length;
+        + sp.quickNotes.filter(n => dayKey(n.at) === today).length
+        + Math.round(Object.values(sp.analytics.appMinutes || {}).reduce((a,b)=>a+b,0));
       return mins;
     }
 
@@ -755,7 +782,6 @@
         renderStart(el.startSearch.value || '');
         queueSave();
       });
-    }
 
     function renderStart(filter='') {
       const q = (filter || '').trim().toLowerCase();
@@ -788,6 +814,7 @@
         openWindow('notes-window');
         closePopups();
       });
+    }
 
     function launchApp(id) {
       if (id.startsWith('webapp:')) {
@@ -815,6 +842,7 @@
       document.querySelectorAll('.window').forEach(x => x.classList.remove('active'));
       w.style.display = 'flex';
       w.classList.add('active');
+      activeWindowId = id;
       const rect = getSpace().windows[id];
       if (rect) {
         w.style.left = rect.left;
@@ -822,6 +850,7 @@
         w.style.width = rect.width;
         w.style.height = rect.height;
       }
+      logStudyEvent('open-window', { id });
       setActiveTaskbar(id);
     }
 
@@ -830,6 +859,7 @@
       if (!w) return;
       w.style.display = 'none';
       w.classList.remove('active');
+      if (activeWindowId === id) activeWindowId = document.querySelector('.window.active')?.id || '';
       saveWindowRect(id);
       setActiveTaskbar(document.querySelector('.window.active')?.id || '');
     }
@@ -928,6 +958,7 @@
         w.addEventListener('mousedown', () => {
           document.querySelectorAll('.window').forEach(x => x.classList.remove('active'));
           w.classList.add('active');
+          activeWindowId = w.id;
           setActiveTaskbar(w.id);
         });
       });
@@ -955,6 +986,7 @@
       cur.title = el.noteTitle.value;
       cur.content = el.noteContent.value;
       cur.updatedAt = Date.now();
+      logStudyEvent('save-note', { title: cur.title || 'Untitled' });
       renderNotes();
       queueSave();
       el.status.textContent = 'Note saved';
@@ -975,6 +1007,7 @@
         if (!t) return;
         t.done = n.checked;
         t.doneAt = Date.now();
+        logStudyEvent('task-toggle', { title: t.title, done: t.done });
         renderTasks();
         queueSave();
       });
@@ -1031,6 +1064,7 @@
       if (!tab) return;
       tab.url = v;
       tab.title = v.replace(/^https?:\/\//,'').slice(0, 30);
+      logStudyEvent('navigate', { url: v.slice(0,120) });
       renderBrowserTabs();
       loadActiveTab();
       queueSave();
@@ -1090,10 +1124,13 @@
       $('m-today').textContent = `${today}m`;
       $('m-streak').textContent = `${streak}d`;
       $('m-tasks').textContent = String(sp.tasks.filter(t => t.done).length);
-      $('m-vault').textContent = String(sp.vault.length);
+      $('m-vault').textContent = `${sp.vault.length} / H:${sp.highlights.length}`;
       $('daily-goal').value = String(Number(sp.dailyGoal || 120));
       const left = Math.max(0, Number(sp.dailyGoal || 120) - today);
-      $('coach-text').textContent = left ? `Need ${left} more minutes today. Keep going.` : 'Goal achieved. Great work!';
+      const topApp = Object.entries(sp.analytics.appMinutes || {}).sort((a,b)=>b[1]-a[1])[0];
+      const topAppText = topApp ? `Top focus app: ${topApp[0].replace('-window','')} (${Math.round(topApp[1])}m)` : 'No app usage tracked yet.';
+      $('coach-text').textContent = `${left ? `Need ${left} more minutes today.` : 'Goal achieved.'} ${topAppText}`;
+      $('study-activity').innerHTML = (sp.analytics.events || []).slice(0,5).map(e => `<div class="panel" style="padding:6px;">${esc(e.type)} • ${new Date(e.at).toLocaleTimeString()}</div>`).join('') || '<div class="panel" style="padding:6px;">No activity yet.</div>';
     }
 
     function showStart() {
@@ -1178,6 +1215,7 @@
       };
       $('tb-show-desktop').onclick = () => {
         document.querySelectorAll('.window').forEach(w => { w.style.display = 'none'; w.classList.remove('active'); });
+        activeWindowId = '';
         setActiveTaskbar('');
       };
       $('tb-annot').onclick = () => {
@@ -1238,8 +1276,10 @@
         sp.quickNotes.unshift({ id: crypto.randomUUID(), text, at: Date.now() });
         sp.vault.unshift({ text, at: Date.now() });
         el.quickNoteText.value = '';
+        addHighlight('quick-note', text, 'Quick note');
         renderVault();
         renderDashboard();
+        logStudyEvent('quick-note', { len: text.length });
         queueSave();
       };
 
@@ -1260,12 +1300,22 @@
         queueSave();
       };
       $('note-save').onclick = saveCurrentNote;
+      $('note-highlight').onclick = () => {
+        const start = el.noteContent.selectionStart || 0;
+        const end = el.noteContent.selectionEnd || 0;
+        if (end <= start) return;
+        const selected = el.noteContent.value.slice(start, end);
+        el.noteContent.setRangeText(`==${selected}==`, start, end, 'end');
+        addHighlight('notes', selected, el.noteTitle.value || 'Untitled');
+        saveCurrentNote();
+      };
       $('pin-to-vault').onclick = () => {
         saveCurrentNote();
         const sp = getSpace();
         const cur = sp.notes.find(n => n.id === sp.selectedNoteId);
         if (!cur) return;
         sp.vault.unshift({ text: `${cur.title || 'Untitled'}: ${cur.content.slice(0, 250)}`, at: Date.now() });
+        addHighlight('notes-pin', cur.title || 'Untitled', 'Pinned summary');
         renderVault();
         queueSave();
       };
@@ -1291,6 +1341,14 @@
         queueSave();
       };
       $('browser-go').onclick = () => navigateBrowser(el.browserUrl.value);
+      $('browser-highlight').onclick = () => {
+        const text = prompt('Save important point from this site:');
+        if (!text?.trim()) return;
+        const tab = getActiveTab();
+        addHighlight('browser', text.trim(), tab?.url || '');
+        getSpace().vault.unshift({ text: `[Web] ${text.trim()}`, at: Date.now() });
+        renderVault();
+      };
       el.browserUrl.addEventListener('keydown', e => e.key === 'Enter' && navigateBrowser(el.browserUrl.value));
       $('browser-open-external').onclick = () => {
         const url = getActiveTab()?.url;
@@ -1305,6 +1363,20 @@
         if (!name?.trim()) return;
         const id = `webapp:${crypto.randomUUID()}`;
         getSpace().apps.push({ id, name: name.trim(), icon:'🌐', type:'webapp', url });
+        logStudyEvent('install-app', { name: name.trim(), url });
+        renderDesktop();
+        renderStart(el.startSearch.value || '');
+        queueSave();
+      };
+      $('uninstall-webapp').onclick = () => {
+        const apps = getSpace().apps.filter(a => a.type === 'webapp');
+        if (!apps.length) return alert('No installed apps in this space.');
+        const picked = prompt(`Uninstall which app?\n${apps.map((a,i)=>`${i+1}. ${a.name}`).join('\n')}`);
+        const idx = Number(picked) - 1;
+        if (!Number.isInteger(idx) || idx < 0 || idx >= apps.length) return;
+        const target = apps[idx];
+        getSpace().apps = getSpace().apps.filter(a => a.id !== target.id);
+        logStudyEvent('uninstall-app', { name: target.name });
         renderDesktop();
         renderStart(el.startSearch.value || '');
         queueSave();
@@ -1322,9 +1394,17 @@
         });
         const sp = getSpace();
         sp.books.unshift({ id: crypto.randomUUID(), title, dataUrl, addedAt: Date.now() });
+        logStudyEvent('book-add', { title });
         renderBooks();
         el.pdfFrame.src = dataUrl;
         queueSave();
+      };
+      $('pdf-highlight').onclick = () => {
+        const text = prompt('Save important point from this PDF:');
+        if (!text?.trim()) return;
+        addHighlight('pdf', text.trim(), $('book-title').value || 'PDF');
+        getSpace().vault.unshift({ text: `[PDF] ${text.trim()}`, at: Date.now() });
+        renderVault();
       };
 
       let drawing = false;
@@ -1369,6 +1449,7 @@
         const text = $('vault-input').value.trim();
         if (!text) return;
         getSpace().vault.unshift({ text, at: Date.now() });
+        addHighlight('vault', text, 'Direct save');
         $('vault-input').value = '';
         renderVault();
         renderDashboard();
@@ -1468,6 +1549,12 @@
       renderDashboard();
     }, 1000);
 
+    setInterval(() => {
+      if (!activeWindowId) return;
+      addAppMinutes(activeWindowId, 0.25);
+      if (Math.random() < 0.2) queueSave();
+    }, 15000);
+
     onAuthStateChanged(auth, async user => {
       currentUser = user;
       setAuthUI(user);
@@ -1476,6 +1563,7 @@
       el.status.textContent = user ? 'Loaded Firebase' : 'Loaded local';
       // no apps open at start
       document.querySelectorAll('.window').forEach(w => { w.style.display='none'; w.classList.remove('active'); });
+      activeWindowId = '';
       setActiveTaskbar('');
     });
   </script>
