@@ -2,162 +2,162 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Mac Studio - Study Edition</title>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    
+    <title>macOS Study Station</title>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
         :root {
-            --mac-glass: rgba(255, 255, 255, 0.2);
-            --win-bg: rgba(255, 255, 255, 0.8);
-            --font-main: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+            --bg-url: url('https://help.apple.com/assets/6656209581E0F57C6C0A1950/6656209881E0F57C6C0A195F/en_US/62f689c836d07466547190f890989f66.png');
+            --glass: rgba(255, 255, 255, 0.7);
         }
 
-        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: var(--font-main); }
-
-        /* Real macOS Background */
+        body, html { margin: 0; height: 100vh; overflow: hidden; font-family: -apple-system, sans-serif; }
+        
         .desktop {
-            background: url('https://images.wallpapersden.com/image/download/macos-sequoia-official-apple_bWlpZ2mUmZqaraWkpJRmbmdlrWZsZWU.jpg') no-repeat center center fixed;
-            background-size: cover;
-            width: 100vw; height: 100vh; position: relative;
+            background: var(--bg-url) no-repeat center center fixed;
+            background-size: cover; width: 100vw; height: 100vh; position: relative;
         }
 
         /* Top Menu Bar */
-        .menu-bar {
-            height: 30px; width: 100%; background: rgba(0,0,0,0.2);
+        .top-bar {
+            height: 30px; width: 100%; background: rgba(0,0,0,0.15);
             backdrop-filter: blur(20px); color: white; display: flex;
-            align-items: center; padding: 0 20px; font-size: 14px; box-sizing: border-box;
+            align-items: center; padding: 0 20px; font-size: 13px; font-weight: 500;
         }
 
-        /* The Draggable Window */
+        /* macOS Window */
         .window {
-            position: absolute; width: 500px; height: 400px;
-            background: var(--win-bg); backdrop-filter: blur(25px);
-            border-radius: 12px; box-shadow: 0 50px 100px rgba(0,0,0,0.3);
+            position: absolute; background: var(--glass);
+            backdrop-filter: blur(30px); border-radius: 12px;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.3);
             display: none; flex-direction: column; overflow: hidden;
-            border: 1px solid rgba(255,255,255,0.4); z-index: 10;
+            border: 0.5px solid rgba(255,255,255,0.4); z-index: 10;
         }
 
-        .title-bar {
-            height: 40px; background: rgba(255,255,255,0.1);
-            display: flex; align-items: center; padding: 0 15px; cursor: default;
-        }
-
+        .title-bar { height: 35px; display: flex; align-items: center; padding: 0 12px; cursor: move; }
         .dots { display: flex; gap: 8px; }
-        .dot { width: 12px; height: 12px; border-radius: 50%; cursor: pointer; }
-        .close { background: #ff5f56; } .min { background: #ffbd2e; } .max { background: #27c93f; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        .close { background: #FF5F56; } .min { background: #FFBD2E; } .max { background: #27C93F; }
 
-        .app-view { flex: 1; padding: 20px; overflow-y: auto; color: #333; }
+        .content { flex: 1; padding: 0; position: relative; }
+        
+        textarea { 
+            width: 100%; height: 100%; border: none; padding: 20px; 
+            background: transparent; font-size: 16px; outline: none; box-sizing: border-box;
+        }
 
         /* The Dock */
         .dock {
-            position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%);
-            background: rgba(255,255,255,0.25); backdrop-filter: blur(30px);
-            padding: 10px 15px; border-radius: 24px; display: flex; gap: 15px;
+            position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+            background: rgba(255,255,255,0.2); backdrop-filter: blur(20px);
+            padding: 8px 15px; border-radius: 20px; display: flex; gap: 12px;
             border: 1px solid rgba(255,255,255,0.2);
         }
 
         .icon {
-            width: 55px; height: 55px; border-radius: 14px; cursor: pointer;
-            transition: transform 0.3s; background-size: cover;
+            width: 50px; height: 50px; border-radius: 12px; cursor: pointer;
+            background-size: cover; transition: 0.2s;
         }
-        .icon:hover { transform: scale(1.3) translateY(-10px); }
+        .icon:hover { transform: scale(1.2) translateY(-10px); }
 
-        /* Apps UI */
-        textarea { width: 100%; height: 70%; border: none; background: transparent; outline: none; font-size: 16px; }
-        #render-area { border-top: 1px solid #ccc; padding-top: 10px; margin-top: 10px; }
+        /* Browser Header */
+        .browser-nav { background: #e0e0e0; padding: 5px; display: flex; gap: 5px; }
+        input#url-input { flex: 1; border-radius: 5px; border: 1px solid #ccc; padding: 3px 10px; }
     </style>
 </head>
 <body>
 
 <div class="desktop">
-    <div class="menu-bar">
-        <strong></strong> &nbsp;&nbsp; File &nbsp; Edit &nbsp; View &nbsp; Study &nbsp; Window
-        <span id="clock" style="margin-left: auto;">10:00 AM</span>
+    <div class="top-bar">
+        <strong></strong> &nbsp;&nbsp; Finder &nbsp; File &nbsp; Edit &nbsp; View &nbsp; Go &nbsp; Window
+        <span id="clock" style="margin-left:auto"></span>
     </div>
 
-    <div class="window" id="notes-app" style="top:100px; left:100px;">
-        <div class="title-bar" onmousedown="makeDraggable('notes-app')">
-            <div class="dots"><div class="dot close" onclick="toggleApp('notes-app')"></div><div class="dot min"></div><div class="dot max"></div></div>
-            <span style="margin-left: 20px; font-weight: 600;">LaTeX Notes</span>
+    <div class="window" id="notes-app" style="width:500px; height:400px; top:100px; left:100px;">
+        <div class="title-bar" onmousedown="initDrag(this.parentElement)">
+            <div class="dots"><div class="dot close" onclick="closeApp('notes-app')"></div><div class="dot min"></div><div class="dot max"></div></div>
+            <span style="margin-left: 15px; font-size: 13px; font-weight: 600;">Notes</span>
         </div>
-        <div class="app-view">
-            <textarea id="note-input" placeholder="Type JEE Equations... e.g. $$x^2 + y^2 = r^2$$"></textarea>
-            <button onclick="renderLatex()">Render & Sync</button>
-            <div id="render-area"></div>
+        <div class="content">
+            <textarea id="note-text" placeholder="Start writing JEE notes..."></textarea>
         </div>
     </div>
 
-    <div class="window" id="search-app" style="top:150px; left:300px; width: 700px; height: 500px;">
-        <div class="title-bar" onmousedown="makeDraggable('search-app')">
-            <div class="dots"><div class="dot close" onclick="toggleApp('search-app')"></div><div class="dot min"></div><div class="dot max"></div></div>
-            <span style="margin-left: 20px; font-weight: 600;">Study Browser</span>
+    <div class="window" id="browser-app" style="width:800px; height:550px; top:150px; left:300px;">
+        <div class="title-bar" onmousedown="initDrag(this.parentElement)">
+            <div class="dots"><div class="dot close" onclick="closeApp('browser-app')"></div><div class="dot min"></div><div class="dot max"></div></div>
+            <span style="margin-left: 15px; font-size: 13px; font-weight: 600;">Safari</span>
         </div>
-        <div class="app-view" style="padding:0;">
-            <div style="padding: 10px; background: #eee;">
-                <input type="text" id="url" placeholder="Search JEE topics..." style="width: 80%;">
-                <button onclick="searchStudy()">Search</button>
-            </div>
-            <iframe id="browser" src="https://m.wikipedia.org" style="width:100%; height:85%; border:none;"></iframe>
+        <div class="browser-nav">
+            <input type="text" id="url-input" placeholder="Enter URL or Search...">
+            <button onclick="goURL()">Go</button>
+        </div>
+        <div class="content">
+            <iframe id="web-frame" src="https://www.wikipedia.org" style="width:100%; height:100%; border:none; background:white;"></iframe>
         </div>
     </div>
 
     <div class="dock">
-        <div class="icon" title="Notes" style="background-image: url('https://upload.wikimedia.org/wikipedia/commons/3/30/macOS_Notes_icon.svg');" onclick="toggleApp('notes-app')"></div>
-        <div class="icon" title="Browser" style="background-image: url('https://upload.wikimedia.org/wikipedia/commons/5/52/Safari_browser_logo.svg');" onclick="toggleApp('search-app')"></div>
-        <div class="icon" title="Upload" style="background-image: url('https://cdn-icons-png.flaticon.com/512/338/338914.png');" onclick="alert('Upload your PDF to Firebase Storage via Console')"></div>
+        <div class="icon" style="background-image:url('https://upload.wikimedia.org/wikipedia/commons/3/30/macOS_Notes_icon.svg')" onclick="openApp('notes-app')"></div>
+        <div class="icon" style="background-image:url('https://upload.wikimedia.org/wikipedia/commons/5/52/Safari_browser_logo.svg')" onclick="openApp('browser-app')"></div>
     </div>
 </div>
 
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAPzgwYDQQqR4y8aRcu8BmXfhYoLPXDuVM",
+        authDomain: "forclearpcm.firebaseapp.com",
+        projectId: "forclearpcm",
+        storageBucket: "forclearpcm.firebasestorage.app",
+        messagingSenderId: "313585574692",
+        appId: "1:313585574692:web:d4e1262ce22c7cd0bb89b1"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Auto-Save Logic
+    const textArea = document.getElementById('note-text');
+    textArea.addEventListener('input', async () => {
+        await setDoc(doc(db, "study", "notes"), { content: textArea.value });
+    });
+
+    // Auto-Load Logic
+    window.addEventListener('load', async () => {
+        const snap = await getDoc(doc(db, "study", "notes"));
+        if (snap.exists()) textArea.value = snap.data().content;
+    });
+</script>
+
 <script>
-    // WINDOW TOGGLE
-    function toggleApp(id) {
-        let win = document.getElementById(id);
-        win.style.display = (win.style.display === 'flex') ? 'none' : 'flex';
+    function openApp(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeApp(id) { document.getElementById(id).style.display = 'none'; }
+    
+    function goURL() {
+        let val = document.getElementById('url-input').value;
+        if(!val.startsWith('http')) val = 'https://' + val;
+        document.getElementById('web-frame').src = val;
     }
 
-    // DRAG LOGIC (The "OS" Feel)
-    function makeDraggable(id) {
-        let el = document.getElementById(id);
-        el.onmousedown = function(e) {
-            let offsetX = e.clientX - el.offsetLeft;
-            let offsetY = e.clientY - el.offsetTop;
-            document.onmousemove = function(e) {
-                el.style.left = (e.clientX - offsetX) + 'px';
-                el.style.top = (e.clientY - offsetY) + 'px';
+    function initDrag(el) {
+        let px = 0, py = 0, cx = 0, cy = 0;
+        el.onmousedown = (e) => {
+            cx = e.clientX; cy = e.clientY;
+            document.onmousemove = (e) => {
+                px = cx - e.clientX; py = cy - e.clientY;
+                cx = e.clientX; cy = e.clientY;
+                el.style.top = (el.offsetTop - py) + "px";
+                el.style.left = (el.offsetLeft - px) + "px";
             };
-            document.onmouseup = function() {
-                document.onmousemove = null;
-            };
+            document.onmouseup = () => { document.onmousemove = null; };
         };
     }
 
-    // LATEX RENDER
-    function renderLatex() {
-        let input = document.getElementById('note-input').value;
-        document.getElementById('render-area').innerHTML = input;
-        MathJax.typeset();
-        localStorage.setItem('saved_note', input); // Basic local save
-    }
-
-    // BROWSER LOGIC
-    function searchStudy() {
-        let q = document.getElementById('url').value;
-        document.getElementById('browser').src = "https://m.wikipedia.org/wiki/" + q;
-    }
-
-    // CLOCK
     setInterval(() => {
         document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
     }, 1000);
-
-    // Initial Load
-    window.onload = () => {
-        let saved = localStorage.getItem('saved_note');
-        if(saved) {
-            document.getElementById('note-input').value = saved;
-            renderLatex();
-        }
-    };
 </script>
 
 </body>
