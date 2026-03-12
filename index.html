@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='52' font-size='52'%3E%F0%9F%93%98%3C/text%3E%3C/svg%3E" />
   <title>For Clear Studies</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.3.136/pdf.min.js"></script>
-  <script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
 pdfjsLib.GlobalWorkerOptions.workerSrc =
-  "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.3.136/pdf.worker.min.js";
+"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 </script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -601,6 +601,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
 
     const $ = id => document.getElementById(id);
     const el = {
+      bookshelf: $('bookshelf'),
       desktop: $('desktop'), startMenu: $('start-menu'), startSearch: $('start-search'), startGrid: $('start-grid'),
       spaces: $('spaces'), recommendedList: $('recommended-list'), quickNotePop: $('quick-note-pop'), quickNoteText: $('quick-note-text'),
       notesList: $('notes-list'), noteTitle: $('note-title'), noteContent: $('note-content'), taskList: $('task-list'),
