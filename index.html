@@ -4,7 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='52' font-size='52'%3E%F0%9F%93%98%3C/text%3E%3C/svg%3E" />
-  <title>StudyOS 11 Pro</title>
+  <title>For Clear Studies</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.3.136/pdf.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     :root {
@@ -468,8 +469,25 @@
 
   <section id="pdf-window" class="window" style="left:150px;top:80px;width:min(1080px,94vw);height:min(730px,86vh);">
     <div class="titlebar" data-window="pdf-window"><div class="title">Bookshelf + PDF</div><div class="w-controls"><button class="ctrl min" data-close="pdf-window">—</button><button class="ctrl max" data-max="pdf-window">▢</button><button class="ctrl close" data-close="pdf-window">✕</button></div></div>
-    <div class="toolbar"><input id="pdf-upload" type="file" class="field" accept="application/pdf"><input id="book-title" class="field" placeholder="Book title" style="width:180px;"><button class="btn primary" id="add-book">Add Book</button><button class="btn" id="pdf-highlight">Save Highlight</button></div>
-    <div class="app-body split"><aside class="panel" id="bookshelf" style="overflow:auto;"></aside><section class="panel" style="padding:8px;"><iframe id="pdf-frame"></iframe></section></div>
+    <div class="toolbar">
+<input id="pdf-upload" type="file" accept="application/pdf">
+<input id="book-title" class="field" placeholder="Book title">
+
+<button class="btn primary" id="add-book">Add Book</button>
+
+<button class="btn" id="pdf-prev">◀ Page</button>
+<button class="btn" id="pdf-next">Page ▶</button>
+
+<button class="btn" id="pdf-zoom-in">Zoom +</button>
+<button class="btn" id="pdf-zoom-out">Zoom −</button>
+
+<button class="btn" id="pdf-fullscreen">Fullscreen</button>
+
+<button class="btn" id="pdf-highlight">Save Highlight</button>
+</div>
+    <div class="app-body split"><aside class="panel" id="bookshelf" style="overflow:auto;"></aside><section class="panel" style="padding:8px;"><div id="pdf-viewer-container" style="width:100%;height:100%;overflow:auto;background:#111;">
+  <canvas id="pdf-canvas"></canvas>
+</div></section></div>
   </section>
 
   <section id="studio-window" class="window" style="left:180px;top:90px;width:min(920px,94vw);height:min(690px,84vh);">
@@ -1128,7 +1146,7 @@
       el.bookshelf.innerHTML = sp.books.map(b => `<div class="book-item" data-book="${b.id}"><div>${esc(b.title)}</div><small>${new Date(b.addedAt).toLocaleDateString()}</small></div>`).join('') || '<div class="book-item">No books yet.</div>';
       [...el.bookshelf.querySelectorAll('[data-book]')].forEach(n => n.onclick = () => {
         const b = sp.books.find(x => x.id === n.dataset.book);
-        if (b?.dataUrl) el.pdfFrame.src = b.dataUrl;
+        if (b?.dataUrl) loadPDF(b.dataUrl);
       });
     }
 
@@ -1626,7 +1644,56 @@
     window.addEventListener('unhandledrejection', e => {
       showToast(`Async error: ${e.reason?.message || e.reason || 'unknown'}`);
     });
-      
+      let pdfDoc = null;
+let pdfPage = 1;
+let pdfScale = 1.4;
+
+const canvas = document.getElementById("pdf-canvas");
+const ctx = canvas.getContext("2d");
+
+async function loadPDF(url) {
+  const loadingTask = pdfjsLib.getDocument(url);
+  pdfDoc = await loadingTask.promise;
+  pdfPage = 1;
+  renderPage();
+}
+
+async function renderPage() {
+  const page = await pdfDoc.getPage(pdfPage);
+
+  const viewport = page.getViewport({ scale: pdfScale });
+
+  canvas.height = viewport.height;
+  canvas.width = viewport.width;
+
+  const renderContext = {
+    canvasContext: ctx,
+    viewport: viewport
+  };
+
+  await page.render(renderContext);
+}
+    document.getElementById("pdf-next").onclick = () => {
+  if (pdfPage >= pdfDoc.numPages) return;
+  pdfPage++;
+  renderPage();
+};
+
+document.getElementById("pdf-prev").onclick = () => {
+  if (pdfPage <= 1) return;
+  pdfPage--;
+  renderPage();
+};
+    document.getElementById("pdf-zoom-in").onclick = () => {
+  pdfScale += 0.2;
+  renderPage();
+};
+
+document.getElementById("pdf-zoom-out").onclick = () => {
+  pdfScale = Math.max(0.6, pdfScale - 0.2);
+  renderPage();
+};
+    
   </script>
 </body>
 </html>
