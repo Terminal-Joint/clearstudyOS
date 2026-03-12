@@ -1,216 +1,869 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>macOS Sequoia</title>
-    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-    <style>
-        :root {
-            --mac-glass: rgba(255, 255, 255, 0.2);
-            --mac-border: rgba(255, 255, 255, 0.3);
-            --blur-strength: blur(40px) saturate(180%);
-            --shadow-standard: 0 20px 50px rgba(0,0,0,0.3);
-            --accent: #007AFF;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>macOS Study Desktop</title>
+  <style>
+    :root {
+      --glass: rgba(255, 255, 255, 0.18);
+      --glass-strong: rgba(255, 255, 255, 0.25);
+      --border: rgba(255, 255, 255, 0.35);
+      --shadow: 0 28px 50px rgba(0, 0, 0, 0.32);
+      --accent: #0a84ff;
+      --text: #f4f6fb;
+    }
 
-        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif; }
-        
-        body, html { 
-            margin: 0; height: 100vh; width: 100vw; overflow: hidden;
-            /* Official macOS Sequoia Wallpaper */
-            background: url('https://wallpapers.ispazio.net/wp-content/uploads/2024/06/macOS-Sequoia-Light.jpg') center/cover no-repeat;
-        }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+      color: var(--text);
+      user-select: none;
+      background: #0d1420;
+    }
 
-        /* Top Menu Bar (Cleaned) */
-        .menu-bar {
-            height: 28px; width: 100%; background: rgba(0, 0, 0, 0.15); backdrop-filter: var(--blur-strength);
-            display: flex; align-items: center; padding: 0 15px; color: white; font-size: 13px;
-            position: fixed; top: 0; z-index: 10000;
-        }
+    body {
+      background-image: url('https://images.unsplash.com/photo-1674566744737-66f7f1d0f2b8?auto=format&fit=crop&w=2200&q=80');
+      background-size: cover;
+      background-position: center;
+      transition: background-image 350ms ease;
+    }
 
-        /* Desktop Shortcuts Layer */
-        #desktop {
-            position: absolute; inset: 28px 0 0 0; padding: 20px;
-            display: grid; grid-template-columns: repeat(auto-fill, 100px);
-            grid-template-rows: repeat(auto-fill, 110px); grid-auto-flow: column; gap: 10px;
-        }
+    .menu-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 31px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 0 14px;
+      background: rgba(25, 27, 35, 0.35);
+      backdrop-filter: blur(20px) saturate(170%);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+      z-index: 99999;
+      font-size: 13px;
+    }
 
-        .shortcut {
-            width: 90px; height: 100px; display: flex; flex-direction: column; align-items: center;
-            cursor: pointer; transition: background 0.2s; border-radius: 8px; padding-top: 10px;
-        }
-        .shortcut:hover { background: rgba(255,255,255,0.1); }
-        .shortcut img, .shortcut .note-icon {
-            width: 64px; height: 64px; border-radius: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
-        .shortcut span { color: white; font-size: 12px; margin-top: 8px; text-shadow: 0 1px 3px rgba(0,0,0,0.8); text-align: center; }
+    .apple-btn {
+      border: 0;
+      background: transparent;
+      color: #fff;
+      font-size: 15px;
+      cursor: pointer;
+      padding: 0;
+    }
 
-        /* Window Styling */
-        .window {
-            position: absolute; background: rgba(255, 255, 255, 0.85); backdrop-filter: var(--blur-strength);
-            border-radius: 12px; box-shadow: var(--shadow-standard); display: none; flex-direction: column;
-            border: 0.5px solid var(--mac-border); overflow: hidden;
-        }
-        .window.active { z-index: 5000; box-shadow: 0 40px 100px rgba(0,0,0,0.5); }
-        
-        .title-bar {
-            height: 40px; display: flex; align-items: center; padding: 0 12px; cursor: move;
-            background: rgba(255, 255, 255, 0.1);
-        }
-        .traffic-lights { display: flex; gap: 8px; }
-        .dot { width: 12px; height: 12px; border-radius: 50%; }
-        .dot.close { background: #FF5F56; } .dot.min { background: #FFBD2E; } .dot.max { background: #27C93F; }
+    .menu-link { opacity: 0.9; }
+    .menu-app { font-weight: 700; }
+    #clock { margin-left: auto; font-weight: 550; }
 
-        /* Custom Context Menu */
-        #ctx-menu {
-            position: fixed; display: none; background: rgba(255, 255, 255, 0.6); backdrop-filter: var(--blur-strength);
-            border: 1px solid var(--mac-border); border-radius: 8px; padding: 5px; width: 200px; z-index: 11000;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-        .ctx-item {
-            padding: 6px 12px; font-size: 13px; color: #333; cursor: pointer; border-radius: 5px;
-        }
-        .ctx-item:hover { background: var(--accent); color: white; }
+    #desktop {
+      position: absolute;
+      top: 31px;
+      left: 0;
+      right: 0;
+      bottom: 88px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(94px, 1fr));
+      grid-auto-rows: 112px;
+      gap: 10px;
+      padding: 16px;
+      align-content: start;
+      justify-items: center;
+      overflow: auto;
+    }
 
-        /* Dock (Sequoia Style) */
-        .dock-container {
-            position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.2); backdrop-filter: var(--blur-strength);
-            padding: 8px; border-radius: 22px; display: flex; gap: 12px; border: 1px solid var(--mac-border);
-        }
-        .dock-icon { width: 54px; height: 54px; transition: transform 0.2s; cursor: pointer; }
-        .dock-icon:hover { transform: scale(1.3) translateY(-10px); }
-    </style>
+    .desktop-icon,
+    .launch-icon {
+      width: 92px;
+      text-align: center;
+      color: #fff;
+      cursor: pointer;
+      border-radius: 12px;
+      padding: 8px 4px;
+      transition: background 160ms;
+    }
+
+    .desktop-icon:hover,
+    .launch-icon:hover {
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    .app-tile {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      font-size: 30px;
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255,255,255,0.28);
+      background: linear-gradient(160deg, rgba(255,255,255,0.3), rgba(255,255,255,0.08));
+      backdrop-filter: blur(6px);
+    }
+
+    .icon-title {
+      margin-top: 8px;
+      font-size: 12px;
+      line-height: 1.25;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.7);
+      word-break: break-word;
+    }
+
+    .dock {
+      position: fixed;
+      left: 50%;
+      bottom: 12px;
+      transform: translateX(-50%);
+      height: 74px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: end;
+      gap: 12px;
+      border-radius: 24px;
+      background: rgba(245, 245, 248, 0.19);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(26px) saturate(180%);
+      z-index: 9000;
+    }
+
+    .dock-btn {
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      font-size: 29px;
+      transition: transform 170ms ease;
+      position: relative;
+    }
+
+    .dock-btn:hover { transform: translateY(-10px) scale(1.12); }
+    .dock-btn::after {
+      content: attr(data-label);
+      position: absolute;
+      bottom: 64px;
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 8px;
+      background: rgba(0,0,0,0.58);
+      color: #fff;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(6px);
+      transition: all 120ms;
+      white-space: nowrap;
+    }
+    .dock-btn:hover::after { opacity: 1; transform: translateY(0); }
+
+    .window {
+      position: absolute;
+      display: none;
+      flex-direction: column;
+      min-width: 420px;
+      min-height: 260px;
+      background: rgba(248, 249, 253, 0.75);
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      z-index: 100;
+    }
+
+    .window.active { z-index: 5000; }
+
+    .title-bar {
+      height: 44px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 12px;
+      background: rgba(250, 252, 255, 0.6);
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+      color: #1f2330;
+      font-size: 14px;
+    }
+
+    .traffic { display: flex; gap: 8px; }
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 0;
+      cursor: pointer;
+    }
+    .dot.close { background: #ff5f57; }
+    .dot.min { background: #febc2e; }
+    .dot.max { background: #28c840; }
+
+    .window-title { font-weight: 600; }
+
+    .browser-controls {
+      display: flex;
+      gap: 8px;
+      margin-left: auto;
+      width: min(62%, 680px);
+    }
+
+    .browser-controls input {
+      width: 100%;
+      border: 1px solid rgba(0,0,0,0.14);
+      border-radius: 8px;
+      padding: 6px 10px;
+      outline: none;
+      background: rgba(255,255,255,0.94);
+      font-size: 13px;
+    }
+
+    .browser-controls button,
+    .notes-toolbar button,
+    .modal-actions button {
+      border: 0;
+      border-radius: 8px;
+      padding: 7px 11px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 12px;
+      background: #e8edf8;
+      color: #111827;
+    }
+
+    .browser-controls .go,
+    .primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    iframe { flex: 1; border: 0; background: #fff; }
+
+    .notes-shell {
+      display: grid;
+      grid-template-columns: 236px 1fr;
+      height: 100%;
+      color: #1f2937;
+      user-select: text;
+    }
+
+    .notes-list {
+      border-right: 1px solid rgba(0,0,0,0.12);
+      background: rgba(243,246,252,0.88);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .notes-toolbar {
+      display: flex;
+      gap: 8px;
+      padding: 10px;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+    }
+
+    .note-items { overflow: auto; min-height: 0; }
+
+    .note-item {
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      cursor: pointer;
+      background: transparent;
+    }
+
+    .note-item.active { background: rgba(10,132,255,0.12); }
+    .note-item-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #111827;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .note-editor {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      background: rgba(255,255,255,0.9);
+    }
+
+    .note-editor input,
+    .note-editor textarea,
+    .modal input,
+    .modal select {
+      border: 1px solid rgba(0,0,0,0.14);
+      border-radius: 9px;
+      outline: none;
+      font: inherit;
+    }
+
+    #note-title {
+      margin: 12px 12px 8px;
+      padding: 9px 11px;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    #note-body {
+      margin: 0 12px 12px;
+      padding: 12px;
+      resize: none;
+      flex: 1;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .launchpad {
+      position: fixed;
+      inset: 0;
+      display: none;
+      z-index: 8000;
+      background: rgba(18, 23, 34, 0.72);
+      backdrop-filter: blur(24px) saturate(170%);
+      padding: 68px 46px 120px;
+      color: #fff;
+    }
+
+    .launch-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 18px;
+      align-content: start;
+      max-height: 100%;
+      overflow: auto;
+    }
+
+    #context-menu {
+      position: fixed;
+      min-width: 230px;
+      display: none;
+      z-index: 12000;
+      border-radius: 11px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.83);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 20px 28px rgba(0,0,0,0.25);
+      padding: 6px;
+    }
+
+    #context-menu button {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      text-align: left;
+      padding: 8px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      color: #1f2937;
+    }
+
+    #context-menu button:hover { background: rgba(10,132,255,0.13); }
+
+    .modal-wrap {
+      position: fixed;
+      inset: 0;
+      display: none;
+      z-index: 14000;
+      place-items: center;
+      background: rgba(7, 10, 17, 0.45);
+      backdrop-filter: blur(7px);
+    }
+
+    .modal {
+      width: min(460px, 92vw);
+      background: #fff;
+      border-radius: 14px;
+      color: #111827;
+      border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 25px 50px rgba(0,0,0,0.35);
+      padding: 16px;
+    }
+
+    .modal h3 { margin: 4px 0 12px; font-size: 18px; }
+    .form-row { display: flex; flex-direction: column; gap: 6px; margin: 10px 0; font-size: 13px; }
+    .modal input, .modal select { padding: 8px 10px; }
+    .modal-actions { display: flex; justify-content: end; gap: 8px; margin-top: 14px; }
+  </style>
 </head>
-<body oncontextmenu="return openCtx(event)">
+<body>
+  <div class="menu-bar">
+    <button class="apple-btn" id="apple-menu"></button>
+    <span class="menu-app" id="active-app">Finder</span>
+    <span class="menu-link">File</span>
+    <span class="menu-link">Edit</span>
+    <span class="menu-link">View</span>
+    <span id="clock"></span>
+  </div>
 
-<div class="menu-bar">
-    <span style="font-weight: 900; margin-right: 15px;"></span>
-    <b id="active-app-display">Finder</b>
-    <span style="margin-left: 20px;">File</span>
-    <span style="margin-left: 15px;">Edit</span>
-    <span id="clock" style="margin-left: auto; font-weight: 500;"></span>
-</div>
+  <main id="desktop"></main>
 
-<div id="desktop"></div>
+  <section class="window" id="browser-window" style="width:min(1100px, 93vw);height:min(730px, 84vh);top:68px;left:70px;">
+    <div class="title-bar" data-window="browser-window">
+      <div class="traffic">
+        <button class="dot close" data-close="browser-window"></button>
+        <button class="dot min" data-close="browser-window"></button>
+        <button class="dot max" data-max="browser-window"></button>
+      </div>
+      <span class="window-title">Browser</span>
+      <div class="browser-controls">
+        <input id="browser-url" placeholder="Enter URL or search" />
+        <button class="go" id="browser-go">Go</button>
+      </div>
+    </div>
+    <iframe id="browser-frame" src="https://duckduckgo.com"></iframe>
+  </section>
 
-<div id="ctx-menu">
-    <div class="ctx-item" onclick="createApp('note')">New Note App</div>
-    <div class="ctx-item" onclick="createApp('site')">New Website App</div>
-    <hr style="border: 0.5px solid rgba(0,0,0,0.1); margin: 5px 0;">
-    <div class="ctx-item">Change Wallpaper</div>
-</div>
-
-<div class="window" id="notes-win" style="width: 800px; height: 550px; top: 100px; left: 150px;">
-    <div class="title-bar" onmousedown="focusWin('notes-win'); dragWin(this.parentElement)">
-        <div class="traffic-lights">
-            <div class="dot close" onclick="closeWin('notes-win')"></div>
-            <div class="dot min"></div>
-            <div class="dot max"></div>
+  <section class="window" id="notes-window" style="width:min(1100px, 93vw);height:min(730px, 84vh);top:84px;left:120px;">
+    <div class="title-bar" data-window="notes-window">
+      <div class="traffic">
+        <button class="dot close" data-close="notes-window"></button>
+        <button class="dot min" data-close="notes-window"></button>
+        <button class="dot max" data-max="notes-window"></button>
+      </div>
+      <span class="window-title">Notes</span>
+    </div>
+    <div class="notes-shell">
+      <aside class="notes-list">
+        <div class="notes-toolbar">
+          <button id="new-note">New</button>
+          <button id="delete-note">Delete</button>
+          <button id="pin-note">Pin to Desktop</button>
         </div>
-        <input type="text" id="note-name" value="New Note" style="background:transparent; border:none; margin-left: 20px; font-weight: bold; font-size: 14px; outline:none;">
+        <div class="note-items" id="note-items"></div>
+      </aside>
+      <section class="note-editor">
+        <input id="note-title" placeholder="Title" />
+        <textarea id="note-body" placeholder=""></textarea>
+      </section>
     </div>
-    <div id="editor" style="flex:1; background: white;"></div>
-</div>
+  </section>
 
-<div class="window" id="safari-win" style="width: 1000px; height: 650px; top: 50px; left: 100px;">
-    <div class="title-bar" onmousedown="focusWin('safari-win'); dragWin(this.parentElement)">
-        <div class="traffic-lights"><div class="dot close" onclick="closeWin('safari-win')"></div><div class="dot min"></div><div class="dot max"></div></div>
-        <input type="text" id="safari-url" placeholder="Search or URL" style="flex:1; margin:0 40px; background:rgba(0,0,0,0.05); border:1px solid rgba(0,0,0,0.1); border-radius:6px; padding:2px 10px; text-align:center;">
-    </div>
-    <iframe id="safari-frame" src="https://duckduckgo.com" style="flex:1; border:none; background:white;"></iframe>
-</div>
+  <div class="launchpad" id="launchpad">
+    <div class="launch-grid" id="launch-grid"></div>
+  </div>
 
-<div class="dock-container">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/3/30/macOS_Notes_icon.svg" class="dock-icon" onclick="openWin('notes-win')">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/5/52/Safari_browser_logo.svg" class="dock-icon" onclick="openWin('safari-win')">
-</div>
+  <div id="context-menu">
+    <button data-action="add-note-shortcut">Add Note Shortcut</button>
+    <button data-action="add-web-app">Add Website App Shortcut</button>
+    <button data-action="open-launchpad">Open Start Menu</button>
+    <button data-action="change-wallpaper">Change Wallpaper</button>
+  </div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, doc, setDoc, onSnapshot, collection, query } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  <div class="dock">
+    <button class="dock-btn" data-label="Start" id="dock-launchpad">🚀</button>
+    <button class="dock-btn" data-label="Browser" id="dock-browser">🌐</button>
+    <button class="dock-btn" data-label="Notes" id="dock-notes">📝</button>
+  </div>
 
-    const firebaseConfig = { /* USE YOUR CONFIG FROM PREVIOUS STEP */ };
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+  <div class="modal-wrap" id="shortcut-modal-wrap">
+    <form class="modal" id="shortcut-form">
+      <h3 id="modal-title">Add Shortcut</h3>
+      <div class="form-row">
+        <label for="shortcut-name">Name</label>
+        <input id="shortcut-name" required />
+      </div>
+      <div class="form-row" id="shortcut-url-row" style="display:none;">
+        <label for="shortcut-url">Website URL</label>
+        <input id="shortcut-url" placeholder="https://example.com" />
+      </div>
+      <div class="form-row">
+        <label for="shortcut-location">Add to</label>
+        <select id="shortcut-location">
+          <option value="desktop">Desktop Home</option>
+          <option value="start">Start Menu</option>
+          <option value="both">Desktop + Start Menu</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button type="button" id="cancel-modal">Cancel</button>
+        <button type="submit" class="primary">Save</button>
+      </div>
+    </form>
+  </div>
 
-    const quill = new Quill('#editor', { theme: 'snow', modules: { toolbar: [['bold', 'italic'], ['image', 'code-block']] } });
-    
-    // Create Apps/Desktop Icons
-    window.createApp = async (type) => {
-        const name = prompt(`Enter ${type} name:`);
-        const target = type === 'site' ? prompt("Enter URL:") : "";
-        const id = "app_" + Date.now();
-        await setDoc(doc(db, "desktop_icons", id), { name, type, target, id });
-        document.getElementById('ctx-menu').style.display = 'none';
+  <script>
+    const STORAGE_KEY = 'macStudyDesktop.v1';
+    const defaultState = {
+      notes: [{ id: crypto.randomUUID(), title: '', body: '', updatedAt: Date.now() }],
+      selectedNoteId: null,
+      shortcuts: [
+        { id: 'core-browser', name: 'Browser', type: 'browser', location: 'both', core: true },
+        { id: 'core-notes', name: 'Notes', type: 'notes', location: 'both', core: true }
+      ],
+      wallpaper: 0
     };
 
-    // Real-time Desktop Sync
-    onSnapshot(collection(db, "desktop_icons"), (snap) => {
-        const desktop = document.getElementById('desktop');
-        desktop.innerHTML = '';
-        snap.forEach(doc => {
-            const data = doc.data();
-            const icon = data.type === 'note' ? 'https://upload.wikimedia.org/wikipedia/commons/3/30/macOS_Notes_icon.svg' : 'https://upload.wikimedia.org/wikipedia/commons/5/52/Safari_browser_logo.svg';
-            desktop.innerHTML += `
-                <div class="shortcut" onclick="launchApp('${data.id}', '${data.type}', '${data.target}')">
-                    <img src="${icon}">
-                    <span>${data.name}</span>
-                </div>`;
+    const wallpapers = [
+      'https://images.unsplash.com/photo-1674566744737-66f7f1d0f2b8?auto=format&fit=crop&w=2200&q=80',
+      'https://images.unsplash.com/photo-1515263487990-61b07816b324?auto=format&fit=crop&w=2200&q=80',
+      'https://images.unsplash.com/photo-1485470733090-0aae1788d5af?auto=format&fit=crop&w=2200&q=80',
+      'https://images.unsplash.com/photo-1493246318656-5bfd4cfb29b8?auto=format&fit=crop&w=2200&q=80'
+    ];
+
+    const state = loadState();
+    if (!state.selectedNoteId && state.notes.length) state.selectedNoteId = state.notes[0].id;
+
+    const desktop = document.getElementById('desktop');
+    const launchpad = document.getElementById('launchpad');
+    const launchGrid = document.getElementById('launch-grid');
+    const contextMenu = document.getElementById('context-menu');
+    const activeApp = document.getElementById('active-app');
+
+
+    const noteItems = document.getElementById('note-items');
+    const noteTitle = document.getElementById('note-title');
+    const noteBody = document.getElementById('note-body');
+
+    let modalType = 'note-shortcut';
+
+    document.body.style.backgroundImage = `url('${wallpapers[state.wallpaper % wallpapers.length]}')`;
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return structuredClone(defaultState);
+        const parsed = JSON.parse(raw);
+        return {
+          ...structuredClone(defaultState),
+          ...parsed,
+          notes: parsed.notes?.length ? parsed.notes : structuredClone(defaultState.notes),
+          shortcuts: normalizeShortcuts(parsed.shortcuts)
+        };
+      } catch {
+        return structuredClone(defaultState);
+      }
+    }
+
+    function normalizeShortcuts(existing = []) {
+      const map = new Map(existing.map(s => [s.id, s]));
+      const merged = structuredClone(defaultState.shortcuts).map(core => ({ ...core, ...(map.get(core.id) || {}) }));
+      existing.forEach(item => {
+        if (!['core-browser', 'core-notes'].includes(item.id)) merged.push(item);
+      });
+      return merged;
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function makeIcon(shortcut, container) {
+      const item = document.createElement('div');
+      item.className = container === 'desktop' ? 'desktop-icon' : 'launch-icon';
+      item.innerHTML = `<div class="app-tile">${iconFor(shortcut)}</div><div class="icon-title">${escapeHtml(shortcut.name || '')}</div>`;
+      item.onclick = () => launchShortcut(shortcut.id);
+      return item;
+    }
+
+    function iconFor(shortcut) {
+      if (shortcut.type === 'notes') return '📝';
+      if (shortcut.type === 'browser') return '🌐';
+      if (shortcut.type === 'webapp') return '🔗';
+      if (shortcut.type === 'note-shortcut') return '📒';
+      return '📦';
+    }
+
+    function renderDesktop() {
+      desktop.innerHTML = '';
+      state.shortcuts
+        .filter(s => s.location === 'desktop' || s.location === 'both')
+        .forEach(s => desktop.appendChild(makeIcon(s, 'desktop')));
+    }
+
+    function renderLaunchpad() {
+      launchGrid.innerHTML = '';
+      state.shortcuts
+        .filter(s => s.location === 'start' || s.location === 'both')
+        .forEach(s => launchGrid.appendChild(makeIcon(s, 'start')));
+    }
+
+    function launchShortcut(shortcutId) {
+      const shortcut = state.shortcuts.find(s => s.id === shortcutId);
+      if (!shortcut) return;
+      if (shortcut.type === 'browser' || shortcut.type === 'webapp') {
+        openWindow('browser-window');
+        if (shortcut.url) {
+          document.getElementById('browser-url').value = shortcut.url;
+          navigateBrowser(shortcut.url);
+        }
+        return;
+      }
+      if (shortcut.type === 'notes') {
+        openWindow('notes-window');
+        return;
+      }
+      if (shortcut.type === 'note-shortcut') {
+        openWindow('notes-window');
+        const note = state.notes.find(n => n.id === shortcut.noteId);
+        if (note) {
+          state.selectedNoteId = note.id;
+          renderNotes();
+          saveState();
+        }
+      }
+    }
+
+    function renderNotes() {
+      noteItems.innerHTML = '';
+      state.notes
+        .sort((a, b) => b.updatedAt - a.updatedAt)
+        .forEach(note => {
+          const row = document.createElement('div');
+          row.className = 'note-item' + (note.id === state.selectedNoteId ? ' active' : '');
+          row.innerHTML = `<div class="note-item-title">${escapeHtml(note.title || 'Untitled')}</div>`;
+          row.onclick = () => {
+            state.selectedNoteId = note.id;
+            renderNotes();
+            saveState();
+          };
+          noteItems.appendChild(row);
         });
+
+      const active = state.notes.find(n => n.id === state.selectedNoteId) || state.notes[0];
+      if (!active) return;
+      state.selectedNoteId = active.id;
+      noteTitle.value = active.title;
+      noteBody.value = active.body;
+    }
+
+    function addNote() {
+      const note = { id: crypto.randomUUID(), title: '', body: '', updatedAt: Date.now() };
+      state.notes.unshift(note);
+      state.selectedNoteId = note.id;
+      renderNotes();
+      saveState();
+    }
+
+    function deleteSelectedNote() {
+      if (state.notes.length === 1) {
+        state.notes[0] = { id: crypto.randomUUID(), title: '', body: '', updatedAt: Date.now() };
+        state.selectedNoteId = state.notes[0].id;
+      } else {
+        state.notes = state.notes.filter(n => n.id !== state.selectedNoteId);
+        state.shortcuts = state.shortcuts.filter(s => s.type !== 'note-shortcut' || s.noteId !== state.selectedNoteId);
+        state.selectedNoteId = state.notes[0].id;
+      }
+      renderDesktop();
+      renderLaunchpad();
+      renderNotes();
+      saveState();
+    }
+
+    function updateActiveNote() {
+      const note = state.notes.find(n => n.id === state.selectedNoteId);
+      if (!note) return;
+      note.title = noteTitle.value;
+      note.body = noteBody.value;
+      note.updatedAt = Date.now();
+      renderNotes();
+      saveState();
+    }
+
+    function pinCurrentNoteToDesktop() {
+      const note = state.notes.find(n => n.id === state.selectedNoteId);
+      if (!note) return;
+      const exists = state.shortcuts.some(s => s.type === 'note-shortcut' && s.noteId === note.id);
+      if (exists) return;
+      state.shortcuts.push({
+        id: 'note-' + crypto.randomUUID(),
+        name: note.title || 'Untitled Note',
+        type: 'note-shortcut',
+        noteId: note.id,
+        location: 'both'
+      });
+      renderDesktop();
+      renderLaunchpad();
+      saveState();
+    }
+
+    function openWindow(id) {
+      document.querySelectorAll('.window').forEach(w => w.classList.remove('active'));
+      const win = document.getElementById(id);
+      win.style.display = 'flex';
+      win.classList.add('active');
+      activeApp.textContent = id === 'notes-window' ? 'Notes' : 'Browser';
+      hideLaunchpad();
+    }
+
+    function closeWindow(id) {
+      const win = document.getElementById(id);
+      win.style.display = 'none';
+      if (!document.querySelector('.window.active')) activeApp.textContent = 'Finder';
+    }
+
+    function toggleLaunchpad(force) {
+      const show = typeof force === 'boolean' ? force : launchpad.style.display !== 'block';
+      launchpad.style.display = show ? 'block' : 'none';
+      if (show) activeApp.textContent = 'Start Menu';
+      else if (!document.querySelector('.window.active')) activeApp.textContent = 'Finder';
+    }
+
+    function hideLaunchpad() { launchpad.style.display = 'none'; }
+
+    function navigateBrowser(value) {
+      let entry = (value || '').trim();
+      if (!entry) return;
+      if (!/^https?:\/\//i.test(entry)) {
+        if (entry.includes('.') && !entry.includes(' ')) entry = `https://${entry}`;
+        else entry = `https://duckduckgo.com/?q=${encodeURIComponent(entry)}`;
+      }
+      document.getElementById('browser-frame').src = entry;
+      document.getElementById('browser-url').value = entry;
+    }
+
+    function escapeHtml(s) {
+      return s
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function openShortcutModal(type) {
+      modalType = type;
+      document.getElementById('shortcut-modal-wrap').style.display = 'grid';
+      document.getElementById('shortcut-form').reset();
+      document.getElementById('shortcut-url-row').style.display = type === 'webapp' ? 'flex' : 'none';
+      document.getElementById('modal-title').textContent = type === 'webapp' ? 'Add Website App Shortcut' : 'Add Note Shortcut';
+    }
+
+    function submitShortcutForm(e) {
+      e.preventDefault();
+      const name = document.getElementById('shortcut-name').value.trim();
+      const location = document.getElementById('shortcut-location').value;
+      const url = document.getElementById('shortcut-url').value.trim();
+      if (!name) return;
+      if (modalType === 'webapp') {
+        state.shortcuts.push({ id: 'web-' + crypto.randomUUID(), name, type: 'webapp', url, location });
+      } else {
+        const note = state.notes.find(n => n.id === state.selectedNoteId);
+        if (!note) return;
+        state.shortcuts.push({ id: 'note-short-' + crypto.randomUUID(), name, type: 'note-shortcut', noteId: note.id, location });
+      }
+      document.getElementById('shortcut-modal-wrap').style.display = 'none';
+      renderDesktop();
+      renderLaunchpad();
+      saveState();
+    }
+
+    function rotateWallpaper() {
+      state.wallpaper = (state.wallpaper + 1) % wallpapers.length;
+      document.body.style.backgroundImage = `url('${wallpapers[state.wallpaper]}')`;
+      saveState();
+    }
+
+    document.getElementById('dock-browser').onclick = () => openWindow('browser-window');
+    document.getElementById('dock-notes').onclick = () => openWindow('notes-window');
+    document.getElementById('dock-launchpad').onclick = () => toggleLaunchpad();
+    document.getElementById('apple-menu').onclick = () => toggleLaunchpad();
+
+    document.querySelectorAll('[data-close]').forEach(btn => btn.onclick = () => closeWindow(btn.dataset.close));
+    document.querySelectorAll('[data-max]').forEach(btn => btn.onclick = () => {
+      const win = document.getElementById(btn.dataset.max);
+      win.style.top = '35px';
+      win.style.left = '8px';
+      win.style.width = 'calc(100vw - 16px)';
+      win.style.height = 'calc(100vh - 120px)';
     });
 
-    window.launchApp = (id, type, target) => {
-        if(type === 'site') {
-            openWin('safari-win');
-            document.getElementById('safari-frame').src = target;
-        } else {
-            openWin('notes-win');
-            // Logic to load specific note content from Firebase based on id
-        }
-    };
-</script>
-
-<script>
-    // System Functionality
-    function openCtx(e) {
-        e.preventDefault();
-        const menu = document.getElementById('ctx-menu');
-        menu.style.display = 'block';
-        menu.style.left = e.pageX + 'px';
-        menu.style.top = e.pageY + 'px';
-        return false;
-    }
-
-    document.onclick = () => document.getElementById('ctx-menu').style.display = 'none';
-
-    function focusWin(id) {
+    document.querySelectorAll('.window').forEach(win => {
+      win.addEventListener('mousedown', () => {
         document.querySelectorAll('.window').forEach(w => w.classList.remove('active'));
-        document.getElementById(id).style.display = 'flex';
-        document.getElementById(id).classList.add('active');
-        document.getElementById('active-app-display').innerText = id === 'notes-win' ? 'Notes' : 'Safari';
-    }
+        win.classList.add('active');
+      });
+    });
 
-    function closeWin(id) { document.getElementById(id).style.display = 'none'; }
+    document.querySelectorAll('.title-bar').forEach(bar => {
+      bar.addEventListener('mousedown', (event) => {
+        if (event.target.closest('input,button')) return;
+        const win = document.getElementById(bar.dataset.window);
+        const startX = event.clientX;
+        const startY = event.clientY;
+        const initialLeft = win.offsetLeft;
+        const initialTop = win.offsetTop;
 
-    function dragWin(el) {
-        let x = 0, y = 0;
-        el.onmousedown = (e) => {
-            if(e.target.tagName === 'INPUT') return;
-            x = e.clientX; y = e.clientY;
-            document.onmousemove = (e) => {
-                el.style.top = (el.offsetTop - (y - e.clientY)) + "px";
-                el.style.left = (el.offsetLeft - (x - e.clientX)) + "px";
-                x = e.clientX; y = e.clientY;
-            };
-            document.onmouseup = () => document.onmousemove = null;
+        const move = (e) => {
+          win.style.left = `${Math.max(0, initialLeft + e.clientX - startX)}px`;
+          win.style.top = `${Math.max(31, initialTop + e.clientY - startY)}px`;
         };
-    }
+
+        const stop = () => {
+          window.removeEventListener('mousemove', move);
+          window.removeEventListener('mouseup', stop);
+        };
+
+        window.addEventListener('mousemove', move);
+        window.addEventListener('mouseup', stop);
+      });
+    });
+
+    document.getElementById('browser-go').onclick = () => navigateBrowser(document.getElementById('browser-url').value);
+    document.getElementById('browser-url').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') navigateBrowser(e.target.value);
+    });
+
+    document.getElementById('new-note').onclick = addNote;
+    document.getElementById('delete-note').onclick = deleteSelectedNote;
+    document.getElementById('pin-note').onclick = pinCurrentNoteToDesktop;
+    noteTitle.addEventListener('input', updateActiveNote);
+    noteBody.addEventListener('input', updateActiveNote);
+
+    document.getElementById('shortcut-form').addEventListener('submit', submitShortcutForm);
+    document.getElementById('cancel-modal').onclick = () => {
+      document.getElementById('shortcut-modal-wrap').style.display = 'none';
+    };
+
+    window.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      contextMenu.style.display = 'block';
+      contextMenu.style.left = `${e.clientX}px`;
+      contextMenu.style.top = `${e.clientY}px`;
+    });
+
+    window.addEventListener('click', () => {
+      contextMenu.style.display = 'none';
+    });
+
+    contextMenu.addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const action = btn.dataset.action;
+      if (action === 'add-note-shortcut') openShortcutModal('note-shortcut');
+      if (action === 'add-web-app') openShortcutModal('webapp');
+      if (action === 'open-launchpad') toggleLaunchpad(true);
+      if (action === 'change-wallpaper') rotateWallpaper();
+    });
+
+    launchpad.addEventListener('click', (e) => {
+      if (e.target === launchpad) hideLaunchpad();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        hideLaunchpad();
+        document.getElementById('shortcut-modal-wrap').style.display = 'none';
+      }
+    });
 
     setInterval(() => {
-        document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', weekday:'short', day:'numeric', month:'short'});
+      document.getElementById('clock').textContent = new Date().toLocaleString([], {
+        weekday: 'short', hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short'
+      });
     }, 1000);
-</script>
+
+    renderDesktop();
+    renderLaunchpad();
+    renderNotes();
+    openWindow('notes-window');
+  </script>
 </body>
 </html>
