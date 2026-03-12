@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>StudyOS 11 Pro</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     :root {
       --taskbar-h: 58px;
       --radius-win: 10px;
@@ -430,6 +431,7 @@
         <div id="coach-text" style="margin-top:8px;opacity:.9;"></div>
       </div>
     </div>
+    <div class="app-body panel" id="task-list"></div>
   </section>
 
   <section id="notes-window" class="window" style="left:100px;top:70px;">
@@ -786,7 +788,6 @@
         openWindow('notes-window');
         closePopups();
       });
-    }
 
     function launchApp(id) {
       if (id.startsWith('webapp:')) {
@@ -956,6 +957,7 @@
       cur.updatedAt = Date.now();
       renderNotes();
       queueSave();
+      el.status.textContent = 'Note saved';
     }
 
     function renderTasks() {
