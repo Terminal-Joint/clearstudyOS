@@ -3,82 +3,290 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>StudyOS 11 Ultimate</title>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+  <title>StudyOS 11 Pro</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     :root {
-      --taskbar-h: 64px;
-      --glass-opacity: 0.46;
-      --accent: #5b8cff;
+      --taskbar-h: 58px;
+      --radius-win: 10px;
+      --glass: rgba(16, 22, 40, 0.56);
+      --line: rgba(255,255,255,.18);
       --text: #f5f7ff;
-      --line: rgba(255,255,255,.20);
-      --bg-url: url('https://images.unsplash.com/photo-1526778548025-fa2f459cd5ce?q=80&w=2070&auto=format&fit=crop');
+      --accent: #4f8cff;
+      --wallpaper: url('https://images.unsplash.com/photo-1604079628040-94301bb21b91?q=80&w=1974&auto=format&fit=crop');
+      --window-bg: rgba(23, 30, 54, 0.72);
+      --font-size-ui: 13px;
+      --font-family-ui: "Segoe UI", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
     }
     * { box-sizing: border-box; }
-    html, body { margin:0; width:100%; height:100%; overflow:hidden; font-family:"SF Pro Display","Inter",-apple-system,"Segoe UI",sans-serif; color:var(--text); }
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: var(--font-family-ui);
+      font-size: var(--font-size-ui);
+      color: var(--text);
+    }
     body {
       background:
-        radial-gradient(100% 100% at 20% 10%, rgba(98,125,255,.35), transparent 50%),
-        radial-gradient(120% 100% at 80% 20%, rgba(172,80,255,.25), transparent 45%),
-        var(--bg-url) center/cover no-repeat;
+        radial-gradient(120% 100% at 20% 10%, rgba(102,132,255,.30), transparent 48%),
+        radial-gradient(120% 100% at 90% 10%, rgba(177,114,255,.22), transparent 42%),
+        var(--wallpaper) center/cover no-repeat;
     }
-    .glass { background: rgba(14,20,40,var(--glass-opacity)); backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%); border:1px solid var(--line); box-shadow:0 10px 30px rgba(0,0,0,.35); }
-    .btn { border:1px solid var(--line); background:rgba(255,255,255,.12); color:var(--text); border-radius:10px; padding:8px 10px; font:inherit; cursor:pointer; }
-    .btn.primary { background:var(--accent); border-color:transparent; }
-    .field { border:1px solid var(--line); background:rgba(255,255,255,.12); color:var(--text); border-radius:10px; padding:8px 10px; font:inherit; }
+    .glass {
+      background: var(--glass);
+      backdrop-filter: blur(16px) saturate(145%);
+      -webkit-backdrop-filter: blur(16px) saturate(145%);
+      border: 1px solid var(--line);
+      box-shadow: 0 14px 34px rgba(0,0,0,.34);
+    }
+    .btn, .field, select {
+      font: inherit;
+      color: var(--text);
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.10);
+      padding: 7px 10px;
+    }
+    .btn { cursor: pointer; }
+    .btn:hover { background: rgba(255,255,255,.17); }
+    .btn.primary { background: var(--accent); border-color: transparent; }
 
-    #desktop { position:absolute; inset:10px 10px calc(var(--taskbar-h) + 10px) 10px; display:grid; grid-template-columns:repeat(auto-fill,minmax(98px,1fr)); grid-auto-rows:110px; gap:8px; align-content:start; overflow:auto; }
-    .icon { width:92px; justify-self:center; text-align:center; border-radius:12px; padding:6px; cursor:pointer; }
-    .icon:hover { background:rgba(255,255,255,.14); }
-    .tile { width:56px; height:56px; margin:0 auto; border-radius:14px; border:1px solid rgba(255,255,255,.4); background:rgba(255,255,255,.14); display:grid; place-items:center; font-size:28px; }
-    .label { margin-top:6px; font-size:12px; text-shadow:0 2px 6px rgba(0,0,0,.6); }
+    #desktop {
+      position: absolute;
+      inset: 10px 10px calc(var(--taskbar-h) + 10px) 10px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+      grid-auto-rows: 110px;
+      gap: 10px;
+      align-content: start;
+      overflow: auto;
+      user-select: none;
+    }
+    .desktop-icon {
+      width: 92px;
+      justify-self: center;
+      text-align: center;
+      border-radius: 10px;
+      padding: 6px;
+      cursor: pointer;
+      position: relative;
+    }
+    .desktop-icon:hover { background: rgba(255,255,255,.15); }
+    .tile {
+      width: 54px;
+      height: 54px;
+      margin: 0 auto;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.35);
+      background: rgba(255,255,255,.16);
+      display: grid;
+      place-items: center;
+      font-size: 26px;
+    }
+    .label {
+      margin-top: 6px;
+      font-size: 12px;
+      text-shadow: 0 2px 6px rgba(0,0,0,.6);
+      word-break: break-word;
+    }
+    .icon-edit {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 18px;
+      height: 18px;
+      border-radius: 6px;
+      display: none;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.35);
+      font-size: 11px;
+      line-height: 16px;
+      text-align: center;
+    }
+    .desktop-icon:hover .icon-edit { display: inline-block; }
 
-    #taskbar { position:fixed; left:12px; right:12px; bottom:10px; height:var(--taskbar-h); border-radius:12px; z-index:6000; display:grid; grid-template-columns:1fr auto 1fr; align-items:center; padding:0 12px; }
-    #tb-left,#tb-center,#tb-right{display:flex;align-items:center;gap:8px;} #tb-center{justify-content:center;} #tb-right{justify-content:flex-end;}
-    .tb-btn { position:relative; border:1px solid transparent; background:transparent; color:var(--text); border-radius:10px; height:40px; min-width:40px; padding:0 10px; cursor:pointer; }
-    .tb-btn:hover{ background:rgba(255,255,255,.16); border-color:rgba(255,255,255,.2); }
+    #taskbar {
+      position: fixed;
+      left: 10px;
+      right: 10px;
+      bottom: 8px;
+      height: var(--taskbar-h);
+      border-radius: 12px;
+      z-index: 9000;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 10px;
+      padding: 0 10px;
+    }
+    #tb-left, #tb-center, #tb-right { display: flex; align-items: center; gap: 8px; }
+    #tb-center { justify-content: center; }
+    #tb-right { justify-content: flex-end; }
+    .tb-btn {
+      position: relative;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text);
+      border-radius: 8px;
+      height: 38px;
+      min-width: 38px;
+      padding: 0 9px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .tb-btn:hover { background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.2); }
     .tb-btn.active::after {
-      content:'';
-      position:absolute;
-      left:50%; transform:translateX(-50%);
-      bottom:3px;
-      width:22px; height:3px;
-      border-radius:999px;
-      background:#fff;
-      box-shadow:0 0 8px rgba(255,255,255,.6);
+      content: '';
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 2px;
+      width: 20px;
+      height: 3px;
+      border-radius: 999px;
+      background: #fff;
     }
-    .pill { border:1px solid var(--line); border-radius:10px; background:rgba(255,255,255,.12); padding:6px 10px; font-size:12px; }
+    .pill {
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: rgba(255,255,255,.12);
+      padding: 6px 10px;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    #start-menu, #quick-note-pop {
+      position: fixed;
+      bottom: 74px;
+      border-radius: 12px;
+      z-index: 9400;
+      display: none;
+      opacity: 0;
+      transition: transform .22s ease, opacity .2s ease;
+    }
+    #start-menu.open, #quick-note-pop.open { opacity: 1; }
 
     #start-menu {
-      position:fixed; left:50%; transform:translateX(-50%) translateY(18px) scale(.97);
-      bottom:84px; width:min(860px,95vw); border-radius:12px; padding:12px; z-index:6200;
-      display:none; opacity:0; transition:transform .26s cubic-bezier(.2,.9,.2,1.1), opacity .24s ease;
+      left: 50%;
+      transform: translateX(-50%) translateY(16px) scale(.98);
+      width: min(900px, 96vw);
+      padding: 12px;
     }
-    #start-menu.open { opacity:1; transform:translateX(-50%) translateY(0) scale(1); }
-    #start-search { width:100%; margin-bottom:10px; }
-    #spaces { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
-    .space-chip { border:1px solid var(--line); background:rgba(255,255,255,.1); color:var(--text); border-radius:999px; padding:6px 10px; cursor:pointer; font-size:12px; }
-    .space-chip.active { background:var(--accent); border-color:transparent; }
-    #start-grid { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:8px; }
-    .start-item { border:1px solid var(--line); background:rgba(255,255,255,.08); border-radius:12px; padding:10px; text-align:center; cursor:pointer; font-size:12px; }
-    #recommended { margin-top:10px; border:1px solid var(--line); border-radius:12px; padding:10px; background:rgba(255,255,255,.05); }
-    #recommended-list { display:grid; gap:6px; margin-top:8px; }
-    .rec-item { border:1px solid var(--line); border-radius:10px; padding:8px; background:rgba(255,255,255,.06); cursor:pointer; font-size:12px; }
+    #start-menu.open { transform: translateX(-50%) translateY(0) scale(1); }
+    #start-search { width: 100%; }
+    #space-row { display: flex; gap: 8px; align-items: center; margin: 10px 0; flex-wrap: wrap; }
+    .space-chip {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.10);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 6px 10px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .space-chip.active { background: var(--accent); border-color: transparent; }
+    #start-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0,1fr));
+      gap: 8px;
+    }
+    .start-item {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.08);
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      min-height: 70px;
+    }
+    #recommended {
+      margin-top: 10px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px;
+      background: rgba(255,255,255,.06);
+    }
+    #recommended-list { display: grid; gap: 7px; margin-top: 8px; }
+    .rec-item { border: 1px solid var(--line); border-radius: 8px; padding: 7px 8px; cursor: pointer; background: rgba(255,255,255,.06); }
 
-    .window { position:absolute; display:none; flex-direction:column; min-width:360px; min-height:260px; width:min(980px,92vw); height:min(720px,84vh); left:90px; top:70px; border-radius:10px; overflow:hidden; z-index:300; }
-    .window.active { z-index:900; }
-    .titlebar { height:46px; display:flex; align-items:center; gap:8px; padding:0 12px; border-bottom:1px solid var(--line); background:rgba(255,255,255,.08); cursor:move; }
-    .ctrl { width:30px; height:26px; border-radius:8px; border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.08); color:#fff; cursor:pointer; display:grid; place-items:center; font-size:13px; }
-    .ctrl:hover { background:rgba(255,255,255,.18); }
-    .ctrl.close:hover { background:#c42b1c; border-color:#c42b1c; }
-    .snap-layouts {
-      position:absolute; top:38px; right:10px; z-index:3000; display:none; gap:6px;
-      padding:8px; border-radius:10px; border:1px solid var(--line); background:rgba(14,20,40,.95);
-      grid-template-columns:repeat(3,40px);
+    #quick-note-pop {
+      right: 12px;
+      width: min(360px, 92vw);
+      transform: translateY(16px);
+      padding: 10px;
     }
-    .snap-layouts button { border:1px solid var(--line); background:rgba(255,255,255,.09); color:#fff; border-radius:6px; height:28px; cursor:pointer; font-size:11px; }
-    .resize-handle { position:absolute; z-index:1200; }
+    #quick-note-pop.open { transform: translateY(0); }
+    #quick-note-text { width: 100%; min-height: 120px; resize: vertical; }
+
+    .window {
+      position: absolute;
+      display: none;
+      flex-direction: column;
+      min-width: 330px;
+      min-height: 240px;
+      width: min(980px, 94vw);
+      height: min(720px, 86vh);
+      left: 80px;
+      top: 64px;
+      border-radius: var(--radius-win);
+      overflow: hidden;
+      z-index: 500;
+      background: var(--window-bg);
+      border: 1px solid var(--line);
+      backdrop-filter: blur(12px);
+    }
+    .window.active { z-index: 1300; }
+    .titlebar {
+      height: 36px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 8px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,.06);
+      cursor: move;
+      user-select: none;
+    }
+    .title {
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-right: auto;
+    }
+    .w-controls { display: flex; gap: 4px; margin-left: auto; }
+    .ctrl {
+      width: 28px;
+      height: 24px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: #fff;
+      cursor: pointer;
+      font-size: 13px;
+      display: grid;
+      place-items: center;
+    }
+    .ctrl:hover { background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.2); }
+    .ctrl.close:hover { background: #c42b1c; border-color: #c42b1c; }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,.05);
+    }
+    .app-body { flex: 1; min-height: 0; overflow: auto; padding: 8px; }
+    .panel { border: 1px solid var(--line); border-radius: 9px; background: rgba(255,255,255,.06); }
+    .split { display: grid; grid-template-columns: 270px 1fr; gap: 8px; height: 100%; }
+
+    .resize-handle { position: absolute; z-index: 1400; }
     .resize-handle.e { top:8px; bottom:8px; right:-4px; width:8px; cursor:ew-resize; }
     .resize-handle.w { top:8px; bottom:8px; left:-4px; width:8px; cursor:ew-resize; }
     .resize-handle.n { left:8px; right:8px; top:-4px; height:8px; cursor:ns-resize; }
@@ -87,28 +295,111 @@
     .resize-handle.nw { top:-4px; left:-4px; width:10px; height:10px; cursor:nwse-resize; }
     .resize-handle.se { bottom:-4px; right:-4px; width:10px; height:10px; cursor:nwse-resize; }
     .resize-handle.sw { bottom:-4px; left:-4px; width:10px; height:10px; cursor:nesw-resize; }
-    .toolbar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:10px; border-bottom:1px solid var(--line); background:rgba(255,255,255,.07); }
-    .app-body { flex:1; min-height:0; overflow:auto; padding:10px; }
 
-    .cards { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
-    .card { border:1px solid var(--line); border-radius:14px; background:rgba(255,255,255,.08); padding:12px; }
-    .card b { font-size:24px; }
-    .split { display:grid; grid-template-columns:270px 1fr; gap:10px; height:100%; }
-    .panel { border:1px solid var(--line); border-radius:14px; background:rgba(255,255,255,.07); }
-    .note-item,.book-item,.task-row{padding:10px;border-bottom:1px solid rgba(255,255,255,.14);} .note-item.active{background:rgba(91,140,255,.25)}
-    .task-row{display:grid;grid-template-columns:28px 1fr auto auto;gap:8px;align-items:center;}
-    #browser-frame,#pdf-frame{width:100%;height:100%;border:0;border-radius:10px;background:white;}
-    #assistant-messages{height:300px;overflow:auto;border:1px solid var(--line);border-radius:12px;padding:10px;background:rgba(255,255,255,.06)}
-    .msg{margin:8px 0;padding:8px 10px;border-radius:10px;max-width:90%}.msg.user{margin-left:auto;background:rgba(91,140,255,.35)}.msg.ai{background:rgba(255,255,255,.14)}
-    @media (max-width: 980px){ .cards{grid-template-columns:repeat(2,1fr)} #start-grid{grid-template-columns:repeat(3,1fr)} .split{grid-template-columns:1fr;} }
+    .note-item, .task-row, .book-item, .vault-item, .sticky-item {
+      padding: 8px;
+      border-bottom: 1px solid rgba(255,255,255,.12);
+      cursor: pointer;
+    }
+    .note-item.active { background: rgba(79,140,255,.32); }
+
+    .cards { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; }
+    .card { padding: 10px; border-radius: 10px; border: 1px solid var(--line); background: rgba(255,255,255,.08); }
+    .card b { font-size: 22px; }
+
+    /* Chrome-like browser */
+    #browser-top { padding: 4px 6px 0; border-bottom: 1px solid var(--line); background: rgba(255,255,255,.04); }
+    #browser-tabs {
+      display: flex;
+      align-items: end;
+      gap: 4px;
+      overflow: auto;
+      padding-bottom: 4px;
+    }
+    .btab {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.08);
+      color: var(--text);
+      border-radius: 8px 8px 0 0;
+      min-width: 150px;
+      max-width: 240px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 8px;
+      cursor: pointer;
+    }
+    .btab.active { background: rgba(79,140,255,.34); }
+    .btab .name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12px; flex: 1; }
+    .btab .close-tab {
+      width: 18px;
+      height: 18px;
+      border-radius: 5px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: #fff;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    .btab .close-tab:hover { background: rgba(255,255,255,.22); }
+    #browser-frame { width:100%; height:100%; border:0; background:#fff; border-radius:8px; }
+
+    /* Global annotation overlay */
+    #annot-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 12000;
+      display: none;
+      pointer-events: none;
+    }
+    #annot-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: auto;
+      cursor: crosshair;
+    }
+    #annot-tools {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 12500;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      border-radius: 10px;
+      pointer-events: auto;
+    }
+
+    @media (max-width: 1100px) {
+      .cards { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      #start-grid { grid-template-columns: repeat(4, minmax(0,1fr)); }
+      .split { grid-template-columns: 1fr; }
+      .pill { display: none; }
+    }
+    @media (max-width: 700px) {
+      #start-grid { grid-template-columns: repeat(3, minmax(0,1fr)); }
+      .tb-btn { min-width: 34px; height: 34px; }
+      #taskbar { height: 52px; }
+      .window { width: calc(100vw - 16px); height: calc(100vh - 72px); left: 8px; top: 8px; }
+    }
   </style>
 </head>
 <body>
   <main id="desktop"></main>
 
   <aside id="start-menu" class="glass">
-    <input id="start-search" class="field" placeholder="Search apps, websites, commands..." />
-    <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;"><div id="spaces" style="display:flex;gap:8px;flex-wrap:wrap;flex:1;"></div><button id="add-space" class="btn">+ Space</button></div>
+    <input id="start-search" class="field" placeholder="Search apps and note content..." />
+    <div id="space-row">
+      <div id="spaces" style="display:flex;gap:8px;flex-wrap:wrap;flex:1"></div>
+      <button class="btn" id="add-space">+ Space</button>
+      <button class="btn" id="rename-space">Rename</button>
+      <button class="btn" id="delete-space">Delete</button>
+    </div>
     <div id="start-grid"></div>
     <div id="recommended">
       <b>Recommended</b>
@@ -116,177 +407,135 @@
     </div>
   </aside>
 
-  <section id="dashboard-window" class="window glass">
-    <div class="titlebar" data-window="dashboard-window">
-      <button class="ctrl close" title="Close" data-close="dashboard-window">✕</button><button class="ctrl min" title="Minimize" data-close="dashboard-window">—</button><button class="ctrl max" title="Maximize" data-max="dashboard-window">▢</button><div class="snap-layouts" data-snap-menu="dashboard-window"><button data-snap="left">½</button><button data-snap="top">▔</button><button data-snap="right">½</button><button data-snap="left-third">⅓</button><button data-snap="center-third">⅓</button><button data-snap="right-third">⅓</button></div>
-      <b>Dashboard</b><div style="margin-left:auto"></div><button class="btn" id="sync-now">Sync</button>
-    </div>
+  <aside id="quick-note-pop" class="glass">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><b style="margin-right:auto;">Quick Note</b><button class="btn" id="quick-note-save">Save</button></div>
+    <textarea id="quick-note-text" class="field" placeholder="Write and save instantly..."></textarea>
+  </aside>
+
+  <section id="dashboard-window" class="window">
+    <div class="titlebar" data-window="dashboard-window"><div class="title">Dashboard</div><div class="w-controls"><button class="ctrl min" data-close="dashboard-window">—</button><button class="ctrl max" data-max="dashboard-window">▢</button><button class="ctrl close" data-close="dashboard-window">✕</button></div></div>
     <div class="app-body">
       <div class="cards">
         <div class="card"><div>Today Minutes</div><b id="m-today">0m</b></div>
         <div class="card"><div>Streak</div><b id="m-streak">0d</b></div>
         <div class="card"><div>Tasks Done</div><b id="m-tasks">0</b></div>
-        <div class="card"><div>Quiz Accuracy</div><b id="m-quiz">0%</b></div>
+        <div class="card"><div>Vault Items</div><b id="m-vault">0</b></div>
       </div>
-      <div class="panel" style="margin-top:10px;padding:12px;">
-        <h3 style="margin:0 0 8px;">Learning Coach</h3>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-          <label>Goal <input id="daily-goal" type="number" class="field" min="30" max="600" style="width:110px"></label>
+      <div class="panel" style="margin-top:10px;padding:10px;">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <label>Daily goal <input class="field" id="daily-goal" type="number" min="30" max="600" style="width:110px"></label>
           <button class="btn primary" id="save-goal">Save Goal</button>
-          <button class="btn" id="open-focus">Open Focus Timer</button>
+          <button class="btn" id="sync-now">Sync Now</button>
+          <button class="btn" id="open-desktop-from-dashboard">Show Desktop</button>
         </div>
         <div id="coach-text" style="margin-top:8px;opacity:.9;"></div>
       </div>
     </div>
+    <div class="app-body panel" id="task-list"></div>
   </section>
 
-  <section id="notes-window" class="window glass" style="left:120px;top:84px;">
-    <div class="titlebar" data-window="notes-window">
-      <button class="ctrl close" title="Close" data-close="notes-window">✕</button><button class="ctrl min" title="Minimize" data-close="notes-window">—</button><button class="ctrl max" title="Maximize" data-max="notes-window">▢</button><div class="snap-layouts" data-snap-menu="notes-window"><button data-snap="left">½</button><button data-snap="top">▔</button><button data-snap="right">½</button><button data-snap="left-third">⅓</button><button data-snap="center-third">⅓</button><button data-snap="right-third">⅓</button></div>
-      <b>Notes</b><div style="margin-left:auto"></div>
-      <button class="btn" id="note-new">New</button><button class="btn" id="note-delete">Delete</button><button class="btn" id="note-save">Save Note</button><button class="btn primary" id="note-cards">Flashcards</button>
-    </div>
+  <section id="notes-window" class="window" style="left:100px;top:70px;">
+    <div class="titlebar" data-window="notes-window"><div class="title">Notes</div><div class="w-controls"><button class="ctrl min" data-close="notes-window">—</button><button class="ctrl max" data-max="notes-window">▢</button><button class="ctrl close" data-close="notes-window">✕</button></div></div>
+    <div class="toolbar"><button class="btn" id="note-new">New</button><button class="btn" id="note-delete">Delete</button><button class="btn primary" id="note-save">Save</button><button class="btn" id="pin-to-vault">Pin to Vault</button></div>
     <div class="app-body split">
-      <aside class="panel" id="notes-list"></aside>
-      <section class="panel" style="padding:10px;display:flex;flex-direction:column;gap:8px;">
-        <input id="note-title" class="field" placeholder="Title" />
-        <textarea id="note-content" class="field" style="min-height:360px;resize:vertical;" placeholder="Type notes, formulas, and key:value pairs for flashcards."></textarea>
+      <aside class="panel" id="notes-list" style="overflow:auto;"></aside>
+      <section class="panel" style="display:flex;flex-direction:column;gap:8px;padding:8px;">
+        <input id="note-title" class="field" placeholder="Title">
+        <textarea id="note-content" class="field" style="min-height:320px;resize:vertical;" placeholder="Your study notes..."></textarea>
       </section>
     </div>
   </section>
 
-  <section id="planner-window" class="window glass" style="left:150px;top:96px;width:min(760px,92vw);height:min(640px,78vh);">
-    <div class="titlebar" data-window="planner-window"><button class="ctrl close" title="Close" data-close="planner-window">✕</button><button class="ctrl min" title="Minimize" data-close="planner-window">—</button><button class="ctrl max" title="Maximize" data-max="planner-window">▢</button><div class="snap-layouts" data-snap-menu="planner-window"><button data-snap="left">½</button><button data-snap="top">▔</button><button data-snap="right">½</button><button data-snap="left-third">⅓</button><button data-snap="center-third">⅓</button><button data-snap="right-third">⅓</button></div><b>Planner</b></div>
-    <div class="toolbar">
-      <input id="task-title" class="field" placeholder="Task" style="flex:1;"><input id="task-subject" class="field" placeholder="Subject" style="width:140px;"><input id="task-due" class="field" type="date"><button class="btn primary" id="task-add">Add</button>
-    </div>
+  <section id="planner-window" class="window" style="left:130px;top:84px;width:min(760px,94vw);height:min(620px,82vh);">
+    <div class="titlebar" data-window="planner-window"><div class="title">Planner</div><div class="w-controls"><button class="ctrl min" data-close="planner-window">—</button><button class="ctrl max" data-max="planner-window">▢</button><button class="ctrl close" data-close="planner-window">✕</button></div></div>
+    <div class="toolbar"><input id="task-title" class="field" placeholder="Task" style="flex:1;"><input id="task-subject" class="field" placeholder="Subject" style="width:140px;"><input id="task-due" class="field" type="date"><button class="btn primary" id="task-add">Add</button></div>
     <div class="app-body panel" id="task-list"></div>
   </section>
 
-  <section id="browser-window" class="window glass" style="left:180px;top:88px;width:min(1100px,94vw);height:min(740px,86vh);">
-    <div class="titlebar" data-window="browser-window"><button class="ctrl close" title="Close" data-close="browser-window">✕</button><button class="ctrl min" title="Minimize" data-close="browser-window">—</button><button class="ctrl max" title="Maximize" data-max="browser-window">▢</button><div class="snap-layouts" data-snap-menu="browser-window"><button data-snap="left">½</button><button data-snap="top">▔</button><button data-snap="right">½</button><button data-snap="left-third">⅓</button><button data-snap="center-third">⅓</button><button data-snap="right-third">⅓</button></div><b>Study Browser</b></div>
-    <div class="toolbar" id="browser-tabs" style="border-bottom:0;padding-bottom:0;"></div>
-    <div class="toolbar">
-      <input id="browser-url" class="field" placeholder="Enter URL or search" style="flex:1;">
-      <button class="btn primary" id="browser-go">Go</button>
-      <button class="btn" id="browser-new-tab">+ Tab</button>
-      <button class="btn" id="browser-close-tab">Close Tab</button>
-      <button class="btn" id="browser-open-external">Open External</button>
-      <button class="btn" id="install-webapp">Install as App</button>
+  <section id="browser-window" class="window" style="left:140px;top:62px;width:min(1150px,96vw);height:min(760px,88vh);">
+    <div class="titlebar" data-window="browser-window"><div class="title">Study Browser</div><div class="w-controls"><button class="ctrl min" data-close="browser-window">—</button><button class="ctrl max" data-max="browser-window">▢</button><button class="ctrl close" data-close="browser-window">✕</button></div></div>
+    <div id="browser-top">
+      <div id="browser-tabs"></div>
     </div>
-    <div class="app-body" style="padding:10px;"><iframe id="browser-frame" src="https://www.wikipedia.org" referrerpolicy="no-referrer"></iframe></div>
+    <div class="toolbar"><button class="btn" id="browser-new-tab">+ Tab</button><input id="browser-url" class="field" style="flex:1;" placeholder="Search Google or enter URL"><button class="btn primary" id="browser-go">Go</button><button class="btn" id="browser-open-external">Open External</button><button class="btn" id="install-webapp">Install App</button></div>
+    <div class="app-body" style="padding:8px;"><iframe id="browser-frame" src="https://www.google.com" referrerpolicy="no-referrer"></iframe></div>
   </section>
 
-  <section id="assistant-window" class="window glass" style="left:200px;top:110px;width:min(980px,94vw);height:min(700px,84vh);">
-    <div class="titlebar" data-window="assistant-window"><button class="ctrl close" title="Close" data-close="assistant-window">✕</button><button class="ctrl min" title="Minimize" data-close="assistant-window">—</button><button class="ctrl max" title="Maximize" data-max="assistant-window">▢</button><div class="snap-layouts" data-snap-menu="assistant-window"><button data-snap="left">½</button><button data-snap="top">▔</button><button data-snap="right">½</button><button data-snap="left-third">⅓</button><button data-snap="center-third">⅓</button><button data-snap="right-third">⅓</button></div><b>AI Web Hub</b></div>
-    <div class="toolbar">
-      <select id="ai-site" class="field"><option value="https://chatgpt.com">ChatGPT</option><option value="https://gemini.google.com">Gemini</option><option value="https://copilot.microsoft.com">Copilot</option><option value="https://www.perplexity.ai">Perplexity</option></select>
-      <button class="btn primary" id="ai-open-site">Open Site</button>
-      <button class="btn" id="ai-open-external">Open in Browser Tab</button>
-    </div>
-    <div class="app-body" style="padding:8px;"><iframe id="ai-frame" src="https://chatgpt.com" referrerpolicy="no-referrer"></iframe></div>
+  <section id="pdf-window" class="window" style="left:150px;top:80px;width:min(1080px,94vw);height:min(730px,86vh);">
+    <div class="titlebar" data-window="pdf-window"><div class="title">Bookshelf + PDF</div><div class="w-controls"><button class="ctrl min" data-close="pdf-window">—</button><button class="ctrl max" data-max="pdf-window">▢</button><button class="ctrl close" data-close="pdf-window">✕</button></div></div>
+    <div class="toolbar"><input id="pdf-upload" type="file" class="field" accept="application/pdf"><input id="book-title" class="field" placeholder="Book title" style="width:180px;"><button class="btn primary" id="add-book">Add Book</button></div>
+    <div class="app-body split"><aside class="panel" id="bookshelf" style="overflow:auto;"></aside><section class="panel" style="padding:8px;"><iframe id="pdf-frame"></iframe></section></div>
   </section>
 
-  <section id="flashcards-window" class="window glass" style="left:220px;top:120px;width:min(700px,90vw);height:min(560px,76vh);">
-    <div class="titlebar" data-window="flashcards-window"><button class="ctrl close" title="Close" data-close="flashcards-window">✕</button><button class="ctrl min" title="Minimize" data-close="flashcards-window">—</button><button class="ctrl max" title="Maximize" data-max="flashcards-window">▢</button><div class="snap-layouts" data-snap-menu="flashcards-window"><button data-snap="left">½</button><button data-snap="top">▔</button><button data-snap="right">½</button><button data-snap="left-third">⅓</button><button data-snap="center-third">⅓</button><button data-snap="right-third">⅓</button></div><b>Flashcards</b><div style="margin-left:auto"></div><button class="btn" id="card-prev">Prev</button><button class="btn" id="card-flip">Flip</button><button class="btn" id="card-next">Next</button></div>
-    <div class="app-body" style="display:flex;flex-direction:column;gap:10px;">
-      <div id="flash-card" class="panel" style="min-height:260px;display:grid;place-items:center;padding:14px;text-align:center;"></div>
-      <div style="display:flex;gap:8px;justify-content:center;"><button class="btn" data-rate="again">Again</button><button class="btn" data-rate="hard">Hard</button><button class="btn primary" data-rate="good">Good</button><button class="btn" data-rate="easy">Easy</button></div>
-      <div id="card-meta" style="text-align:center;opacity:.9;"></div>
-    </div>
+  <section id="studio-window" class="window" style="left:180px;top:90px;width:min(920px,94vw);height:min(690px,84vh);">
+    <div class="titlebar" data-window="studio-window"><div class="title">Study Studio</div><div class="w-controls"><button class="ctrl min" data-close="studio-window">—</button><button class="ctrl max" data-max="studio-window">▢</button><button class="ctrl close" data-close="studio-window">✕</button></div></div>
+    <div class="toolbar"><button class="btn" id="studio-clear">Clear</button><button class="btn" id="studio-add-sticky">Add Sticky</button><button class="btn primary" id="studio-save">Save Studio</button></div>
+    <div class="app-body split"><section class="panel" style="position:relative;overflow:hidden;"><canvas id="studio-canvas" style="width:100%;height:100%;display:block;background:white;"></canvas></section><aside id="studio-stickies" class="panel" style="overflow:auto;"></aside></div>
   </section>
 
-  <section id="pdf-window" class="window glass" style="left:140px;top:100px;width:min(1080px,94vw);height:min(740px,86vh);">
-    <div class="titlebar" data-window="pdf-window"><button class="ctrl close" title="Close" data-close="pdf-window">✕</button><button class="ctrl min" title="Minimize" data-close="pdf-window">—</button><button class="ctrl max" title="Maximize" data-max="pdf-window">▢</button><div class="snap-layouts" data-snap-menu="pdf-window"><button data-snap="left">½</button><button data-snap="top">▔</button><button data-snap="right">½</button><button data-snap="left-third">⅓</button><button data-snap="center-third">⅓</button><button data-snap="right-third">⅓</button></div><b>Bookshelf & PDF Reader</b></div>
-    <div class="toolbar">
-      <input type="file" id="pdf-upload" class="field" accept="application/pdf">
-      <input id="book-title" class="field" placeholder="Book title" style="width:180px;">
-      <button class="btn primary" id="add-book">Add to Shelf</button>
-    </div>
-    <div class="app-body split">
-      <aside class="panel" id="bookshelf" style="overflow:auto;"></aside>
-      <section class="panel" style="padding:8px;"><iframe id="pdf-frame"></iframe></section>
-    </div>
-  </section>
-
-
-  <section id="studio-window" class="window glass" style="left:210px;top:100px;width:min(900px,94vw);height:min(680px,82vh);">
-    <div class="titlebar" data-window="studio-window"><button class="ctrl close" title="Close" data-close="studio-window">✕</button><button class="ctrl min" title="Minimize" data-close="studio-window">—</button><button class="ctrl max" title="Maximize" data-max="studio-window">▢</button><div class="snap-layouts" data-snap-menu="studio-window"><button data-snap="left">½</button><button data-snap="top">▔</button><button data-snap="right">½</button><button data-snap="left-third">⅓</button><button data-snap="center-third">⅓</button><button data-snap="right-third">⅓</button></div><b>Study Studio (Annotate + Plan)</b></div>
-    <div class="toolbar">
-      <button class="btn" id="studio-clear">Clear Canvas</button>
-      <button class="btn" id="studio-add-sticky">Add Sticky</button>
-      <button class="btn primary" id="studio-save">Save Studio</button>
-    </div>
-    <div class="app-body split">
-      <section class="panel" style="position:relative;overflow:hidden;"><canvas id="studio-canvas" style="width:100%;height:100%;display:block;background:white;"></canvas></section>
-      <aside class="panel" id="studio-stickies" style="overflow:auto;"></aside>
-    </div>
-  </section>
-
-  <section id="focus-window" class="window glass" style="left:250px;top:120px;width:min(560px,92vw);height:min(500px,72vh);">
-    <div class="titlebar" data-window="focus-window"><button class="ctrl close" title="Close" data-close="focus-window">✕</button><button class="ctrl min" title="Minimize" data-close="focus-window">—</button><button class="ctrl max" title="Maximize" data-max="focus-window">▢</button><div class="snap-layouts" data-snap-menu="focus-window"><button data-snap="left">½</button><button data-snap="top">▔</button><button data-snap="right">½</button><button data-snap="left-third">⅓</button><button data-snap="center-third">⅓</button><button data-snap="right-third">⅓</button></div><b>Focus Timer</b></div>
-    <div class="app-body" style="display:grid;place-items:center;gap:10px;">
-      <div id="focus-timer" style="font-size:58px;font-weight:800;">25:00</div>
-      <div style="display:flex;gap:8px;"><button class="btn primary" id="focus-start">Start</button><button class="btn" id="focus-pause">Pause</button><button class="btn" id="focus-reset">Reset</button></div>
-      <div id="focus-state" style="opacity:.9;">Ready</div>
-    </div>
-  </section>
-
-  <section id="settings-window" class="window glass" style="left:180px;top:95px;width:min(820px,92vw);height:min(660px,82vh);">
-    <div class="titlebar" data-window="settings-window"><button class="ctrl close" title="Close" data-close="settings-window">✕</button><button class="ctrl min" title="Minimize" data-close="settings-window">—</button><button class="ctrl max" title="Maximize" data-max="settings-window">▢</button><div class="snap-layouts" data-snap-menu="settings-window"><button data-snap="left">½</button><button data-snap="top">▔</button><button data-snap="right">½</button><button data-snap="left-third">⅓</button><button data-snap="center-third">⅓</button><button data-snap="right-third">⅓</button></div><b>Settings</b></div>
-    <div class="app-body" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-      <div class="panel" style="padding:10px;display:flex;flex-direction:column;gap:8px;">
-        <h4 style="margin:0;">Desktop Customization</h4>
-        <label>Wallpaper URL <input id="set-wallpaper" class="field" placeholder="https://..." /></label>
-        <label>Accent color <input id="set-accent" class="field" type="color" /></label>
-        <label>Glass Opacity <input id="set-glass" class="field" type="range" min="20" max="80" /></label>
-        <button class="btn primary" id="apply-theme">Apply Theme</button>
-      </div>
-      <div class="panel" style="padding:10px;display:flex;flex-direction:column;gap:8px;">
-        <h4 style="margin:0;">AI Assistant (Online)</h4>
-        <label>Endpoint <input id="ai-endpoint" class="field" placeholder="https://api.openai.com/v1/chat/completions" /></label>
-        <label>Model <input id="ai-model" class="field" placeholder="gpt-4o-mini" /></label>
-        <label>API Key <input id="ai-key" class="field" type="password" placeholder="sk-..." /></label>
-        <button class="btn" id="save-ai-settings">Save AI Settings</button>
-      </div>
-    </div>
-  </section>
-
-
-  <section id="vault-window" class="window glass" style="left:260px;top:130px;width:min(680px,92vw);height:min(560px,76vh);">
-    <div class="titlebar" data-window="vault-window"><button class="ctrl close" title="Close" data-close="vault-window">✕</button><button class="ctrl min" title="Minimize" data-close="vault-window">—</button><button class="ctrl max" title="Maximize" data-max="vault-window">▢</button><div class="snap-layouts" data-snap-menu="vault-window"><button data-snap="left">½</button><button data-snap="top">▔</button><button data-snap="right">½</button><button data-snap="left-third">⅓</button><button data-snap="center-third">⅓</button><button data-snap="right-third">⅓</button></div><b>Important Vault</b></div>
-    <div class="toolbar"><input id="vault-input" class="field" placeholder="Save important point instantly" style="flex:1;"><button class="btn primary" id="vault-add">Save Now</button></div>
+  <section id="vault-window" class="window" style="left:220px;top:110px;width:min(700px,92vw);height:min(580px,78vh);">
+    <div class="titlebar" data-window="vault-window"><div class="title">Important Vault</div><div class="w-controls"><button class="ctrl min" data-close="vault-window">—</button><button class="ctrl max" data-max="vault-window">▢</button><button class="ctrl close" data-close="vault-window">✕</button></div></div>
+    <div class="toolbar"><input id="vault-input" class="field" style="flex:1;" placeholder="Save important point instantly"><button class="btn primary" id="vault-add">Save</button></div>
     <div class="app-body panel" id="vault-list"></div>
   </section>
 
-  <section id="quiz-window" class="window glass" style="left:240px;top:86px;width:min(780px,92vw);height:min(620px,80vh);">
-    <div class="titlebar" data-window="quiz-window"><button class="ctrl close" title="Close" data-close="quiz-window">✕</button><button class="ctrl min" title="Minimize" data-close="quiz-window">—</button><button class="ctrl max" title="Maximize" data-max="quiz-window">▢</button><div class="snap-layouts" data-snap-menu="quiz-window"><button data-snap="left">½</button><button data-snap="top">▔</button><button data-snap="right">½</button><button data-snap="left-third">⅓</button><button data-snap="center-third">⅓</button><button data-snap="right-third">⅓</button></div><b>Adaptive Quiz</b><div style="margin-left:auto"></div><button class="btn" id="quiz-generate">Generate</button><button class="btn primary" id="quiz-submit">Submit</button></div>
-    <div class="app-body" id="quiz-body"></div>
+  <section id="settings-window" class="window" style="left:150px;top:82px;width:min(920px,94vw);height:min(700px,84vh);">
+    <div class="titlebar" data-window="settings-window"><div class="title">Settings</div><div class="w-controls"><button class="ctrl min" data-close="settings-window">—</button><button class="ctrl max" data-max="settings-window">▢</button><button class="ctrl close" data-close="settings-window">✕</button></div></div>
+    <div class="app-body" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <div class="panel" style="padding:9px;display:flex;flex-direction:column;gap:8px;">
+        <h4 style="margin:0;">Theme & Visuals</h4>
+        <label>Wallpaper URL <input id="set-wallpaper" class="field" placeholder="https://..."></label>
+        <label>Accent color <input id="set-accent" class="field" type="color"></label>
+        <label>Glass opacity <input id="set-glass" class="field" type="range" min="25" max="85"></label>
+        <label>UI font size <input id="set-font-size" class="field" type="range" min="11" max="18"></label>
+        <label>Window radius <input id="set-radius" class="field" type="range" min="6" max="16"></label>
+        <label>UI font family
+          <select id="set-font-family" class="field">
+            <option value='"Segoe UI", "Inter", sans-serif'>Segoe UI</option>
+            <option value='"Inter", "Segoe UI", sans-serif'>Inter</option>
+            <option value='"Arial", sans-serif'>Arial</option>
+            <option value='"Verdana", sans-serif'>Verdana</option>
+          </select>
+        </label>
+        <button class="btn primary" id="apply-theme">Apply Theme</button>
+      </div>
+      <div class="panel" style="padding:9px;display:flex;flex-direction:column;gap:8px;">
+        <h4 style="margin:0;">Behavior & Layout</h4>
+        <label><input type="checkbox" id="set-autosave"> Enable instant autosave while typing</label>
+        <label><input type="checkbox" id="set-click-close"> Click outside closes menus/popups</label>
+        <label><input type="checkbox" id="set-open-start"> Open start menu on load</label>
+        <label><input type="checkbox" id="set-snap"> Enable snap helpers</label>
+        <label>Preferred homepage <input id="set-homepage" class="field" placeholder="https://www.google.com"></label>
+        <button class="btn" id="settings-reset-layout">Reset window layout</button>
+      </div>
+    </div>
   </section>
 
+  <div id="annot-overlay">
+    <canvas id="annot-canvas"></canvas>
+  </div>
+  <div id="annot-tools" class="glass">
+    <button class="btn" id="annot-pen">Pen</button>
+    <button class="btn" id="annot-eraser">Eraser</button>
+    <input id="annot-size" type="range" min="2" max="28" value="3">
+    <input id="annot-color" type="color" value="#ff0000">
+    <button class="btn" id="annot-clear">Clear</button>
+    <button class="btn primary" id="annot-exit">Exit Draw</button>
+  </div>
+
   <div id="taskbar" class="glass">
-    <div id="tb-left">
-      <div class="pill" id="user-pill">Guest</div>
-      <button class="tb-btn" id="btn-login">Login</button>
-      <button class="tb-btn" id="btn-logout" style="display:none;">Logout</button>
-    </div>
+    <div id="tb-left"><button class="tb-btn" id="tb-start" title="Start">⊞</button><button class="tb-btn" id="tb-show-desktop" title="Show desktop">🖥️</button><button class="tb-btn" id="tb-annot" title="Draw on screen">✏️</button></div>
     <div id="tb-center">
-      <button class="tb-btn" id="tb-start">⊞</button>
-      <button class="tb-btn" data-open="dashboard-window">📊</button>
-      <button class="tb-btn" data-open="notes-window">📝</button>
-      <button class="tb-btn" data-open="planner-window">📅</button>
-      <button class="tb-btn" data-open="browser-window">🌐</button>
-      <button class="tb-btn" data-open="assistant-window">🤖</button>
-      <button class="tb-btn" data-open="studio-window">🖊️</button>
-      <button class="tb-btn" data-open="vault-window">⭐</button>
-      <button class="tb-btn" data-open="pdf-window">📚</button>
-      <button class="tb-btn" data-open="settings-window">⚙️</button>
+      <button class="tb-btn" data-open="dashboard-window" title="Dashboard">📊</button>
+      <button class="tb-btn" data-open="notes-window" title="Notes">📝</button>
+      <button class="tb-btn" data-open="planner-window" title="Planner">📅</button>
+      <button class="tb-btn" data-open="browser-window" title="Browser">🌐</button>
+      <button class="tb-btn" data-open="pdf-window" title="Bookshelf">📚</button>
+      <button class="tb-btn" data-open="studio-window" title="Studio">🖊️</button>
+      <button class="tb-btn" data-open="vault-window" title="Vault">⭐</button>
+      <button class="tb-btn" data-open="settings-window" title="Settings">⚙️</button>
     </div>
-    <div id="tb-right">
-      <div class="pill" id="space-pill">Space: Physics</div>
-      <div class="pill" id="status-pill">Saved</div>
-      <div class="pill" id="clock-pill"></div>
-    </div>
+    <div id="tb-right"><button class="tb-btn" id="tb-quick-note" title="Quick note">🗒️</button><div class="pill" id="space-pill">Space</div><div class="pill" id="status-pill">Saved</div><div class="pill" id="clock-pill"></div><button class="tb-btn" id="btn-login" title="Login">👤</button><button class="tb-btn" id="btn-logout" title="Logout" style="display:none;">⇦</button></div>
   </div>
 
   <script type="module">
@@ -304,139 +553,122 @@
       appId: "1:594895089425:web:65e09f36f7f519f8578fdb",
       measurementId: "G-FM5Y4M0HB0"
     };
-
     const app = initializeApp(firebaseConfig);
     try { getAnalytics(app); } catch {}
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
     const db = getFirestore(app);
 
-    const LOCAL_KEY = 'studyos11-ultimate-guest';
-    const DEFAULT_SPACES = ['Physics','Chemistry','Mathematics','Aptitude'];
+    const LOCAL_KEY = 'studyos11-pro-guest';
+
     const CORE_APPS = [
-      { id:'dashboard-window', name:'Dashboard', icon:'📊', type:'core' },
-      { id:'notes-window', name:'Notes', icon:'📝', type:'core' },
-      { id:'planner-window', name:'Planner', icon:'📅', type:'core' },
-      { id:'browser-window', name:'Browser', icon:'🌐', type:'core' },
-      { id:'assistant-window', name:'AI Web Hub', icon:'🤖', type:'core' },
-      { id:'studio-window', name:'Study Studio', icon:'🖊️', type:'core' },
-      { id:'vault-window', name:'Important Vault', icon:'⭐', type:'core' },
-      { id:'flashcards-window', name:'Flashcards', icon:'🗂️', type:'core' },
-      { id:'quiz-window', name:'Quiz', icon:'🧠', type:'core' },
-      { id:'pdf-window', name:'Bookshelf', icon:'📚', type:'core' },
-      { id:'focus-window', name:'Focus', icon:'⏱️', type:'core' },
-      { id:'settings-window', name:'Settings', icon:'⚙️', type:'core' }
+      { id:'dashboard-window', name:'Dashboard', icon:'📊' },
+      { id:'notes-window', name:'Notes', icon:'📝' },
+      { id:'planner-window', name:'Planner', icon:'📅' },
+      { id:'browser-window', name:'Browser', icon:'🌐' },
+      { id:'pdf-window', name:'Bookshelf', icon:'📚' },
+      { id:'studio-window', name:'Studio', icon:'🖊️' },
+      { id:'vault-window', name:'Vault', icon:'⭐' },
+      { id:'settings-window', name:'Settings', icon:'⚙️' }
     ];
 
+    const $ = id => document.getElementById(id);
     const el = {
-      desktop: document.getElementById('desktop'),
-      startMenu: document.getElementById('start-menu'),
-      startSearch: document.getElementById('start-search'),
-      startGrid: document.getElementById('start-grid'),
-      addSpace: document.getElementById('add-space'),
-      recommendedList: document.getElementById('recommended-list'),
-      spaces: document.getElementById('spaces'),
-      userPill: document.getElementById('user-pill'),
-      status: document.getElementById('status-pill'),
-      clock: document.getElementById('clock-pill'),
-      spacePill: document.getElementById('space-pill'),
-      noteList: document.getElementById('notes-list'),
-      noteTitle: document.getElementById('note-title'),
-      noteContent: document.getElementById('note-content'),
-      taskList: document.getElementById('task-list'),
-      browserUrl: document.getElementById('browser-url'),
-      browserFrame: document.getElementById('browser-frame'),
-      aiSite: document.getElementById('ai-site'),
-      aiFrame: document.getElementById('ai-frame'),
-      flashCard: document.getElementById('flash-card'),
-      cardMeta: document.getElementById('card-meta'),
-      bookshelf: document.getElementById('bookshelf'),
-      pdfFrame: document.getElementById('pdf-frame'),
-      focusTimer: document.getElementById('focus-timer'),
-      focusState: document.getElementById('focus-state'),
-      quizBody: document.getElementById('quiz-body'),
-      browserTabs: document.getElementById('browser-tabs'),
-      studioCanvas: document.getElementById('studio-canvas'),
-      studioStickies: document.getElementById('studio-stickies'),
-      vaultList: document.getElementById('vault-list')
+      desktop: $('desktop'), startMenu: $('start-menu'), startSearch: $('start-search'), startGrid: $('start-grid'),
+      spaces: $('spaces'), recommendedList: $('recommended-list'), quickNotePop: $('quick-note-pop'), quickNoteText: $('quick-note-text'),
+      notesList: $('notes-list'), noteTitle: $('note-title'), noteContent: $('note-content'), taskList: $('task-list'),
+      browserTabs: $('browser-tabs'), browserUrl: $('browser-url'), browserFrame: $('browser-frame'),
+      bookshelf: $('bookshelf'), pdfFrame: $('pdf-frame'),
+      studioCanvas: $('studio-canvas'), studioStickies: $('studio-stickies'), vaultList: $('vault-list'),
+      status: $('status-pill'), clock: $('clock-pill'), spacePill: $('space-pill'),
+      annotOverlay: $('annot-overlay'), annotCanvas: $('annot-canvas'), annotTools: $('annot-tools')
     };
 
     let currentUser = null;
     let saveTimer = null;
-    let flashIndex = 0;
-    let flashBack = false;
-    let quiz = [];
 
-    function baseSpace() {
+    function baseSpace(name='Physics') {
       return {
-        notes: [{ id: crypto.randomUUID(), title: 'Welcome', content: 'Start learning in this subject space.', updatedAt: Date.now() }],
+        name,
+        notes: [{ id: crypto.randomUUID(), title: 'Welcome', content: 'Start writing your notes here.', updatedAt: Date.now() }],
         selectedNoteId: null,
         tasks: [],
-        flashcards: [],
         books: [],
-        quizHistory: [],
-        browser: { tabs:[{id:crypto.randomUUID(),title:'Wikipedia',url:'https://www.wikipedia.org'}], activeTabId:null },
         studio: { drawing:'', stickies:[] },
         vault: [],
+        browser: { tabs:[{ id: crypto.randomUUID(), title:'Google', url:'https://www.google.com' }], activeTabId:null },
+        quickNotes: [],
+        apps: CORE_APPS.map(a => ({ id: a.id, name: a.name, icon: a.icon, type:'core' })),
         windows: {}
       };
     }
 
     function baseState() {
-      const spaces = {};
-DEFAULT_SPACES.forEach(s => spaces[s] = baseSpace());
+      const sp = baseSpace('Physics');
+      sp.selectedNoteId = sp.notes[0].id;
+      sp.browser.activeTabId = sp.browser.tabs[0].id;
       return {
         currentSpace: 'Physics',
-        spaceOrder: [...DEFAULT_SPACES],
-        spaces,
-        installedApps: [],
-        analytics: { dailyGoalMin: 120, minutesByDay: {}, completedFocus: 0 },
-        focus: { running: false, endAt: null, leftMs: 25 * 60 * 1000 },
-        theme: { wallpaper: '', accent: '#5b8cff', glass: 46 },
-        ai: { preferredSite: 'https://chatgpt.com' }
+        spaceOrder: ['Physics','Chemistry','Mathematics'],
+        spaces: {
+          Physics: sp,
+          Chemistry: { ...baseSpace('Chemistry'), selectedNoteId: null },
+          Mathematics: { ...baseSpace('Mathematics'), selectedNoteId: null }
+        },
+        theme: {
+          wallpaper: '', accent:'#4f8cff', glass:56, uiFontSize:13, radius:10,
+          fontFamily:'"Segoe UI", "Inter", sans-serif'
+        },
+        prefs: {
+          autosave: true,
+          clickClose: true,
+          openStartOnLoad: false,
+          snap: true,
+          homepage: 'https://www.google.com'
+        },
+        installedAppsGlobal: []
       };
     }
 
     function normalize(raw) {
       const b = baseState();
       const s = { ...b, ...(raw || {}) };
-      s.spaceOrder = (s.spaceOrder && s.spaceOrder.length ? s.spaceOrder : [...DEFAULT_SPACES]).filter(Boolean);
+      s.spaceOrder = (s.spaceOrder?.length ? s.spaceOrder : b.spaceOrder).filter(Boolean);
       s.spaces = s.spaces || {};
       s.spaceOrder.forEach(name => {
-        const sp = { ...baseSpace(), ...(s.spaces[name] || {}) };
-        sp.notes = (sp.notes?.length ? sp.notes : baseSpace().notes).map(n => ({ ...n, updatedAt: n.updatedAt || Date.now() }));
-        sp.selectedNoteId = sp.selectedNoteId && sp.notes.some(n => n.id === sp.selectedNoteId) ? sp.selectedNoteId : sp.notes[0].id;
+        const base = baseSpace(name);
+        const sp = { ...base, ...(s.spaces[name] || {}) };
+        sp.notes = (sp.notes?.length ? sp.notes : base.notes).map(n => ({ ...n, updatedAt: n.updatedAt || Date.now() }));
+        sp.selectedNoteId = sp.selectedNoteId && sp.notes.some(n => n.id === sp.selectedNoteId) ? sp.selectedNoteId : sp.notes[0]?.id || null;
         sp.tasks = sp.tasks || [];
-        sp.flashcards = sp.flashcards || [];
         sp.books = sp.books || [];
-        sp.quizHistory = sp.quizHistory || [];
-        const tabs = sp.browser?.tabs?.length ? sp.browser.tabs : [{id:crypto.randomUUID(),title:'Wikipedia',url:'https://www.wikipedia.org'}];
-        sp.browser = { tabs, activeTabId: sp.browser?.activeTabId || tabs[0].id };
-        if (!sp.browser.tabs.some(t=>t.id===sp.browser.activeTabId)) sp.browser.activeTabId = sp.browser.tabs[0].id;
         sp.studio = { drawing: sp.studio?.drawing || '', stickies: sp.studio?.stickies || [] };
         sp.vault = sp.vault || [];
+        sp.quickNotes = sp.quickNotes || [];
+        sp.apps = sp.apps?.length ? sp.apps : base.apps;
+        const tabs = sp.browser?.tabs?.length ? sp.browser.tabs : [{ id: crypto.randomUUID(), title:'Google', url:(s.prefs?.homepage || 'https://www.google.com') }];
+        sp.browser = { tabs, activeTabId: sp.browser?.activeTabId || tabs[0].id };
+        if (!sp.browser.tabs.some(t => t.id === sp.browser.activeTabId)) sp.browser.activeTabId = sp.browser.tabs[0].id;
         sp.windows = sp.windows || {};
         s.spaces[name] = sp;
       });
-      s.installedApps = s.installedApps || [];
-      s.analytics = { ...b.analytics, ...(s.analytics || {}) };
-      s.analytics.minutesByDay = s.analytics.minutesByDay || {};
-      s.focus = { ...b.focus, ...(s.focus || {}) };
+      if (!s.spaceOrder.includes(s.currentSpace)) s.currentSpace = s.spaceOrder[0];
       s.theme = { ...b.theme, ...(s.theme || {}) };
-      s.ai = { ...b.ai, ...(s.ai || {}) };
-      if (!s.spaceOrder.includes(s.currentSpace)) s.currentSpace = s.spaceOrder[0] || 'Physics';
+      s.prefs = { ...b.prefs, ...(s.prefs || {}) };
+      s.installedAppsGlobal = s.installedAppsGlobal || [];
       return s;
     }
 
     let state = normalize(null);
-
     const getSpace = () => state.spaces[state.currentSpace];
-    const dayKey = (ts=Date.now()) => new Date(ts).toISOString().slice(0,10);
-    function markMinutes(m) { const k = dayKey(); state.analytics.minutesByDay[k] = Number(state.analytics.minutesByDay[k] || 0) + Math.max(0,m); }
-    function streakDays() {
-      let n=0; const d = new Date(); d.setHours(0,0,0,0);
-      while (true) { const k = d.toISOString().slice(0,10); if ((state.analytics.minutesByDay[k] || 0) <= 0) break; n++; d.setDate(d.getDate()-1); }
-      return n;
+
+    function dayKey(ts=Date.now()) { return new Date(ts).toISOString().slice(0,10); }
+    function totalTodayMinutes() {
+      const sp = getSpace();
+      const today = dayKey();
+      const mins = sp.tasks.filter(t => t.done && dayKey(t.doneAt || t.at) === today).length * 5
+        + sp.quickNotes.filter(n => dayKey(n.at) === today).length;
+      return mins;
     }
 
     async function loadState(user) {
@@ -450,6 +682,7 @@ DEFAULT_SPACES.forEach(s => spaces[s] = baseSpace());
     }
 
     async function saveNow() {
+      if (!state) return;
       el.status.textContent = 'Saving...';
       if (!currentUser) {
         localStorage.setItem(LOCAL_KEY, JSON.stringify(state));
@@ -457,129 +690,164 @@ DEFAULT_SPACES.forEach(s => spaces[s] = baseSpace());
         return;
       }
       const ref = doc(db, 'users', currentUser.uid, 'studyos', 'state');
-      await setDoc(ref, { payload: state, updatedAt: serverTimestamp(), uid: currentUser.uid }, { merge: true });
+      await setDoc(ref, { payload: state, uid: currentUser.uid, updatedAt: serverTimestamp() }, { merge: true });
       el.status.textContent = 'Saved Firebase';
     }
 
-    const queueSave = () => { clearTimeout(saveTimer); saveTimer = setTimeout(saveNow, 350); };
+    function queueSave() {
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(saveNow, 300);
+    }
 
-    function allApps() {
-      return [...CORE_APPS, ...state.installedApps.map(a => ({ ...a, id: `webapp-${a.id}`, type:'webapp' }))];
+    function esc(v='') {
+      return v.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
     }
 
     function applyTheme() {
-      document.documentElement.style.setProperty('--accent', state.theme.accent || '#5b8cff');
-      document.documentElement.style.setProperty('--glass-opacity', String((Number(state.theme.glass || 46))/100));
-      if (state.theme.wallpaper) document.documentElement.style.setProperty('--bg-url', `url('${state.theme.wallpaper}')`);
+      document.documentElement.style.setProperty('--accent', state.theme.accent || '#4f8cff');
+      document.documentElement.style.setProperty('--glass-opacity', String((Number(state.theme.glass || 56))/100));
+      document.documentElement.style.setProperty('--font-size-ui', `${Number(state.theme.uiFontSize || 13)}px`);
+      document.documentElement.style.setProperty('--radius-win', `${Number(state.theme.radius || 10)}px`);
+      document.documentElement.style.setProperty('--font-family-ui', state.theme.fontFamily || '"Segoe UI", "Inter", sans-serif');
+      if (state.theme.wallpaper) document.documentElement.style.setProperty('--wallpaper', `url('${state.theme.wallpaper}')`);
+    }
+
+    function allAppEntries() {
+      return getSpace().apps;
     }
 
     function renderSpaces() {
-      el.spaces.innerHTML = state.spaceOrder.map(s => `<button class="space-chip ${s===state.currentSpace?'active':''}" data-space="${s}">${s}</button>`).join('');
-      [...el.spaces.querySelectorAll('[data-space]')].forEach(n => n.onclick = () => {
-        persistWindowRects();
-        state.currentSpace = n.dataset.space;
-        renderAll();
-        queueSave();
-      });
+      el.spaces.innerHTML = state.spaceOrder.map(s => `<button class="space-chip ${s===state.currentSpace?'active':''}" data-space="${s}">${esc(s)}</button>`).join('');
+      [...el.spaces.querySelectorAll('[data-space]')].forEach(n => n.onclick = () => switchSpace(n.dataset.space));
       el.spacePill.textContent = `Space: ${state.currentSpace}`;
     }
 
+    function switchSpace(name) {
+      persistWindowRects();
+      state.currentSpace = name;
+      renderAll();
+      queueSave();
+    }
+
     function renderDesktop() {
-      el.desktop.innerHTML = allApps().map(a => `<div class="icon" data-open="${a.id}"><div class="tile">${a.icon || '🌐'}</div><div class="label">${a.name}</div></div>`).join('');
-      [...el.desktop.querySelectorAll('[data-open]')].forEach(n => n.onclick = () => launchApp(n.dataset.open));
+      el.desktop.innerHTML = allAppEntries().map(a => `
+        <div class="desktop-icon" data-open="${a.id}">
+          <div class="icon-edit" data-edit-icon="${a.id}" title="Edit icon">✎</div>
+          <div class="tile">${a.icon || '📦'}</div>
+          <div class="label">${esc(a.name)}</div>
+        </div>
+      `).join('');
+      [...el.desktop.querySelectorAll('[data-open]')].forEach(n => n.onclick = e => {
+        if (e.target.closest('[data-edit-icon]')) return;
+        launchApp(n.dataset.open);
+      });
+      [...el.desktop.querySelectorAll('[data-edit-icon]')].forEach(n => n.onclick = e => {
+        e.stopPropagation();
+        const id = n.dataset.editIcon;
+        const app = getSpace().apps.find(x => x.id === id);
+        if (!app) return;
+        const icon = prompt('New icon (emoji/text)', app.icon || '📦');
+        if (icon == null) return;
+        app.icon = icon.trim() || app.icon;
+        const name = prompt('App name', app.name);
+        if (name != null && name.trim()) app.name = name.trim();
+        renderDesktop();
+        renderStart(el.startSearch.value || '');
+        queueSave();
+      });
     }
 
     function renderStart(filter='') {
-      const q = filter.trim().toLowerCase();
-      const noteHits = Object.values(state.spaces)
-        .flatMap(sp => sp.notes || [])
-        .filter(n => q && (`${n.title} ${n.content}`).toLowerCase().includes(q))
-        .slice(0, 6)
-        .map(n => ({ id: `note:${n.id}`, name: `Note: ${n.title || 'Untitled'}`, icon: '📄' }));
-
-      const entries = [...allApps(), ...noteHits].filter(a => !q || a.name.toLowerCase().includes(q)).slice(0, 18);
-      el.startGrid.innerHTML = entries.map(a => `<div class="start-item" data-open="${a.id}">${a.icon || '🌐'}<div>${a.name}</div></div>`).join('');
-      [...el.startGrid.querySelectorAll('[data-open]')].forEach(n => n.onclick = () => {
-        if (n.dataset.open.startsWith('note:')) {
-          const id = n.dataset.open.slice(5);
-          const targetSpace = state.spaceOrder.find(sp => (state.spaces[sp].notes || []).some(x => x.id === id));
+      const q = (filter || '').trim().toLowerCase();
+      const noteHits = Object.values(state.spaces).flatMap(sp => sp.notes || []).filter(n => q && `${n.title} ${n.content}`.toLowerCase().includes(q)).slice(0, 6).map(n => ({ id:`note:${n.id}`, icon:'📄', name:`Note: ${n.title || 'Untitled'}` }));
+      const apps = allAppEntries().filter(a => !q || a.name.toLowerCase().includes(q));
+      const entries = [...apps, ...noteHits].slice(0, 18);
+      el.startGrid.innerHTML = entries.map(a => `<div class="start-item" data-launch="${a.id}">${a.icon || '📦'}<div>${esc(a.name)}</div></div>`).join('');
+      [...el.startGrid.querySelectorAll('[data-launch]')].forEach(n => n.onclick = () => {
+        const id = n.dataset.launch;
+        if (id.startsWith('note:')) {
+          const noteId = id.slice(5);
+          const targetSpace = state.spaceOrder.find(sp => (state.spaces[sp].notes || []).some(x => x.id === noteId));
           if (targetSpace) {
             state.currentSpace = targetSpace;
-            state.spaces[targetSpace].selectedNoteId = id;
+            state.spaces[targetSpace].selectedNoteId = noteId;
             renderAll();
             openWindow('notes-window');
           }
         } else {
-          launchApp(n.dataset.open);
+          launchApp(id);
         }
-        el.startMenu.classList.remove('open');
-        setTimeout(() => el.startMenu.style.display='none', 220);
+        closePopups();
       });
 
-      const rec = [...getSpace().notes].sort((a,b)=>b.updatedAt-a.updatedAt).slice(0,5);
-      el.recommendedList.innerHTML = rec.map(n => `<div class="rec-item" data-rec-note="${n.id}">${esc(n.title || 'Untitled')}<small style="display:block;opacity:.8;">Recent note</small></div>`).join('');
-      [...el.recommendedList.querySelectorAll('[data-rec-note]')].forEach(n => n.onclick = () => {
-        getSpace().selectedNoteId = n.dataset.recNote;
+      const rec = [...getSpace().notes].sort((a,b)=>b.updatedAt-a.updatedAt).slice(0, 5);
+      el.recommendedList.innerHTML = rec.map(n => `<div class="rec-item" data-rec="${n.id}">${esc(n.title || 'Untitled')}<small style="display:block;opacity:.8;">Recent note</small></div>`).join('') || '<div class="rec-item">No recent notes</div>';
+      [...el.recommendedList.querySelectorAll('[data-rec]')].forEach(n => n.onclick = () => {
+        getSpace().selectedNoteId = n.dataset.rec;
         renderNotes();
         openWindow('notes-window');
-        el.startMenu.classList.remove('open');
-        setTimeout(() => el.startMenu.style.display='none', 220);
+        closePopups();
       });
-    }
 
     function launchApp(id) {
-      if (id.startsWith('webapp-')) {
+      if (id.startsWith('webapp:')) {
+        const app = getSpace().apps.find(a => a.id === id);
+        if (!app) return;
         openWindow('browser-window');
-        const app = state.installedApps.find(a => `webapp-${a.id}` === id);
-        if (app) navigateBrowser(app.url);
+        const tab = getActiveTab();
+        tab.url = app.url;
+        tab.title = app.name;
+        renderBrowserTabs();
+        loadActiveTab();
+        queueSave();
         return;
       }
       openWindow(id);
     }
 
+    function setActiveTaskbar(id='') {
+      [...document.querySelectorAll('.tb-btn[data-open]')].forEach(b => b.classList.toggle('active', b.dataset.open === id));
+    }
+
     function openWindow(id) {
-      document.querySelectorAll('.window').forEach(w => w.classList.remove('active'));
-      const node = document.getElementById(id);
-      if (!node) return;
-      node.style.display = 'flex';
-      node.classList.add('active');
-      document.querySelectorAll('.tb-btn[data-open]').forEach(b => b.classList.toggle('active', b.dataset.open === id));
+      const w = $(id);
+      if (!w) return;
+      document.querySelectorAll('.window').forEach(x => x.classList.remove('active'));
+      w.style.display = 'flex';
+      w.classList.add('active');
       const rect = getSpace().windows[id];
-      if (rect) { node.style.left = rect.left; node.style.top = rect.top; node.style.width = rect.width; node.style.height = rect.height; }
+      if (rect) {
+        w.style.left = rect.left;
+        w.style.top = rect.top;
+        w.style.width = rect.width;
+        w.style.height = rect.height;
+      }
+      setActiveTaskbar(id);
     }
 
     function closeWindow(id) {
-      const node = document.getElementById(id);
-      if (!node) return;
-      node.style.display = 'none';
-      node.classList.remove('active');
-      document.querySelectorAll('.tb-btn[data-open]').forEach(b => b.classList.toggle('active', b.dataset.open === (document.querySelector('.window.active')?.id || '')));
-      saveWindowRect(id);
-    }
-
-    function applySnap(id, mode) {
-      const w = document.getElementById(id);
+      const w = $(id);
       if (!w) return;
-      const fullW = window.innerWidth;
-      const fullH = window.innerHeight - 84;
-      if (mode === 'left') { w.style.left = '8px'; w.style.top = '8px'; w.style.width = `calc(50vw - 12px)`; w.style.height = `${fullH}px`; }
-      if (mode === 'right') { w.style.left = `calc(50vw + 4px)`; w.style.top = '8px'; w.style.width = `calc(50vw - 12px)`; w.style.height = `${fullH}px`; }
-      if (mode === 'top') { w.style.left = '8px'; w.style.top = '8px'; w.style.width = `calc(100vw - 16px)`; w.style.height = `${Math.floor(fullH/2)}px`; }
-      if (mode === 'left-third') { w.style.left = '8px'; w.style.top = '8px'; w.style.width = `${Math.floor(fullW/3)-12}px`; w.style.height = `${fullH}px`; }
-      if (mode === 'center-third') { w.style.left = `${Math.floor(fullW/3)+2}px`; w.style.top = '8px'; w.style.width = `${Math.floor(fullW/3)-12}px`; w.style.height = `${fullH}px`; }
-      if (mode === 'right-third') { w.style.left = `${Math.floor(fullW*2/3)-4}px`; w.style.top = '8px'; w.style.width = `${Math.floor(fullW/3)-12}px`; w.style.height = `${fullH}px`; }
-      saveWindowRect(id); queueSave();
+      w.style.display = 'none';
+      w.classList.remove('active');
+      saveWindowRect(id);
+      setActiveTaskbar(document.querySelector('.window.active')?.id || '');
     }
 
     function saveWindowRect(id) {
-      const w = document.getElementById(id);
+      const w = $(id);
       if (!w) return;
       getSpace().windows[id] = {
-        left: w.style.left || `${w.offsetLeft}px`, top: w.style.top || `${w.offsetTop}px`,
-        width: w.style.width || `${w.offsetWidth}px`, height: w.style.height || `${w.offsetHeight}px`
+        left: w.style.left || `${w.offsetLeft}px`,
+        top: w.style.top || `${w.offsetTop}px`,
+        width: w.style.width || `${w.offsetWidth}px`,
+        height: w.style.height || `${w.offsetHeight}px`
       };
     }
-    function persistWindowRects(){ document.querySelectorAll('.window').forEach(w => saveWindowRect(w.id)); }
+
+    function persistWindowRects() {
+      document.querySelectorAll('.window').forEach(w => saveWindowRect(w.id));
+    }
 
     function bindWindowUX() {
       document.querySelectorAll('.window').forEach(w => {
@@ -593,12 +861,22 @@ DEFAULT_SPACES.forEach(s => spaces[s] = baseSpace());
 
       document.querySelectorAll('.titlebar').forEach(bar => {
         bar.addEventListener('mousedown', e => {
-          if (e.target.closest('button,input,textarea,select')) return;
-          const id = bar.dataset.window, w = document.getElementById(id);
-          const sx=e.clientX, sy=e.clientY, sl=w.offsetLeft, st=w.offsetTop;
-          const move = ev => { w.style.left = `${Math.max(0, sl + ev.clientX - sx)}px`; w.style.top = `${Math.max(0, st + ev.clientY - sy)}px`; };
-          const up = () => { window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up); saveWindowRect(id); queueSave(); };
-          window.addEventListener('mousemove', move); window.addEventListener('mouseup', up);
+          if (e.target.closest('button,input,textarea,select,label')) return;
+          const id = bar.dataset.window;
+          const w = $(id);
+          const sx = e.clientX, sy = e.clientY, sl = w.offsetLeft, st = w.offsetTop;
+          const move = ev => {
+            w.style.left = `${Math.max(0, sl + ev.clientX - sx)}px`;
+            w.style.top = `${Math.max(0, st + ev.clientY - sy)}px`;
+          };
+          const up = () => {
+            window.removeEventListener('mousemove', move);
+            window.removeEventListener('mouseup', up);
+            saveWindowRect(id);
+            queueSave();
+          };
+          window.addEventListener('mousemove', move);
+          window.addEventListener('mouseup', up);
         });
       });
 
@@ -609,55 +887,60 @@ DEFAULT_SPACES.forEach(s => spaces[s] = baseSpace());
           const dir = h.dataset.resize;
           const sx=e.clientX, sy=e.clientY, sl=w.offsetLeft, st=w.offsetTop, sw=w.offsetWidth, sh=w.offsetHeight;
           const move = ev => {
-            let l=sl, t=st, ww=sw, hh=sh;
-            if (dir.includes('e')) ww = Math.max(360, sw + ev.clientX - sx);
-            if (dir.includes('s')) hh = Math.max(260, sh + ev.clientY - sy);
-            if (dir.includes('w')) { ww = Math.max(360, sw - (ev.clientX - sx)); l = sl + (ev.clientX - sx); }
-            if (dir.includes('n')) { hh = Math.max(260, sh - (ev.clientY - sy)); t = st + (ev.clientY - sy); }
-            w.style.left=`${l}px`; w.style.top=`${t}px`; w.style.width=`${ww}px`; w.style.height=`${hh}px`;
+            let l=sl,t=st,ww=sw,hh=sh;
+            if (dir.includes('e')) ww = Math.max(330, sw + ev.clientX - sx);
+            if (dir.includes('s')) hh = Math.max(240, sh + ev.clientY - sy);
+            if (dir.includes('w')) { ww = Math.max(330, sw - (ev.clientX - sx)); l = sl + (ev.clientX - sx); }
+            if (dir.includes('n')) { hh = Math.max(240, sh - (ev.clientY - sy)); t = st + (ev.clientY - sy); }
+            w.style.left = `${l}px`; w.style.top = `${t}px`; w.style.width = `${ww}px`; w.style.height = `${hh}px`;
           };
-          const up = () => { window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up); saveWindowRect(w.id); queueSave(); };
-          window.addEventListener('mousemove', move); window.addEventListener('mouseup', up);
+          const up = () => {
+            window.removeEventListener('mousemove', move);
+            window.removeEventListener('mouseup', up);
+            saveWindowRect(w.id);
+            queueSave();
+          };
+          window.addEventListener('mousemove', move);
+          window.addEventListener('mouseup', up);
         });
       });
 
       document.querySelectorAll('[data-close]').forEach(b => b.onclick = () => closeWindow(b.dataset.close));
       document.querySelectorAll('[data-max]').forEach(b => b.onclick = () => {
-        const id = b.dataset.max, w = document.getElementById(id);
+        const id = b.dataset.max;
+        const w = $(id);
         if (w.dataset.full === '1') {
           const r = JSON.parse(w.dataset.restore || '{}');
-          if (r.left) { w.style.left=r.left; w.style.top=r.top; w.style.width=r.width; w.style.height=r.height; }
+          if (r.left) {
+            w.style.left=r.left; w.style.top=r.top; w.style.width=r.width; w.style.height=r.height;
+          }
           w.dataset.full = '0';
         } else {
           w.dataset.restore = JSON.stringify({ left:w.style.left||`${w.offsetLeft}px`, top:w.style.top||`${w.offsetTop}px`, width:w.style.width||`${w.offsetWidth}px`, height:w.style.height||`${w.offsetHeight}px` });
           w.style.left='8px'; w.style.top='8px'; w.style.width='calc(100vw - 16px)'; w.style.height='calc(100vh - var(--taskbar-h) - 20px)';
           w.dataset.full='1';
         }
-        saveWindowRect(id); queueSave();
+        saveWindowRect(id);
+        queueSave();
       });
 
-      document.querySelectorAll('[data-max]').forEach(btn => {
-        const id = btn.dataset.max;
-        const menu = document.querySelector(`[data-snap-menu="${id}"]`);
-        if (!menu) return;
-        let hideTimer = null;
-        const show = () => { clearTimeout(hideTimer); menu.style.display = 'grid'; };
-        const hide = () => { hideTimer = setTimeout(() => menu.style.display='none', 180); };
-        btn.addEventListener('mouseenter', show);
-        btn.addEventListener('mouseleave', hide);
-        menu.addEventListener('mouseenter', show);
-        menu.addEventListener('mouseleave', hide);
-        menu.querySelectorAll('[data-snap]').forEach(n => n.onclick = () => applySnap(id, n.dataset.snap));
+      document.querySelectorAll('.window').forEach(w => {
+        w.addEventListener('mousedown', () => {
+          document.querySelectorAll('.window').forEach(x => x.classList.remove('active'));
+          w.classList.add('active');
+          setActiveTaskbar(w.id);
+        });
       });
     }
-
-    function esc(v=''){ return v.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;'); }
 
     function renderNotes() {
       const sp = getSpace();
       const notes = [...sp.notes].sort((a,b)=>b.updatedAt-a.updatedAt);
-      el.noteList.innerHTML = notes.map(n => `<div class="note-item ${n.id===sp.selectedNoteId?'active':''}" data-note="${n.id}"><div>${esc(n.title||'Untitled')}</div><small>${new Date(n.updatedAt).toLocaleString()}</small></div>`).join('');
-      [...el.noteList.querySelectorAll('[data-note]')].forEach(n => n.onclick = () => { sp.selectedNoteId=n.dataset.note; renderNotes(); });
+      el.notesList.innerHTML = notes.map(n => `<div class="note-item ${n.id===sp.selectedNoteId?'active':''}" data-note="${n.id}"><div>${esc(n.title||'Untitled')}</div><small>${new Date(n.updatedAt).toLocaleString()}</small></div>`).join('');
+      [...el.notesList.querySelectorAll('[data-note]')].forEach(n => n.onclick = () => {
+        sp.selectedNoteId = n.dataset.note;
+        renderNotes();
+      });
       const cur = sp.notes.find(n => n.id === sp.selectedNoteId) || sp.notes[0];
       if (!cur) return;
       sp.selectedNoteId = cur.id;
@@ -672,7 +955,6 @@ DEFAULT_SPACES.forEach(s => spaces[s] = baseSpace());
       cur.title = el.noteTitle.value;
       cur.content = el.noteContent.value;
       cur.updatedAt = Date.now();
-      markMinutes(2);
       renderNotes();
       queueSave();
       el.status.textContent = 'Note saved';
@@ -682,16 +964,25 @@ DEFAULT_SPACES.forEach(s => spaces[s] = baseSpace());
       const sp = getSpace();
       el.taskList.innerHTML = sp.tasks.map(t => `
         <div class="task-row">
-          <input type="checkbox" data-toggle="${t.id}" ${t.done?'checked':''}>
+          <input type="checkbox" data-toggle="${t.id}" ${t.done ? 'checked' : ''}>
           <div><div>${esc(t.title)}</div><small>${esc(t.subject || 'General')} ${t.due ? `• ${t.due}` : ''}</small></div>
           <span>${t.done ? '✅' : '⏳'}</span>
           <button class="btn" data-del="${t.id}">Delete</button>
         </div>
       `).join('');
       [...el.taskList.querySelectorAll('[data-toggle]')].forEach(n => n.onchange = () => {
-        const t = sp.tasks.find(x => x.id===n.dataset.toggle); if (!t) return; t.done=n.checked; if (t.done) markMinutes(5); renderTasks(); queueSave();
+        const t = sp.tasks.find(x => x.id === n.dataset.toggle);
+        if (!t) return;
+        t.done = n.checked;
+        t.doneAt = Date.now();
+        renderTasks();
+        queueSave();
       });
-      [...el.taskList.querySelectorAll('[data-del]')].forEach(n => n.onclick = () => { sp.tasks=sp.tasks.filter(x=>x.id!==n.dataset.del); renderTasks(); queueSave(); });
+      [...el.taskList.querySelectorAll('[data-del]')].forEach(n => n.onclick = () => {
+        sp.tasks = sp.tasks.filter(x => x.id !== n.dataset.del);
+        renderTasks();
+        queueSave();
+      });
     }
 
     function getActiveTab() {
@@ -701,14 +992,28 @@ DEFAULT_SPACES.forEach(s => spaces[s] = baseSpace());
 
     function renderBrowserTabs() {
       const b = getSpace().browser;
-      el.browserTabs.innerHTML = b.tabs.map(t => `<button class="btn ${t.id===b.activeTabId?'primary':''}" data-tab="${t.id}">${esc((t.title || 'Tab').slice(0, 18))}</button>`).join('');
-      [...el.browserTabs.querySelectorAll('[data-tab]')].forEach(n => n.onclick = () => {
+      el.browserTabs.innerHTML = b.tabs.map(t => `
+        <div class="btab ${t.id===b.activeTabId?'active':''}" data-tab="${t.id}">
+          <span class="name">${esc(t.title || 'Tab')}</span>
+          <button class="close-tab" data-close-tab="${t.id}">✕</button>
+        </div>
+      `).join('');
+      [...el.browserTabs.querySelectorAll('[data-tab]')].forEach(n => n.onclick = e => {
+        if (e.target.closest('[data-close-tab]')) return;
         b.activeTabId = n.dataset.tab;
-        loadActiveTab();
         renderBrowserTabs();
+        loadActiveTab();
         queueSave();
       });
-      [...el.taskList.querySelectorAll('[data-del]')].forEach(n => n.onclick = () => { sp.tasks=sp.tasks.filter(x=>x.id!==n.dataset.del); renderTasks(); queueSave(); });
+      [...el.browserTabs.querySelectorAll('[data-close-tab]')].forEach(n => n.onclick = e => {
+        e.stopPropagation();
+        if (b.tabs.length === 1) return;
+        b.tabs = b.tabs.filter(t => t.id !== n.dataset.closeTab);
+        if (!b.tabs.some(t => t.id === b.activeTabId)) b.activeTabId = b.tabs[0].id;
+        renderBrowserTabs();
+        loadActiveTab();
+        queueSave();
+      });
     }
 
     function loadActiveTab() {
@@ -726,102 +1031,8 @@ DEFAULT_SPACES.forEach(s => spaces[s] = baseSpace());
       if (!tab) return;
       tab.url = v;
       tab.title = v.replace(/^https?:\/\//,'').slice(0, 30);
-      el.browserUrl.value = v;
-      el.browserFrame.src = v;
       renderBrowserTabs();
-      queueSave();
-    }
-
-    function openAISite(url, persist=true) {
-      if (!url) return;
-      state.ai.preferredSite = url;
-      el.aiSite.value = url;
-      el.aiFrame.src = url;
-      if (persist) queueSave();
-    }
-
-    function renderStudio() {
-      const sp = getSpace();
-      el.studioStickies.innerHTML = sp.studio.stickies.map((s, i) => `<div class="note-item"><div>${esc(s.text)}</div><small>${new Date(s.at).toLocaleString()}</small><div><button class="btn" data-del-sticky="${i}">Delete</button></div></div>`).join('') || '<div class="note-item">No sticky notes yet.</div>';
-      [...el.studioStickies.querySelectorAll('[data-del-sticky]')].forEach(n => n.onclick = () => {
-        sp.studio.stickies.splice(Number(n.dataset.delSticky), 1);
-        renderStudio();
-        queueSave();
-      });
-
-      const canvas = el.studioCanvas;
-      const rect = canvas.getBoundingClientRect();
-      canvas.width = Math.max(300, Math.floor(rect.width));
-      canvas.height = Math.max(220, Math.floor(rect.height));
-      const ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#fff';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      if (sp.studio.drawing) {
-        const img = new Image();
-        img.onload = () => ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        img.src = sp.studio.drawing;
-      }
-    }
-
-    function persistStudioCanvas() {
-      const sp = getSpace();
-      sp.studio.drawing = el.studioCanvas.toDataURL('image/png');
-      queueSave();
-    }
-
-    function renderVault() {
-      const sp = getSpace();
-      el.vaultList.innerHTML = sp.vault.map((v, i) => `<div class="note-item"><div>${esc(v.text)}</div><small>${new Date(v.at).toLocaleString()}</small><div><button class="btn" data-vault-del="${i}">Delete</button></div></div>`).join('') || '<div class="note-item">No important items saved.</div>';
-      [...el.vaultList.querySelectorAll('[data-vault-del]')].forEach(n => n.onclick = () => {
-        sp.vault.splice(Number(n.dataset.vaultDel), 1);
-        renderVault();
-        queueSave();
-      });
-    }
-
-    function generateFlashcardsFromNote() {
-      saveCurrentNote();
-      const sp = getSpace();
-      const cur = sp.notes.find(n => n.id === sp.selectedNoteId);
-      if (!cur) return;
-      const lines = cur.content.split('\n').map(x=>x.trim()).filter(Boolean);
-      const cards = [];
-      lines.forEach(line => {
-        if (line.includes(':')) {
-          const [f, ...rest] = line.split(':');
-          const b = rest.join(':').trim();
-          if (f.trim() && b) cards.push({ id: crypto.randomUUID(), front:f.trim(), back:b, ease:2.5, interval:1, dueAt:Date.now() });
-        }
-      });
-      if (!cards.length) cards.push({ id:crypto.randomUUID(), front:cur.title || 'Summary', back:cur.content.slice(0,220) || 'Add key:value format for cards.', ease:2.5, interval:1, dueAt:Date.now() });
-      sp.flashcards.unshift(...cards);
-      flashIndex=0; flashBack=false;
-      renderFlashcards();
-      openWindow('flashcards-window');
-      markMinutes(3);
-      queueSave();
-    }
-
-    function dueCards() { return getSpace().flashcards.filter(c => (c.dueAt || 0) <= Date.now()); }
-    function renderFlashcards() {
-      const cards = dueCards();
-      if (!cards.length) { el.flashCard.textContent = 'No due cards. Great progress 🎉'; el.cardMeta.textContent = `Total cards: ${getSpace().flashcards.length}`; return; }
-      flashIndex = ((flashIndex % cards.length) + cards.length) % cards.length;
-      const c = cards[flashIndex];
-      el.flashCard.innerHTML = flashBack ? esc(c.back) : `<b>${esc(c.front)}</b>`;
-      if (window.MathJax?.typesetPromise) MathJax.typesetPromise([el.flashCard]);
-      el.cardMeta.textContent = `Card ${flashIndex+1}/${cards.length} • Ease ${Number(c.ease || 2.5).toFixed(2)}`;
-    }
-    function reviewCard(rate) {
-      const cards = dueCards(); if (!cards.length) return;
-      const c = cards[flashIndex]; if (!c) return;
-      const mult = ({again:.5,hard:1,good:2,easy:3})[rate] || 2;
-      c.ease = Math.max(1.3, (c.ease || 2.5) + (rate==='easy'?0.15:rate==='again'?-0.2:0.05));
-      c.interval = Math.max(1, Math.round((c.interval || 1) * mult * c.ease / 2));
-      c.dueAt = Date.now() + c.interval * 24 * 60 * 60 * 1000;
-      flashBack = false;
-      markMinutes(1);
-      renderFlashcards();
+      loadActiveTab();
       queueSave();
     }
 
@@ -834,156 +1045,291 @@ DEFAULT_SPACES.forEach(s => spaces[s] = baseSpace());
       });
     }
 
-    function renderQuiz() {
-      if (!quiz.length) { el.quizBody.innerHTML = '<div class="panel" style="padding:10px;">No quiz yet. Click Generate.</div>'; return; }
-      el.quizBody.innerHTML = quiz.map((q,i)=>`<div class="panel" style="padding:10px;margin-bottom:8px;"><b>Q${i+1}. ${esc(q.q)}</b><div style="margin-top:8px;display:grid;gap:6px;">${q.options.map((op,oi)=>`<label><input type="radio" name="q-${i}" value="${oi}"> ${esc(op)}</label>`).join('')}</div></div>`).join('');
-    }
-    function makeQuiz() {
-      const text = getSpace().notes.map(n => `${n.title}. ${n.content}`).join('\n');
-      const parts = text.split(/[.!?\n]/).map(x=>x.trim()).filter(x=>x.length>20).slice(0,12);
-      quiz = parts.slice(0,5).map((s,i)=>{
-        const d = parts[(i+1)%parts.length] || 'No matching statement';
-        const options = [s, d, s.split(' ').slice(0,6).join(' ')+' ...', 'Insufficient data'];
-        for (let j=options.length-1;j>0;j--){ const k=Math.floor(Math.random()*(j+1)); [options[j],options[k]]=[options[k],options[j]]; }
-        return { q:'Select the best matching statement from your notes.', a:s, options };
+    function renderStudio() {
+      const sp = getSpace();
+      el.studioStickies.innerHTML = sp.studio.stickies.map((s, i) => `<div class="sticky-item"><div>${esc(s.text)}</div><small>${new Date(s.at).toLocaleString()}</small><div><button class="btn" data-del-sticky="${i}">Delete</button></div></div>`).join('') || '<div class="sticky-item">No stickies yet.</div>';
+      [...el.studioStickies.querySelectorAll('[data-del-sticky]')].forEach(n => n.onclick = () => {
+        sp.studio.stickies.splice(Number(n.dataset.delSticky), 1);
+        renderStudio();
+        queueSave();
       });
-      renderQuiz();
-    }
-    function submitQuiz() {
-      if (!quiz.length) return;
-      let score = 0;
-      quiz.forEach((q,i)=>{
-        const p = document.querySelector(`input[name="q-${i}"]:checked`);
-        if (p && q.options[Number(p.value)] === q.a) score++;
-      });
-      getSpace().quizHistory.unshift({ score, total: quiz.length, at: Date.now() });
-      markMinutes(10);
-      alert(`Quiz score: ${score}/${quiz.length}`);
-      queueSave();
-      renderDashboard();
+
+      const c = el.studioCanvas;
+      const r = c.getBoundingClientRect();
+      c.width = Math.max(320, Math.floor(r.width));
+      c.height = Math.max(220, Math.floor(r.height));
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0,0,c.width,c.height);
+      if (sp.studio.drawing) {
+        const img = new Image();
+        img.onload = () => ctx.drawImage(img, 0, 0, c.width, c.height);
+        img.src = sp.studio.drawing;
+      }
     }
 
-    function renderFocus() {
-      const ms = state.focus.running ? Math.max(0, state.focus.endAt - Date.now()) : state.focus.leftMs;
-      const m = String(Math.floor(ms / 60000)).padStart(2,'0');
-      const s = String(Math.floor((ms % 60000)/1000)).padStart(2,'0');
-      el.focusTimer.textContent = `${m}:${s}`;
-      if (state.focus.running && ms === 0) {
-        state.focus.running = false;
-        state.focus.leftMs = 25*60*1000;
-        state.analytics.completedFocus += 1;
-        markMinutes(25);
-        el.focusState.textContent = 'Session complete ✅';
+    function persistStudioCanvas() {
+      getSpace().studio.drawing = el.studioCanvas.toDataURL('image/png');
+      queueSave();
+    }
+
+    function renderVault() {
+      const sp = getSpace();
+      el.vaultList.innerHTML = sp.vault.map((v,i) => `<div class="vault-item"><div>${esc(v.text)}</div><small>${new Date(v.at).toLocaleString()}</small><div><button class="btn" data-vault-del="${i}">Delete</button></div></div>`).join('') || '<div class="vault-item">No important items.</div>';
+      [...el.vaultList.querySelectorAll('[data-vault-del]')].forEach(n => n.onclick = () => {
+        sp.vault.splice(Number(n.dataset.vaultDel), 1);
+        renderVault();
         queueSave();
-      }
+      });
     }
 
     function renderDashboard() {
       const sp = getSpace();
-      const today = Number(state.analytics.minutesByDay[dayKey()] || 0);
-      const streak = streakDays();
-      const tasksDone = sp.tasks.filter(t=>t.done).length;
-      const tQ = sp.quizHistory.reduce((a,x)=>a+x.total,0) || 1;
-      const sQ = sp.quizHistory.reduce((a,x)=>a+x.score,0);
-      document.getElementById('m-today').textContent = `${today}m`;
-      document.getElementById('m-streak').textContent = `${streak}d`;
-      document.getElementById('m-tasks').textContent = String(tasksDone);
-      document.getElementById('m-quiz').textContent = `${Math.round((sQ/tQ)*100)}%`;
-      document.getElementById('daily-goal').value = state.analytics.dailyGoalMin;
-      const left = Math.max(0, state.analytics.dailyGoalMin - today);
-      document.getElementById('coach-text').textContent = left ? `Need ${left} more minutes today. Try: 1 focus + 10 cards.` : 'Goal achieved. Great work!';
+      const today = totalTodayMinutes();
+      const streak = today > 0 ? 1 : 0;
+      $('m-today').textContent = `${today}m`;
+      $('m-streak').textContent = `${streak}d`;
+      $('m-tasks').textContent = String(sp.tasks.filter(t => t.done).length);
+      $('m-vault').textContent = String(sp.vault.length);
+      $('daily-goal').value = String(Number(sp.dailyGoal || 120));
+      const left = Math.max(0, Number(sp.dailyGoal || 120) - today);
+      $('coach-text').textContent = left ? `Need ${left} more minutes today. Keep going.` : 'Goal achieved. Great work!';
+    }
+
+    function showStart() {
+      el.startMenu.style.display = 'block';
+      requestAnimationFrame(() => el.startMenu.classList.add('open'));
+    }
+    function hideStart() {
+      el.startMenu.classList.remove('open');
+      setTimeout(() => el.startMenu.style.display='none', 220);
+    }
+    function showQuickNote() {
+      el.quickNotePop.style.display = 'block';
+      requestAnimationFrame(() => el.quickNotePop.classList.add('open'));
+    }
+    function hideQuickNote() {
+      el.quickNotePop.classList.remove('open');
+      setTimeout(() => el.quickNotePop.style.display='none', 200);
+    }
+    function closePopups() {
+      hideStart();
+      hideQuickNote();
+    }
+
+    function bindAnnotationOverlay() {
+      const c = el.annotCanvas;
+      const ctx = c.getContext('2d');
+      let drawing = false;
+      let mode = 'pen';
+      let size = 3;
+      let color = '#ff0000';
+      let lx = 0, ly = 0;
+
+      function resizeAnnot() {
+        c.width = window.innerWidth;
+        c.height = window.innerHeight;
+      }
+      resizeAnnot();
+      window.addEventListener('resize', resizeAnnot);
+
+      c.addEventListener('mousedown', e => {
+        drawing = true;
+        lx = e.clientX; ly = e.clientY;
+      });
+      window.addEventListener('mouseup', () => drawing = false);
+      c.addEventListener('mousemove', e => {
+        if (!drawing) return;
+        ctx.lineWidth = size;
+        ctx.lineCap = 'round';
+        if (mode === 'eraser') {
+          ctx.globalCompositeOperation = 'destination-out';
+          ctx.strokeStyle = 'rgba(0,0,0,1)';
+        } else {
+          ctx.globalCompositeOperation = 'source-over';
+          ctx.strokeStyle = color;
+        }
+        ctx.beginPath();
+        ctx.moveTo(lx, ly);
+        ctx.lineTo(e.clientX, e.clientY);
+        ctx.stroke();
+        lx = e.clientX; ly = e.clientY;
+      });
+
+      $('annot-pen').onclick = () => mode = 'pen';
+      $('annot-eraser').onclick = () => mode = 'eraser';
+      $('annot-size').oninput = e => size = Number(e.target.value);
+      $('annot-color').oninput = e => color = e.target.value;
+      $('annot-clear').onclick = () => { ctx.clearRect(0,0,c.width,c.height); };
+      $('annot-exit').onclick = () => {
+        el.annotOverlay.style.display = 'none';
+        el.annotTools.style.display = 'none';
+      };
     }
 
     function bindEvents() {
-      document.getElementById('tb-start').onclick = () => {
-        if (el.startMenu.style.display === 'block') {
-          el.startMenu.classList.remove('open');
-          setTimeout(() => el.startMenu.style.display = 'none', 220);
-        } else {
-          el.startMenu.style.display = 'block';
-          requestAnimationFrame(() => el.startMenu.classList.add('open'));
-          renderStart(el.startSearch.value);
-        }
+      $('tb-start').onclick = () => {
+        if (el.startMenu.style.display === 'block') hideStart();
+        else { showStart(); renderStart(el.startSearch.value || ''); }
       };
-      el.startSearch.oninput = () => renderStart(el.startSearch.value);
-      el.addSpace.onclick = () => {
-        const name = prompt('New subject space name?');
-        if (!name) return;
+      $('tb-quick-note').onclick = () => {
+        if (el.quickNotePop.style.display === 'block') hideQuickNote();
+        else showQuickNote();
+      };
+      $('tb-show-desktop').onclick = () => {
+        document.querySelectorAll('.window').forEach(w => { w.style.display = 'none'; w.classList.remove('active'); });
+        setActiveTaskbar('');
+      };
+      $('tb-annot').onclick = () => {
+        el.annotOverlay.style.display = 'block';
+        el.annotTools.style.display = 'flex';
+      };
+
+      $('add-space').onclick = () => {
+        const name = prompt('New space name?');
+        if (!name?.trim()) return;
         const n = name.trim();
-        if (!n || state.spaceOrder.includes(n)) return;
+        if (state.spaceOrder.includes(n)) return;
         state.spaceOrder.push(n);
-        state.spaces[n] = baseSpace();
+        const sp = baseSpace(n);
+        sp.selectedNoteId = sp.notes[0].id;
+        sp.browser.activeTabId = sp.browser.tabs[0].id;
+        state.spaces[n] = sp;
         state.currentSpace = n;
         renderAll();
         queueSave();
       };
+      $('rename-space').onclick = () => {
+        const cur = state.currentSpace;
+        const next = prompt('Rename space', cur);
+        if (!next?.trim() || next.trim() === cur || state.spaceOrder.includes(next.trim())) return;
+        const n = next.trim();
+        state.spaces[n] = state.spaces[cur];
+        delete state.spaces[cur];
+        state.spaceOrder = state.spaceOrder.map(x => x === cur ? n : x);
+        state.currentSpace = n;
+        renderAll();
+        queueSave();
+      };
+      $('delete-space').onclick = () => {
+        if (state.spaceOrder.length <= 1) return;
+        if (!confirm(`Delete space ${state.currentSpace}?`)) return;
+        delete state.spaces[state.currentSpace];
+        state.spaceOrder = state.spaceOrder.filter(x => x !== state.currentSpace);
+        state.currentSpace = state.spaceOrder[0];
+        renderAll();
+        queueSave();
+      };
+
+      el.startSearch.oninput = () => renderStart(el.startSearch.value || '');
+
       [...document.querySelectorAll('.tb-btn[data-open]')].forEach(n => n.onclick = () => launchApp(n.dataset.open));
 
-      document.getElementById('btn-login').onclick = async () => signInWithPopup(auth, provider);
-      document.getElementById('btn-logout').onclick = async () => signOut(auth);
-      document.getElementById('sync-now').onclick = saveNow;
+      $('btn-login').onclick = async () => signInWithPopup(auth, provider);
+      $('btn-logout').onclick = async () => signOut(auth);
 
-      document.getElementById('note-new').onclick = () => { const sp=getSpace(); const n={id:crypto.randomUUID(),title:'',content:'',updatedAt:Date.now()}; sp.notes.unshift(n); sp.selectedNoteId=n.id; renderNotes(); queueSave(); };
-      document.getElementById('note-delete').onclick = () => { const sp=getSpace(); if (sp.notes.length===1) return; sp.notes=sp.notes.filter(n=>n.id!==sp.selectedNoteId); sp.selectedNoteId=sp.notes[0].id; renderNotes(); queueSave(); };
-      document.getElementById('note-save').onclick = saveCurrentNote;
-      el.noteTitle.addEventListener('input', saveCurrentNote);
-      el.noteContent.addEventListener('input', saveCurrentNote);
-      document.getElementById('note-cards').onclick = generateFlashcardsFromNote;
+      $('sync-now').onclick = saveNow;
+      $('open-desktop-from-dashboard').onclick = () => $('tb-show-desktop').click();
 
-      document.getElementById('task-add').onclick = () => {
-        const t = document.getElementById('task-title').value.trim(); if (!t) return;
-        getSpace().tasks.unshift({ id:crypto.randomUUID(), title:t, subject:document.getElementById('task-subject').value.trim(), due:document.getElementById('task-due').value || '', done:false, at:Date.now() });
-        document.getElementById('task-title').value=''; renderTasks(); queueSave();
+      $('quick-note-save').onclick = () => {
+        const text = el.quickNoteText.value.trim();
+        if (!text) return;
+        const sp = getSpace();
+        sp.quickNotes.unshift({ id: crypto.randomUUID(), text, at: Date.now() });
+        sp.vault.unshift({ text, at: Date.now() });
+        el.quickNoteText.value = '';
+        renderVault();
+        renderDashboard();
+        queueSave();
       };
 
-      document.getElementById('browser-go').onclick = () => navigateBrowser(el.browserUrl.value);
-      el.browserUrl.addEventListener('keydown', e => e.key==='Enter' && navigateBrowser(el.browserUrl.value));
-      document.getElementById('browser-new-tab').onclick = () => {
+      $('note-new').onclick = () => {
+        const sp = getSpace();
+        const n = { id: crypto.randomUUID(), title:'', content:'', updatedAt: Date.now() };
+        sp.notes.unshift(n);
+        sp.selectedNoteId = n.id;
+        renderNotes();
+        queueSave();
+      };
+      $('note-delete').onclick = () => {
+        const sp = getSpace();
+        if (sp.notes.length <= 1) return;
+        sp.notes = sp.notes.filter(n => n.id !== sp.selectedNoteId);
+        sp.selectedNoteId = sp.notes[0].id;
+        renderNotes();
+        queueSave();
+      };
+      $('note-save').onclick = saveCurrentNote;
+      $('pin-to-vault').onclick = () => {
+        saveCurrentNote();
+        const sp = getSpace();
+        const cur = sp.notes.find(n => n.id === sp.selectedNoteId);
+        if (!cur) return;
+        sp.vault.unshift({ text: `${cur.title || 'Untitled'}: ${cur.content.slice(0, 250)}`, at: Date.now() });
+        renderVault();
+        queueSave();
+      };
+      el.noteTitle.addEventListener('input', () => { if (state.prefs.autosave) saveCurrentNote(); });
+      el.noteContent.addEventListener('input', () => { if (state.prefs.autosave) saveCurrentNote(); });
+
+      $('task-add').onclick = () => {
+        const t = $('task-title').value.trim();
+        if (!t) return;
+        getSpace().tasks.unshift({ id: crypto.randomUUID(), title:t, subject:$('task-subject').value.trim(), due:$('task-due').value || '', done:false, at:Date.now() });
+        $('task-title').value = '';
+        renderTasks();
+        queueSave();
+      };
+
+      $('browser-new-tab').onclick = () => {
         const b = getSpace().browser;
-        const t = { id: crypto.randomUUID(), title:'New Tab', url:'https://www.google.com' };
-        b.tabs.push(t); b.activeTabId = t.id;
-        renderBrowserTabs(); loadActiveTab(); queueSave();
+        const t = { id: crypto.randomUUID(), title:'New Tab', url: state.prefs.homepage || 'https://www.google.com' };
+        b.tabs.push(t);
+        b.activeTabId = t.id;
+        renderBrowserTabs();
+        loadActiveTab();
+        queueSave();
       };
-      document.getElementById('browser-close-tab').onclick = () => {
-        const b = getSpace().browser;
-        if (b.tabs.length === 1) return;
-        b.tabs = b.tabs.filter(t => t.id !== b.activeTabId);
-        b.activeTabId = b.tabs[0].id;
-        renderBrowserTabs(); loadActiveTab(); queueSave();
-      };
-      document.getElementById('browser-open-external').onclick = () => {
-        const url = getActiveTab()?.url || el.browserUrl.value;
+      $('browser-go').onclick = () => navigateBrowser(el.browserUrl.value);
+      el.browserUrl.addEventListener('keydown', e => e.key === 'Enter' && navigateBrowser(el.browserUrl.value));
+      $('browser-open-external').onclick = () => {
+        const url = getActiveTab()?.url;
         if (url) window.open(url, '_blank');
       };
-      document.getElementById('install-webapp').onclick = () => {
-        const url = (el.browserUrl.value || '').trim(); if (!url) return;
-        const name = prompt('App name?', new URL(url).hostname.replace('www.',''));
-        if (!name) return;
-        state.installedApps.push({ id:crypto.randomUUID(), name, url, icon:'🌐' });
-        renderDesktop(); renderStart(el.startSearch.value); queueSave();
+      $('install-webapp').onclick = () => {
+        const url = (el.browserUrl.value || '').trim();
+        if (!url) return;
+        let host = 'Web App';
+        try { host = new URL(url).hostname.replace('www.',''); } catch {}
+        const name = prompt('App name', host);
+        if (!name?.trim()) return;
+        const id = `webapp:${crypto.randomUUID()}`;
+        getSpace().apps.push({ id, name: name.trim(), icon:'🌐', type:'webapp', url });
+        renderDesktop();
+        renderStart(el.startSearch.value || '');
+        queueSave();
       };
 
-      document.getElementById('ai-open-site').onclick = () => openAISite(el.aiSite.value);
-      document.getElementById('ai-open-external').onclick = () => window.open(el.aiSite.value || state.ai.preferredSite, '_blank');
-
-      document.getElementById('card-prev').onclick = () => { flashIndex--; flashBack=false; renderFlashcards(); };
-      document.getElementById('card-next').onclick = () => { flashIndex++; flashBack=false; renderFlashcards(); };
-      document.getElementById('card-flip').onclick = () => { flashBack=!flashBack; renderFlashcards(); };
-      [...document.querySelectorAll('[data-rate]')].forEach(n => n.onclick = () => reviewCard(n.dataset.rate));
-
-      document.getElementById('add-book').onclick = async () => {
-        const file = document.getElementById('pdf-upload').files?.[0];
+      $('add-book').onclick = async () => {
+        const file = $('pdf-upload').files?.[0];
         if (!file) return;
-        const title = document.getElementById('book-title').value.trim() || file.name.replace(/\.pdf$/i,'');
-        const dataUrl = await new Promise((resolve,reject)=>{ const fr = new FileReader(); fr.onload=()=>resolve(fr.result); fr.onerror=reject; fr.readAsDataURL(file); });
+        const title = $('book-title').value.trim() || file.name.replace(/\.pdf$/i, '');
+        const dataUrl = await new Promise((resolve, reject) => {
+          const fr = new FileReader();
+          fr.onload = () => resolve(fr.result);
+          fr.onerror = reject;
+          fr.readAsDataURL(file);
+        });
         const sp = getSpace();
-        sp.books.unshift({ id:crypto.randomUUID(), title, dataUrl, addedAt:Date.now() });
-        renderBooks(); el.pdfFrame.src = dataUrl; queueSave();
+        sp.books.unshift({ id: crypto.randomUUID(), title, dataUrl, addedAt: Date.now() });
+        renderBooks();
+        el.pdfFrame.src = dataUrl;
+        queueSave();
       };
 
       let drawing = false;
       let lx = 0, ly = 0;
-      const drawCtx = () => el.studioCanvas.getContext('2d');
+      const sctx = () => el.studioCanvas.getContext('2d');
       el.studioCanvas.addEventListener('mousedown', e => {
         drawing = true;
         const r = el.studioCanvas.getBoundingClientRect();
@@ -994,7 +1340,7 @@ DEFAULT_SPACES.forEach(s => spaces[s] = baseSpace());
         if (!drawing) return;
         const r = el.studioCanvas.getBoundingClientRect();
         const x = e.clientX - r.left, y = e.clientY - r.top;
-        const ctx = drawCtx();
+        const ctx = sctx();
         ctx.strokeStyle = '#1d4ed8';
         ctx.lineWidth = 2;
         ctx.lineCap = 'round';
@@ -1004,82 +1350,83 @@ DEFAULT_SPACES.forEach(s => spaces[s] = baseSpace());
         ctx.stroke();
         lx = x; ly = y;
       });
-      document.getElementById('studio-clear').onclick = () => {
-        const c = drawCtx();
-        c.fillStyle = '#fff';
-        c.fillRect(0,0,el.studioCanvas.width,el.studioCanvas.height);
+      $('studio-clear').onclick = () => {
+        const ctx = sctx();
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0,0,el.studioCanvas.width,el.studioCanvas.height);
         persistStudioCanvas();
       };
-      document.getElementById('studio-add-sticky').onclick = () => {
-        const text = prompt('Sticky note text');
+      $('studio-add-sticky').onclick = () => {
+        const text = prompt('Sticky text');
         if (!text?.trim()) return;
-        getSpace().studio.stickies.unshift({ text: text.trim(), at: Date.now() });
-        renderStudio(); queueSave();
+        getSpace().studio.stickies.unshift({ text:text.trim(), at:Date.now() });
+        renderStudio();
+        queueSave();
       };
-      document.getElementById('studio-save').onclick = () => { persistStudioCanvas(); renderStudio(); };
+      $('studio-save').onclick = () => { persistStudioCanvas(); renderStudio(); };
 
-      document.getElementById('vault-add').onclick = () => {
-        const text = document.getElementById('vault-input').value.trim();
+      $('vault-add').onclick = () => {
+        const text = $('vault-input').value.trim();
         if (!text) return;
         getSpace().vault.unshift({ text, at: Date.now() });
-        document.getElementById('vault-input').value='';
+        $('vault-input').value = '';
         renderVault();
+        renderDashboard();
         queueSave();
       };
 
-      document.getElementById('focus-start').onclick = () => {
-        if (state.focus.running) return;
-        state.focus.running = true;
-        state.focus.endAt = Date.now() + state.focus.leftMs;
-        el.focusState.textContent = 'Focusing...'; queueSave();
-      };
-      document.getElementById('focus-pause').onclick = () => {
-        if (!state.focus.running) return;
-        state.focus.running = false;
-        state.focus.leftMs = Math.max(0, state.focus.endAt - Date.now());
-        el.focusState.textContent = 'Paused'; queueSave();
-      };
-      document.getElementById('focus-reset').onclick = () => {
-        state.focus.running=false; state.focus.leftMs=25*60*1000; state.focus.endAt=null; el.focusState.textContent='Ready'; renderFocus(); queueSave();
-      };
-
-      document.getElementById('quiz-generate').onclick = makeQuiz;
-      document.getElementById('quiz-submit').onclick = submitQuiz;
-
-      document.getElementById('save-goal').onclick = () => { state.analytics.dailyGoalMin = Math.max(30, Math.min(600, Number(document.getElementById('daily-goal').value || 120))); renderDashboard(); queueSave(); };
-      document.getElementById('open-focus').onclick = () => openWindow('focus-window');
-
-      document.getElementById('apply-theme').onclick = () => {
-        state.theme.wallpaper = document.getElementById('set-wallpaper').value.trim();
-        state.theme.accent = document.getElementById('set-accent').value;
-        state.theme.glass = Number(document.getElementById('set-glass').value || 46);
-        applyTheme(); queueSave();
-      };
-      document.getElementById('save-ai-settings').onclick = () => {
-        state.ai.preferredSite = el.aiSite.value || state.ai.preferredSite;
-        openAISite(state.ai.preferredSite);
+      $('save-goal').onclick = () => {
+        const val = Math.max(30, Math.min(600, Number($('daily-goal').value || 120)));
+        getSpace().dailyGoal = val;
+        renderDashboard();
         queueSave();
       };
+
+      $('apply-theme').onclick = () => {
+        state.theme.wallpaper = $('set-wallpaper').value.trim();
+        state.theme.accent = $('set-accent').value;
+        state.theme.glass = Number($('set-glass').value || 56);
+        state.theme.uiFontSize = Number($('set-font-size').value || 13);
+        state.theme.radius = Number($('set-radius').value || 10);
+        state.theme.fontFamily = $('set-font-family').value;
+        applyTheme();
+        queueSave();
+      };
+      $('settings-reset-layout').onclick = () => {
+        getSpace().windows = {};
+        queueSave();
+      };
+      $('set-autosave').onchange = e => { state.prefs.autosave = e.target.checked; queueSave(); };
+      $('set-click-close').onchange = e => { state.prefs.clickClose = e.target.checked; queueSave(); };
+      $('set-open-start').onchange = e => { state.prefs.openStartOnLoad = e.target.checked; queueSave(); };
+      $('set-snap').onchange = e => { state.prefs.snap = e.target.checked; queueSave(); };
+      $('set-homepage').onchange = e => { state.prefs.homepage = e.target.value.trim() || 'https://www.google.com'; queueSave(); };
+
+      document.addEventListener('click', e => {
+        if (!state.prefs.clickClose) return;
+        const inStart = e.target.closest('#start-menu') || e.target.closest('#tb-start');
+        const inQ = e.target.closest('#quick-note-pop') || e.target.closest('#tb-quick-note');
+        if (!inStart && el.startMenu.style.display === 'block') hideStart();
+        if (!inQ && el.quickNotePop.style.display === 'block') hideQuickNote();
+      });
 
       document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') {
-          el.startMenu.classList.remove('open');
-          setTimeout(() => el.startMenu.style.display='none', 220);
-        }
+        if (e.key === 'Escape') closePopups();
       });
     }
 
     function renderSettingsValues() {
-      document.getElementById('set-wallpaper').value = state.theme.wallpaper || '';
-      document.getElementById('set-accent').value = state.theme.accent || '#5b8cff';
-      document.getElementById('set-glass').value = String(state.theme.glass || 46);
-      document.getElementById('ai-endpoint').value = 'Direct websites mode enabled';
-      document.getElementById('ai-model').value = 'Built-in web hub';
-      document.getElementById('ai-key').value = '';
-      document.getElementById('ai-endpoint').disabled = true;
-      document.getElementById('ai-model').disabled = true;
-      document.getElementById('ai-key').disabled = true;
-      el.aiSite.value = state.ai.preferredSite || 'https://chatgpt.com';
+      $('set-wallpaper').value = state.theme.wallpaper || '';
+      $('set-accent').value = state.theme.accent || '#4f8cff';
+      $('set-glass').value = String(state.theme.glass || 56);
+      $('set-font-size').value = String(state.theme.uiFontSize || 13);
+      $('set-radius').value = String(state.theme.radius || 10);
+      $('set-font-family').value = state.theme.fontFamily || '"Segoe UI", "Inter", sans-serif';
+      $('set-autosave').checked = !!state.prefs.autosave;
+      $('set-click-close').checked = !!state.prefs.clickClose;
+      $('set-open-start').checked = !!state.prefs.openStartOnLoad;
+      $('set-snap').checked = !!state.prefs.snap;
+      $('set-homepage').value = state.prefs.homepage || 'https://www.google.com';
     }
 
     function renderAll() {
@@ -1090,38 +1437,34 @@ DEFAULT_SPACES.forEach(s => spaces[s] = baseSpace());
       renderNotes();
       renderTasks();
       renderBooks();
-      renderQuiz();
-      renderFlashcards();
-      renderDashboard();
       renderStudio();
       renderVault();
-      renderSettingsValues();
+      renderDashboard();
       renderBrowserTabs();
       loadActiveTab();
-      openAISite(state.ai.preferredSite || 'https://chatgpt.com', false);
-      el.spacePill.textContent = `Space: ${state.currentSpace}`;
+      renderSettingsValues();
+      if (state.prefs.openStartOnLoad) showStart();
+      else hideStart();
+      hideQuickNote();
+      setActiveTaskbar('');
     }
 
     function setAuthUI(user) {
       if (!user) {
-        el.userPill.textContent = 'Guest';
-        document.getElementById('btn-login').style.display='inline-block';
-        document.getElementById('btn-logout').style.display='none';
+        $('btn-login').style.display = 'inline-block';
+        $('btn-logout').style.display = 'none';
       } else {
-        el.userPill.textContent = user.displayName || user.email || 'User';
-        document.getElementById('btn-login').style.display='none';
-        document.getElementById('btn-logout').style.display='inline-block';
+        $('btn-login').style.display = 'none';
+        $('btn-logout').style.display = 'inline-block';
       }
     }
 
     bindWindowUX();
     bindEvents();
-    openWindow('dashboard-window');
-    openWindow('notes-window');
+    bindAnnotationOverlay();
 
     setInterval(() => {
       el.clock.textContent = new Date().toLocaleString([], { hour:'2-digit', minute:'2-digit', day:'numeric', month:'short' });
-      renderFocus();
       renderDashboard();
     }, 1000);
 
@@ -1131,6 +1474,9 @@ DEFAULT_SPACES.forEach(s => spaces[s] = baseSpace());
       state = await loadState(user);
       renderAll();
       el.status.textContent = user ? 'Loaded Firebase' : 'Loaded local';
+      // no apps open at start
+      document.querySelectorAll('.window').forEach(w => { w.style.display='none'; w.classList.remove('active'); });
+      setActiveTaskbar('');
     });
   </script>
 </body>
