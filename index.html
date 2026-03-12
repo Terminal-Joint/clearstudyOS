@@ -6,6 +6,7 @@
   <title>StudyOS 11 Ultimate</title>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     :root {
       --taskbar-h: 64px;
       --glass-opacity: 0.46;
@@ -707,6 +708,7 @@ DEFAULT_SPACES.forEach(s => spaces[s] = baseSpace());
         renderBrowserTabs();
         queueSave();
       });
+      [...el.taskList.querySelectorAll('[data-del]')].forEach(n => n.onclick = () => { sp.tasks=sp.tasks.filter(x=>x.id!==n.dataset.del); renderTasks(); queueSave(); });
     }
 
     function loadActiveTab() {
