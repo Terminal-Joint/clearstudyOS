@@ -1654,16 +1654,7 @@
       }, 4000);
     }
 
-    
-
-    function switchSpace(name) {
-      persistWindow('browser-window');
-      persistWindow('notes-window');
-      persistWindow('scratch-window');
-      persistWindow('graph-window');
-      state.currentSpace = name;
-      applySpace();
-    }
+  
 
     function renderShelf() {
       const shelf = document.getElementById('shelf');
