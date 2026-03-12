@@ -839,6 +839,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
             state.spaces[targetSpace].selectedNoteId = noteId;
             renderAll();
             openWindow('notes-window');
+            initPDFViewer();
           }
         } else {
           launchApp(id);
@@ -1651,8 +1652,13 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
 let pdfPage = 1;
 let pdfScale = 1.5;
 
-const canvas = document.getElementById("pdf-canvas");
-const ctx = canvas.getContext("2d");
+let canvas;
+let ctx;
+
+function initPDFViewer(){
+  canvas = document.getElementById("pdf-canvas");
+  ctx = canvas.getContext("2d");
+}
 
 async function loadPDF(url) {
   const loadingTask = pdfjsLib.getDocument(url);
@@ -1674,18 +1680,29 @@ async function renderPage() {
     viewport: viewport
   };
 
-  await page.render(renderContext);
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+await page.render(renderContext).promise;
 }
-    document.getElementById("pdf-next").onclick = () => {
+document.getElementById("pdf-next").onclick = () => {
+
+  if(!pdfDoc) return;
+
   if (pdfPage >= pdfDoc.numPages) return;
+
   pdfPage++;
   renderPage();
+
 };
 
 document.getElementById("pdf-prev").onclick = () => {
+
+  if(!pdfDoc) return;
+
   if (pdfPage <= 1) return;
+
   pdfPage--;
   renderPage();
+
 };
     document.getElementById("pdf-zoom-in").onclick = () => {
   pdfScale += 0.2;
