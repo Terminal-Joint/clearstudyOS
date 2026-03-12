@@ -1649,16 +1649,18 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
     window.addEventListener('unhandledrejection', e => {
       showToast(`Async error: ${e.reason?.message || e.reason || 'unknown'}`);
     });
-      let pdfDoc = null;
+let pdfDoc = null;
 let pdfPage = 1;
 let pdfScale = 1.5;
 
-let canvas;
-let ctx;
-
-function initPDFViewer(){
-  canvas = document.getElementById("pdf-canvas");
-  ctx = canvas.getContext("2d");
+function getPDFCanvas(){
+  const canvas = document.getElementById("pdf-canvas");
+  if(!canvas) return null;
+  return {
+    canvas,
+    ctx: canvas.getContext("2d")
+  };
+}
 }
 
 async function loadPDF(url) {
@@ -1668,18 +1670,31 @@ async function loadPDF(url) {
   renderPage();
 }
 
-async function renderPage() {
+async function renderPage(){
+
+  if(!pdfDoc) return;
+
+  const pdfCanvas = getPDFCanvas();
+
+  if(!pdfCanvas) return;
+
+  const {canvas, ctx} = pdfCanvas;
+
   const page = await pdfDoc.getPage(pdfPage);
 
-  const viewport = page.getViewport({ scale: pdfScale });
+  const viewport = page.getViewport({scale: pdfScale});
 
-  canvas.height = viewport.height;
   canvas.width = viewport.width;
+  canvas.height = viewport.height;
 
-  const renderContext = {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  await page.render({
     canvasContext: ctx,
     viewport: viewport
-  };
+  }).promise;
+
+}
 
   ctx.clearRect(0,0,canvas.width,canvas.height);
 await page.render(renderContext).promise;
