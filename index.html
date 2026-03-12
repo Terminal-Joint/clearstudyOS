@@ -6,6 +6,7 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='52' font-size='52'%3E%F0%9F%93%98%3C/text%3E%3C/svg%3E" />
   <title>StudyOS 11 Pro</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     :root {
       --taskbar-h: 58px;
       --radius-win: 10px;
@@ -432,6 +433,7 @@
         <div id="study-activity" style="margin-top:8px;display:grid;gap:5px;font-size:12px;"></div>
       </div>
     </div>
+    <div class="app-body panel" id="task-list"></div>
   </section>
 
   <section id="notes-window" class="window" style="left:100px;top:70px;">
@@ -781,7 +783,6 @@
         renderStart(el.startSearch.value || '');
         queueSave();
       });
-    }
 
     function renderStart(filter='') {
       const q = (filter || '').trim().toLowerCase();
@@ -989,6 +990,7 @@
       logStudyEvent('save-note', { title: cur.title || 'Untitled' });
       renderNotes();
       queueSave();
+      el.status.textContent = 'Note saved';
     }
 
     function renderTasks() {
