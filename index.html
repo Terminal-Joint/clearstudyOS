@@ -108,7 +108,7 @@
 
   <aside id="start-menu" class="glass">
     <input id="start-search" class="field" placeholder="Search apps, websites, commands..." />
-    <div id="spaces"></div>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;"><div id="spaces" style="display:flex;gap:8px;flex-wrap:wrap;flex:1;"></div><button id="add-space" class="btn">+ Space</button></div>
     <div id="start-grid"></div>
     <div id="recommended">
       <b>Recommended</b>
@@ -153,7 +153,6 @@
         <textarea id="note-content" class="field" style="min-height:360px;resize:vertical;" placeholder="Type notes, formulas, and key:value pairs for flashcards."></textarea>
       </section>
     </div>
-    <div class="app-body panel" id="task-list"></div>
   </section>
 
   <section id="planner-window" class="window glass" style="left:150px;top:96px;width:min(760px,92vw);height:min(640px,78vh);">
@@ -166,21 +165,26 @@
 
   <section id="browser-window" class="window glass" style="left:180px;top:88px;width:min(1100px,94vw);height:min(740px,86vh);">
     <div class="titlebar" data-window="browser-window"><button class="ctrl close" title="Close" data-close="browser-window">✕</button><button class="ctrl min" title="Minimize" data-close="browser-window">—</button><button class="ctrl max" title="Maximize" data-max="browser-window">▢</button><div class="snap-layouts" data-snap-menu="browser-window"><button data-snap="left">½</button><button data-snap="top">▔</button><button data-snap="right">½</button><button data-snap="left-third">⅓</button><button data-snap="center-third">⅓</button><button data-snap="right-third">⅓</button></div><b>Study Browser</b></div>
+    <div class="toolbar" id="browser-tabs" style="border-bottom:0;padding-bottom:0;"></div>
     <div class="toolbar">
       <input id="browser-url" class="field" placeholder="Enter URL or search" style="flex:1;">
       <button class="btn primary" id="browser-go">Go</button>
+      <button class="btn" id="browser-new-tab">+ Tab</button>
+      <button class="btn" id="browser-close-tab">Close Tab</button>
+      <button class="btn" id="browser-open-external">Open External</button>
       <button class="btn" id="install-webapp">Install as App</button>
     </div>
-    <div class="app-body" style="padding:10px;"><iframe id="browser-frame" src="https://www.wikipedia.org"></iframe></div>
+    <div class="app-body" style="padding:10px;"><iframe id="browser-frame" src="https://www.wikipedia.org" referrerpolicy="no-referrer"></iframe></div>
   </section>
 
-  <section id="assistant-window" class="window glass" style="left:200px;top:110px;width:min(780px,92vw);height:min(650px,82vh);">
-    <div class="titlebar" data-window="assistant-window"><button class="ctrl close" title="Close" data-close="assistant-window">✕</button><button class="ctrl min" title="Minimize" data-close="assistant-window">—</button><button class="ctrl max" title="Maximize" data-max="assistant-window">▢</button><div class="snap-layouts" data-snap-menu="assistant-window"><button data-snap="left">½</button><button data-snap="top">▔</button><button data-snap="right">½</button><button data-snap="left-third">⅓</button><button data-snap="center-third">⅓</button><button data-snap="right-third">⅓</button></div><b>AI Assistant</b></div>
-    <div class="app-body" style="display:flex;flex-direction:column;gap:8px;">
-      <div id="assistant-messages"></div>
-      <textarea id="assistant-input" class="field" placeholder="Ask your study question..." style="min-height:90px;"></textarea>
-      <div style="display:flex;gap:8px;"><button class="btn primary" id="assistant-send">Send</button><button class="btn" id="assistant-clear">Clear</button></div>
+  <section id="assistant-window" class="window glass" style="left:200px;top:110px;width:min(980px,94vw);height:min(700px,84vh);">
+    <div class="titlebar" data-window="assistant-window"><button class="ctrl close" title="Close" data-close="assistant-window">✕</button><button class="ctrl min" title="Minimize" data-close="assistant-window">—</button><button class="ctrl max" title="Maximize" data-max="assistant-window">▢</button><div class="snap-layouts" data-snap-menu="assistant-window"><button data-snap="left">½</button><button data-snap="top">▔</button><button data-snap="right">½</button><button data-snap="left-third">⅓</button><button data-snap="center-third">⅓</button><button data-snap="right-third">⅓</button></div><b>AI Web Hub</b></div>
+    <div class="toolbar">
+      <select id="ai-site" class="field"><option value="https://chatgpt.com">ChatGPT</option><option value="https://gemini.google.com">Gemini</option><option value="https://copilot.microsoft.com">Copilot</option><option value="https://www.perplexity.ai">Perplexity</option></select>
+      <button class="btn primary" id="ai-open-site">Open Site</button>
+      <button class="btn" id="ai-open-external">Open in Browser Tab</button>
     </div>
+    <div class="app-body" style="padding:8px;"><iframe id="ai-frame" src="https://chatgpt.com" referrerpolicy="no-referrer"></iframe></div>
   </section>
 
   <section id="flashcards-window" class="window glass" style="left:220px;top:120px;width:min(700px,90vw);height:min(560px,76vh);">
@@ -202,6 +206,20 @@
     <div class="app-body split">
       <aside class="panel" id="bookshelf" style="overflow:auto;"></aside>
       <section class="panel" style="padding:8px;"><iframe id="pdf-frame"></iframe></section>
+    </div>
+  </section>
+
+
+  <section id="studio-window" class="window glass" style="left:210px;top:100px;width:min(900px,94vw);height:min(680px,82vh);">
+    <div class="titlebar" data-window="studio-window"><button class="ctrl close" title="Close" data-close="studio-window">✕</button><button class="ctrl min" title="Minimize" data-close="studio-window">—</button><button class="ctrl max" title="Maximize" data-max="studio-window">▢</button><div class="snap-layouts" data-snap-menu="studio-window"><button data-snap="left">½</button><button data-snap="top">▔</button><button data-snap="right">½</button><button data-snap="left-third">⅓</button><button data-snap="center-third">⅓</button><button data-snap="right-third">⅓</button></div><b>Study Studio (Annotate + Plan)</b></div>
+    <div class="toolbar">
+      <button class="btn" id="studio-clear">Clear Canvas</button>
+      <button class="btn" id="studio-add-sticky">Add Sticky</button>
+      <button class="btn primary" id="studio-save">Save Studio</button>
+    </div>
+    <div class="app-body split">
+      <section class="panel" style="position:relative;overflow:hidden;"><canvas id="studio-canvas" style="width:100%;height:100%;display:block;background:white;"></canvas></section>
+      <aside class="panel" id="studio-stickies" style="overflow:auto;"></aside>
     </div>
   </section>
 
@@ -234,6 +252,13 @@
     </div>
   </section>
 
+
+  <section id="vault-window" class="window glass" style="left:260px;top:130px;width:min(680px,92vw);height:min(560px,76vh);">
+    <div class="titlebar" data-window="vault-window"><button class="ctrl close" title="Close" data-close="vault-window">✕</button><button class="ctrl min" title="Minimize" data-close="vault-window">—</button><button class="ctrl max" title="Maximize" data-max="vault-window">▢</button><div class="snap-layouts" data-snap-menu="vault-window"><button data-snap="left">½</button><button data-snap="top">▔</button><button data-snap="right">½</button><button data-snap="left-third">⅓</button><button data-snap="center-third">⅓</button><button data-snap="right-third">⅓</button></div><b>Important Vault</b></div>
+    <div class="toolbar"><input id="vault-input" class="field" placeholder="Save important point instantly" style="flex:1;"><button class="btn primary" id="vault-add">Save Now</button></div>
+    <div class="app-body panel" id="vault-list"></div>
+  </section>
+
   <section id="quiz-window" class="window glass" style="left:240px;top:86px;width:min(780px,92vw);height:min(620px,80vh);">
     <div class="titlebar" data-window="quiz-window"><button class="ctrl close" title="Close" data-close="quiz-window">✕</button><button class="ctrl min" title="Minimize" data-close="quiz-window">—</button><button class="ctrl max" title="Maximize" data-max="quiz-window">▢</button><div class="snap-layouts" data-snap-menu="quiz-window"><button data-snap="left">½</button><button data-snap="top">▔</button><button data-snap="right">½</button><button data-snap="left-third">⅓</button><button data-snap="center-third">⅓</button><button data-snap="right-third">⅓</button></div><b>Adaptive Quiz</b><div style="margin-left:auto"></div><button class="btn" id="quiz-generate">Generate</button><button class="btn primary" id="quiz-submit">Submit</button></div>
     <div class="app-body" id="quiz-body"></div>
@@ -252,6 +277,8 @@
       <button class="tb-btn" data-open="planner-window">📅</button>
       <button class="tb-btn" data-open="browser-window">🌐</button>
       <button class="tb-btn" data-open="assistant-window">🤖</button>
+      <button class="tb-btn" data-open="studio-window">🖊️</button>
+      <button class="tb-btn" data-open="vault-window">⭐</button>
       <button class="tb-btn" data-open="pdf-window">📚</button>
       <button class="tb-btn" data-open="settings-window">⚙️</button>
     </div>
@@ -285,13 +312,15 @@
     const db = getFirestore(app);
 
     const LOCAL_KEY = 'studyos11-ultimate-guest';
-    const SPACES = ['Physics','Chemistry','Mathematics','Aptitude'];
+    const DEFAULT_SPACES = ['Physics','Chemistry','Mathematics','Aptitude'];
     const CORE_APPS = [
       { id:'dashboard-window', name:'Dashboard', icon:'📊', type:'core' },
       { id:'notes-window', name:'Notes', icon:'📝', type:'core' },
       { id:'planner-window', name:'Planner', icon:'📅', type:'core' },
       { id:'browser-window', name:'Browser', icon:'🌐', type:'core' },
-      { id:'assistant-window', name:'AI Assistant', icon:'🤖', type:'core' },
+      { id:'assistant-window', name:'AI Web Hub', icon:'🤖', type:'core' },
+      { id:'studio-window', name:'Study Studio', icon:'🖊️', type:'core' },
+      { id:'vault-window', name:'Important Vault', icon:'⭐', type:'core' },
       { id:'flashcards-window', name:'Flashcards', icon:'🗂️', type:'core' },
       { id:'quiz-window', name:'Quiz', icon:'🧠', type:'core' },
       { id:'pdf-window', name:'Bookshelf', icon:'📚', type:'core' },
@@ -304,6 +333,7 @@
       startMenu: document.getElementById('start-menu'),
       startSearch: document.getElementById('start-search'),
       startGrid: document.getElementById('start-grid'),
+      addSpace: document.getElementById('add-space'),
       recommendedList: document.getElementById('recommended-list'),
       spaces: document.getElementById('spaces'),
       userPill: document.getElementById('user-pill'),
@@ -316,15 +346,19 @@
       taskList: document.getElementById('task-list'),
       browserUrl: document.getElementById('browser-url'),
       browserFrame: document.getElementById('browser-frame'),
-      assistantMessages: document.getElementById('assistant-messages'),
-      assistantInput: document.getElementById('assistant-input'),
+      aiSite: document.getElementById('ai-site'),
+      aiFrame: document.getElementById('ai-frame'),
       flashCard: document.getElementById('flash-card'),
       cardMeta: document.getElementById('card-meta'),
       bookshelf: document.getElementById('bookshelf'),
       pdfFrame: document.getElementById('pdf-frame'),
       focusTimer: document.getElementById('focus-timer'),
       focusState: document.getElementById('focus-state'),
-      quizBody: document.getElementById('quiz-body')
+      quizBody: document.getElementById('quiz-body'),
+      browserTabs: document.getElementById('browser-tabs'),
+      studioCanvas: document.getElementById('studio-canvas'),
+      studioStickies: document.getElementById('studio-stickies'),
+      vaultList: document.getElementById('vault-list')
     };
 
     let currentUser = null;
@@ -341,31 +375,34 @@
         flashcards: [],
         books: [],
         quizHistory: [],
-        browser: { url: 'https://www.wikipedia.org' },
+        browser: { tabs:[{id:crypto.randomUUID(),title:'Wikipedia',url:'https://www.wikipedia.org'}], activeTabId:null },
+        studio: { drawing:'', stickies:[] },
+        vault: [],
         windows: {}
       };
     }
 
     function baseState() {
       const spaces = {};
-      SPACES.forEach(s => spaces[s] = baseSpace());
+DEFAULT_SPACES.forEach(s => spaces[s] = baseSpace());
       return {
         currentSpace: 'Physics',
+        spaceOrder: [...DEFAULT_SPACES],
         spaces,
         installedApps: [],
         analytics: { dailyGoalMin: 120, minutesByDay: {}, completedFocus: 0 },
         focus: { running: false, endAt: null, leftMs: 25 * 60 * 1000 },
         theme: { wallpaper: '', accent: '#5b8cff', glass: 46 },
-        ai: { endpoint: '', model: 'gpt-4o-mini', apiKey: '' },
-        assistant: { messages: [] }
+        ai: { preferredSite: 'https://chatgpt.com' }
       };
     }
 
     function normalize(raw) {
       const b = baseState();
       const s = { ...b, ...(raw || {}) };
+      s.spaceOrder = (s.spaceOrder && s.spaceOrder.length ? s.spaceOrder : [...DEFAULT_SPACES]).filter(Boolean);
       s.spaces = s.spaces || {};
-      SPACES.forEach(name => {
+      s.spaceOrder.forEach(name => {
         const sp = { ...baseSpace(), ...(s.spaces[name] || {}) };
         sp.notes = (sp.notes?.length ? sp.notes : baseSpace().notes).map(n => ({ ...n, updatedAt: n.updatedAt || Date.now() }));
         sp.selectedNoteId = sp.selectedNoteId && sp.notes.some(n => n.id === sp.selectedNoteId) ? sp.selectedNoteId : sp.notes[0].id;
@@ -373,7 +410,11 @@
         sp.flashcards = sp.flashcards || [];
         sp.books = sp.books || [];
         sp.quizHistory = sp.quizHistory || [];
-        sp.browser = { url: 'https://www.wikipedia.org', ...(sp.browser || {}) };
+        const tabs = sp.browser?.tabs?.length ? sp.browser.tabs : [{id:crypto.randomUUID(),title:'Wikipedia',url:'https://www.wikipedia.org'}];
+        sp.browser = { tabs, activeTabId: sp.browser?.activeTabId || tabs[0].id };
+        if (!sp.browser.tabs.some(t=>t.id===sp.browser.activeTabId)) sp.browser.activeTabId = sp.browser.tabs[0].id;
+        sp.studio = { drawing: sp.studio?.drawing || '', stickies: sp.studio?.stickies || [] };
+        sp.vault = sp.vault || [];
         sp.windows = sp.windows || {};
         s.spaces[name] = sp;
       });
@@ -383,8 +424,7 @@
       s.focus = { ...b.focus, ...(s.focus || {}) };
       s.theme = { ...b.theme, ...(s.theme || {}) };
       s.ai = { ...b.ai, ...(s.ai || {}) };
-      s.assistant = { messages: s.assistant?.messages || [] };
-      if (!SPACES.includes(s.currentSpace)) s.currentSpace = SPACES[0];
+      if (!s.spaceOrder.includes(s.currentSpace)) s.currentSpace = s.spaceOrder[0] || 'Physics';
       return s;
     }
 
@@ -434,7 +474,7 @@
     }
 
     function renderSpaces() {
-      el.spaces.innerHTML = SPACES.map(s => `<button class="space-chip ${s===state.currentSpace?'active':''}" data-space="${s}">${s}</button>`).join('');
+      el.spaces.innerHTML = state.spaceOrder.map(s => `<button class="space-chip ${s===state.currentSpace?'active':''}" data-space="${s}">${s}</button>`).join('');
       [...el.spaces.querySelectorAll('[data-space]')].forEach(n => n.onclick = () => {
         persistWindowRects();
         state.currentSpace = n.dataset.space;
@@ -462,7 +502,7 @@
       [...el.startGrid.querySelectorAll('[data-open]')].forEach(n => n.onclick = () => {
         if (n.dataset.open.startsWith('note:')) {
           const id = n.dataset.open.slice(5);
-          const targetSpace = SPACES.find(sp => (state.spaces[sp].notes || []).some(x => x.id === id));
+          const targetSpace = state.spaceOrder.find(sp => (state.spaces[sp].notes || []).some(x => x.id === id));
           if (targetSpace) {
             state.currentSpace = targetSpace;
             state.spaces[targetSpace].selectedNoteId = id;
@@ -609,7 +649,6 @@
         menu.addEventListener('mouseleave', hide);
         menu.querySelectorAll('[data-snap]').forEach(n => n.onclick = () => applySnap(id, n.dataset.snap));
       });
-      [...el.taskList.querySelectorAll('[data-del]')].forEach(n => n.onclick = () => { sp.tasks=sp.tasks.filter(x=>x.id!==n.dataset.del); renderTasks(); queueSave(); });
     }
 
     function esc(v=''){ return v.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;'); }
@@ -655,48 +694,89 @@
       [...el.taskList.querySelectorAll('[data-del]')].forEach(n => n.onclick = () => { sp.tasks=sp.tasks.filter(x=>x.id!==n.dataset.del); renderTasks(); queueSave(); });
     }
 
+    function getActiveTab() {
+      const b = getSpace().browser;
+      return b.tabs.find(t => t.id === b.activeTabId) || b.tabs[0];
+    }
+
+    function renderBrowserTabs() {
+      const b = getSpace().browser;
+      el.browserTabs.innerHTML = b.tabs.map(t => `<button class="btn ${t.id===b.activeTabId?'primary':''}" data-tab="${t.id}">${esc((t.title || 'Tab').slice(0, 18))}</button>`).join('');
+      [...el.browserTabs.querySelectorAll('[data-tab]')].forEach(n => n.onclick = () => {
+        b.activeTabId = n.dataset.tab;
+        loadActiveTab();
+        renderBrowserTabs();
+        queueSave();
+      });
+      [...el.taskList.querySelectorAll('[data-del]')].forEach(n => n.onclick = () => { sp.tasks=sp.tasks.filter(x=>x.id!==n.dataset.del); renderTasks(); queueSave(); });
+    }
+
+    function loadActiveTab() {
+      const tab = getActiveTab();
+      if (!tab) return;
+      el.browserUrl.value = tab.url;
+      el.browserFrame.src = tab.url;
+    }
+
     function navigateBrowser(inputRaw) {
       let v = (inputRaw || '').trim();
       if (!v) return;
       if (!/^https?:\/\//i.test(v)) v = v.includes('.') && !v.includes(' ') ? `https://${v}` : `https://www.google.com/search?q=${encodeURIComponent(v)}`;
-      getSpace().browser.url = v;
+      const tab = getActiveTab();
+      if (!tab) return;
+      tab.url = v;
+      tab.title = v.replace(/^https?:\/\//,'').slice(0, 30);
       el.browserUrl.value = v;
       el.browserFrame.src = v;
+      renderBrowserTabs();
       queueSave();
     }
 
-    async function askAI() {
-      const q = el.assistantInput.value.trim();
-      if (!q) return;
-      state.assistant.messages.push({ role:'user', text:q, at:Date.now() });
-      renderAssistant();
-      el.assistantInput.value='';
+    function openAISite(url, persist=true) {
+      if (!url) return;
+      state.ai.preferredSite = url;
+      el.aiSite.value = url;
+      el.aiFrame.src = url;
+      if (persist) queueSave();
+    }
 
-      if (!state.ai.endpoint || !state.ai.apiKey) {
-        state.assistant.messages.push({ role:'ai', text:'Online AI is not configured. Open Settings → AI Assistant, set endpoint/model/API key.', at:Date.now() });
-        renderAssistant(); queueSave(); return;
-      }
+    function renderStudio() {
+      const sp = getSpace();
+      el.studioStickies.innerHTML = sp.studio.stickies.map((s, i) => `<div class="note-item"><div>${esc(s.text)}</div><small>${new Date(s.at).toLocaleString()}</small><div><button class="btn" data-del-sticky="${i}">Delete</button></div></div>`).join('') || '<div class="note-item">No sticky notes yet.</div>';
+      [...el.studioStickies.querySelectorAll('[data-del-sticky]')].forEach(n => n.onclick = () => {
+        sp.studio.stickies.splice(Number(n.dataset.delSticky), 1);
+        renderStudio();
+        queueSave();
+      });
 
-      try {
-        const resp = await fetch(state.ai.endpoint, {
-          method:'POST',
-          headers:{ 'Content-Type':'application/json', 'Authorization':`Bearer ${state.ai.apiKey}` },
-          body: JSON.stringify({ model: state.ai.model || 'gpt-4o-mini', messages: state.assistant.messages.slice(-12).map(m => ({ role: m.role === 'ai' ? 'assistant' : m.role, content: m.text })) })
-        });
-        const data = await resp.json();
-        const text = data?.choices?.[0]?.message?.content || data?.output_text || 'No response from model.';
-        state.assistant.messages.push({ role:'ai', text, at:Date.now() });
-      } catch (e) {
-        state.assistant.messages.push({ role:'ai', text:`AI request failed: ${e?.message || 'unknown error'}`, at:Date.now() });
+      const canvas = el.studioCanvas;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.max(300, Math.floor(rect.width));
+      canvas.height = Math.max(220, Math.floor(rect.height));
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      if (sp.studio.drawing) {
+        const img = new Image();
+        img.onload = () => ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        img.src = sp.studio.drawing;
       }
-      markMinutes(3);
-      renderAssistant();
+    }
+
+    function persistStudioCanvas() {
+      const sp = getSpace();
+      sp.studio.drawing = el.studioCanvas.toDataURL('image/png');
       queueSave();
     }
 
-    function renderAssistant() {
-      el.assistantMessages.innerHTML = state.assistant.messages.slice(-40).map(m => `<div class="msg ${m.role==='user'?'user':'ai'}">${esc(m.text)}</div>`).join('');
-      el.assistantMessages.scrollTop = el.assistantMessages.scrollHeight;
+    function renderVault() {
+      const sp = getSpace();
+      el.vaultList.innerHTML = sp.vault.map((v, i) => `<div class="note-item"><div>${esc(v.text)}</div><small>${new Date(v.at).toLocaleString()}</small><div><button class="btn" data-vault-del="${i}">Delete</button></div></div>`).join('') || '<div class="note-item">No important items saved.</div>';
+      [...el.vaultList.querySelectorAll('[data-vault-del]')].forEach(n => n.onclick = () => {
+        sp.vault.splice(Number(n.dataset.vaultDel), 1);
+        renderVault();
+        queueSave();
+      });
     }
 
     function generateFlashcardsFromNote() {
@@ -826,6 +906,17 @@
         }
       };
       el.startSearch.oninput = () => renderStart(el.startSearch.value);
+      el.addSpace.onclick = () => {
+        const name = prompt('New subject space name?');
+        if (!name) return;
+        const n = name.trim();
+        if (!n || state.spaceOrder.includes(n)) return;
+        state.spaceOrder.push(n);
+        state.spaces[n] = baseSpace();
+        state.currentSpace = n;
+        renderAll();
+        queueSave();
+      };
       [...document.querySelectorAll('.tb-btn[data-open]')].forEach(n => n.onclick = () => launchApp(n.dataset.open));
 
       document.getElementById('btn-login').onclick = async () => signInWithPopup(auth, provider);
@@ -847,6 +938,23 @@
 
       document.getElementById('browser-go').onclick = () => navigateBrowser(el.browserUrl.value);
       el.browserUrl.addEventListener('keydown', e => e.key==='Enter' && navigateBrowser(el.browserUrl.value));
+      document.getElementById('browser-new-tab').onclick = () => {
+        const b = getSpace().browser;
+        const t = { id: crypto.randomUUID(), title:'New Tab', url:'https://www.google.com' };
+        b.tabs.push(t); b.activeTabId = t.id;
+        renderBrowserTabs(); loadActiveTab(); queueSave();
+      };
+      document.getElementById('browser-close-tab').onclick = () => {
+        const b = getSpace().browser;
+        if (b.tabs.length === 1) return;
+        b.tabs = b.tabs.filter(t => t.id !== b.activeTabId);
+        b.activeTabId = b.tabs[0].id;
+        renderBrowserTabs(); loadActiveTab(); queueSave();
+      };
+      document.getElementById('browser-open-external').onclick = () => {
+        const url = getActiveTab()?.url || el.browserUrl.value;
+        if (url) window.open(url, '_blank');
+      };
       document.getElementById('install-webapp').onclick = () => {
         const url = (el.browserUrl.value || '').trim(); if (!url) return;
         const name = prompt('App name?', new URL(url).hostname.replace('www.',''));
@@ -855,8 +963,8 @@
         renderDesktop(); renderStart(el.startSearch.value); queueSave();
       };
 
-      document.getElementById('assistant-send').onclick = askAI;
-      document.getElementById('assistant-clear').onclick = () => { state.assistant.messages = []; renderAssistant(); queueSave(); };
+      document.getElementById('ai-open-site').onclick = () => openAISite(el.aiSite.value);
+      document.getElementById('ai-open-external').onclick = () => window.open(el.aiSite.value || state.ai.preferredSite, '_blank');
 
       document.getElementById('card-prev').onclick = () => { flashIndex--; flashBack=false; renderFlashcards(); };
       document.getElementById('card-next').onclick = () => { flashIndex++; flashBack=false; renderFlashcards(); };
@@ -871,6 +979,52 @@
         const sp = getSpace();
         sp.books.unshift({ id:crypto.randomUUID(), title, dataUrl, addedAt:Date.now() });
         renderBooks(); el.pdfFrame.src = dataUrl; queueSave();
+      };
+
+      let drawing = false;
+      let lx = 0, ly = 0;
+      const drawCtx = () => el.studioCanvas.getContext('2d');
+      el.studioCanvas.addEventListener('mousedown', e => {
+        drawing = true;
+        const r = el.studioCanvas.getBoundingClientRect();
+        lx = e.clientX - r.left; ly = e.clientY - r.top;
+      });
+      window.addEventListener('mouseup', () => { if (drawing) { drawing = false; persistStudioCanvas(); } });
+      el.studioCanvas.addEventListener('mousemove', e => {
+        if (!drawing) return;
+        const r = el.studioCanvas.getBoundingClientRect();
+        const x = e.clientX - r.left, y = e.clientY - r.top;
+        const ctx = drawCtx();
+        ctx.strokeStyle = '#1d4ed8';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(lx, ly);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        lx = x; ly = y;
+      });
+      document.getElementById('studio-clear').onclick = () => {
+        const c = drawCtx();
+        c.fillStyle = '#fff';
+        c.fillRect(0,0,el.studioCanvas.width,el.studioCanvas.height);
+        persistStudioCanvas();
+      };
+      document.getElementById('studio-add-sticky').onclick = () => {
+        const text = prompt('Sticky note text');
+        if (!text?.trim()) return;
+        getSpace().studio.stickies.unshift({ text: text.trim(), at: Date.now() });
+        renderStudio(); queueSave();
+      };
+      document.getElementById('studio-save').onclick = () => { persistStudioCanvas(); renderStudio(); };
+
+      document.getElementById('vault-add').onclick = () => {
+        const text = document.getElementById('vault-input').value.trim();
+        if (!text) return;
+        getSpace().vault.unshift({ text, at: Date.now() });
+        document.getElementById('vault-input').value='';
+        renderVault();
+        queueSave();
       };
 
       document.getElementById('focus-start').onclick = () => {
@@ -902,9 +1056,8 @@
         applyTheme(); queueSave();
       };
       document.getElementById('save-ai-settings').onclick = () => {
-        state.ai.endpoint = document.getElementById('ai-endpoint').value.trim();
-        state.ai.model = document.getElementById('ai-model').value.trim() || 'gpt-4o-mini';
-        state.ai.apiKey = document.getElementById('ai-key').value.trim();
+        state.ai.preferredSite = el.aiSite.value || state.ai.preferredSite;
+        openAISite(state.ai.preferredSite);
         queueSave();
       };
 
@@ -920,9 +1073,13 @@
       document.getElementById('set-wallpaper').value = state.theme.wallpaper || '';
       document.getElementById('set-accent').value = state.theme.accent || '#5b8cff';
       document.getElementById('set-glass').value = String(state.theme.glass || 46);
-      document.getElementById('ai-endpoint').value = state.ai.endpoint || '';
-      document.getElementById('ai-model').value = state.ai.model || 'gpt-4o-mini';
-      document.getElementById('ai-key').value = state.ai.apiKey || '';
+      document.getElementById('ai-endpoint').value = 'Direct websites mode enabled';
+      document.getElementById('ai-model').value = 'Built-in web hub';
+      document.getElementById('ai-key').value = '';
+      document.getElementById('ai-endpoint').disabled = true;
+      document.getElementById('ai-model').disabled = true;
+      document.getElementById('ai-key').disabled = true;
+      el.aiSite.value = state.ai.preferredSite || 'https://chatgpt.com';
     }
 
     function renderAll() {
@@ -935,11 +1092,13 @@
       renderBooks();
       renderQuiz();
       renderFlashcards();
-      renderAssistant();
       renderDashboard();
+      renderStudio();
+      renderVault();
       renderSettingsValues();
-      el.browserUrl.value = getSpace().browser.url;
-      el.browserFrame.src = getSpace().browser.url;
+      renderBrowserTabs();
+      loadActiveTab();
+      openAISite(state.ai.preferredSite || 'https://chatgpt.com', false);
       el.spacePill.textContent = `Space: ${state.currentSpace}`;
     }
 
