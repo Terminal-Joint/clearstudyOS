@@ -1,12 +1,23 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Per-user StudyOS state document
-    match /users/{uid}/desktop/state {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
     }
 
-    // Deny everything else by default
+    // Current StudyOS state path used by the app
+    match /users/{uid}/studyos/state {
+      allow read, write: if isOwner(uid)
+        && request.resource.data.keys().hasOnly(['payload', 'updatedAt', 'uid'])
+        && request.resource.data.uid == uid;
+    }
+
+    // Backward-compatible legacy path (read/write for migration safety)
+    match /users/{uid}/desktop/state {
+      allow read, write: if isOwner(uid);
+    }
+
+    // Deny everything else
     match /{document=**} {
       allow read, write: if false;
     }

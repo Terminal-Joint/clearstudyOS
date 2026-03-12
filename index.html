@@ -34,25 +34,59 @@
     .tile { width:56px; height:56px; margin:0 auto; border-radius:14px; border:1px solid rgba(255,255,255,.4); background:rgba(255,255,255,.14); display:grid; place-items:center; font-size:28px; }
     .label { margin-top:6px; font-size:12px; text-shadow:0 2px 6px rgba(0,0,0,.6); }
 
-    #taskbar { position:fixed; left:12px; right:12px; bottom:10px; height:var(--taskbar-h); border-radius:16px; z-index:6000; display:grid; grid-template-columns:1fr auto 1fr; align-items:center; padding:0 12px; }
+    #taskbar { position:fixed; left:12px; right:12px; bottom:10px; height:var(--taskbar-h); border-radius:12px; z-index:6000; display:grid; grid-template-columns:1fr auto 1fr; align-items:center; padding:0 12px; }
     #tb-left,#tb-center,#tb-right{display:flex;align-items:center;gap:8px;} #tb-center{justify-content:center;} #tb-right{justify-content:flex-end;}
-    .tb-btn { border:1px solid transparent; background:transparent; color:var(--text); border-radius:11px; height:40px; min-width:40px; padding:0 10px; cursor:pointer; }
+    .tb-btn { position:relative; border:1px solid transparent; background:transparent; color:var(--text); border-radius:10px; height:40px; min-width:40px; padding:0 10px; cursor:pointer; }
     .tb-btn:hover{ background:rgba(255,255,255,.16); border-color:rgba(255,255,255,.2); }
+    .tb-btn.active::after {
+      content:'';
+      position:absolute;
+      left:50%; transform:translateX(-50%);
+      bottom:3px;
+      width:22px; height:3px;
+      border-radius:999px;
+      background:#fff;
+      box-shadow:0 0 8px rgba(255,255,255,.6);
+    }
     .pill { border:1px solid var(--line); border-radius:10px; background:rgba(255,255,255,.12); padding:6px 10px; font-size:12px; }
 
-    #start-menu { position:fixed; left:50%; transform:translateX(-50%); bottom:84px; width:min(860px,95vw); border-radius:18px; padding:12px; z-index:6200; display:none; }
+    #start-menu {
+      position:fixed; left:50%; transform:translateX(-50%) translateY(18px) scale(.97);
+      bottom:84px; width:min(860px,95vw); border-radius:12px; padding:12px; z-index:6200;
+      display:none; opacity:0; transition:transform .26s cubic-bezier(.2,.9,.2,1.1), opacity .24s ease;
+    }
+    #start-menu.open { opacity:1; transform:translateX(-50%) translateY(0) scale(1); }
     #start-search { width:100%; margin-bottom:10px; }
     #spaces { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
     .space-chip { border:1px solid var(--line); background:rgba(255,255,255,.1); color:var(--text); border-radius:999px; padding:6px 10px; cursor:pointer; font-size:12px; }
     .space-chip.active { background:var(--accent); border-color:transparent; }
     #start-grid { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:8px; }
     .start-item { border:1px solid var(--line); background:rgba(255,255,255,.08); border-radius:12px; padding:10px; text-align:center; cursor:pointer; font-size:12px; }
+    #recommended { margin-top:10px; border:1px solid var(--line); border-radius:12px; padding:10px; background:rgba(255,255,255,.05); }
+    #recommended-list { display:grid; gap:6px; margin-top:8px; }
+    .rec-item { border:1px solid var(--line); border-radius:10px; padding:8px; background:rgba(255,255,255,.06); cursor:pointer; font-size:12px; }
 
-    .window { position:absolute; display:none; flex-direction:column; min-width:360px; min-height:260px; width:min(980px,92vw); height:min(720px,84vh); left:90px; top:70px; border-radius:18px; overflow:hidden; z-index:300; resize:both; }
+    .window { position:absolute; display:none; flex-direction:column; min-width:360px; min-height:260px; width:min(980px,92vw); height:min(720px,84vh); left:90px; top:70px; border-radius:10px; overflow:hidden; z-index:300; }
     .window.active { z-index:900; }
     .titlebar { height:46px; display:flex; align-items:center; gap:8px; padding:0 12px; border-bottom:1px solid var(--line); background:rgba(255,255,255,.08); cursor:move; }
-    .ctrl { width:11px; height:11px; border-radius:50%; border:0; cursor:pointer; }
-    .close{background:#ff5f57}.min{background:#febc2e}.max{background:#28c840}
+    .ctrl { width:30px; height:26px; border-radius:8px; border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.08); color:#fff; cursor:pointer; display:grid; place-items:center; font-size:13px; }
+    .ctrl:hover { background:rgba(255,255,255,.18); }
+    .ctrl.close:hover { background:#c42b1c; border-color:#c42b1c; }
+    .snap-layouts {
+      position:absolute; top:38px; right:10px; z-index:3000; display:none; gap:6px;
+      padding:8px; border-radius:10px; border:1px solid var(--line); background:rgba(14,20,40,.95);
+      grid-template-columns:repeat(3,40px);
+    }
+    .snap-layouts button { border:1px solid var(--line); background:rgba(255,255,255,.09); color:#fff; border-radius:6px; height:28px; cursor:pointer; font-size:11px; }
+    .resize-handle { position:absolute; z-index:1200; }
+    .resize-handle.e { top:8px; bottom:8px; right:-4px; width:8px; cursor:ew-resize; }
+    .resize-handle.w { top:8px; bottom:8px; left:-4px; width:8px; cursor:ew-resize; }
+    .resize-handle.n { left:8px; right:8px; top:-4px; height:8px; cursor:ns-resize; }
+    .resize-handle.s { left:8px; right:8px; bottom:-4px; height:8px; cursor:ns-resize; }
+    .resize-handle.ne { top:-4px; right:-4px; width:10px; height:10px; cursor:nesw-resize; }
+    .resize-handle.nw { top:-4px; left:-4px; width:10px; height:10px; cursor:nwse-resize; }
+    .resize-handle.se { bottom:-4px; right:-4px; width:10px; height:10px; cursor:nwse-resize; }
+    .resize-handle.sw { bottom:-4px; left:-4px; width:10px; height:10px; cursor:nesw-resize; }
     .toolbar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:10px; border-bottom:1px solid var(--line); background:rgba(255,255,255,.07); }
     .app-body { flex:1; min-height:0; overflow:auto; padding:10px; }
 
@@ -76,11 +110,15 @@
     <input id="start-search" class="field" placeholder="Search apps, websites, commands..." />
     <div id="spaces"></div>
     <div id="start-grid"></div>
+    <div id="recommended">
+      <b>Recommended</b>
+      <div id="recommended-list"></div>
+    </div>
   </aside>
 
   <section id="dashboard-window" class="window glass">
     <div class="titlebar" data-window="dashboard-window">
-      <button class="ctrl close" data-close="dashboard-window"></button><button class="ctrl min" data-close="dashboard-window"></button><button class="ctrl max" data-max="dashboard-window"></button>
+      <button class="ctrl close" title="Close" data-close="dashboard-window">✕</button><button class="ctrl min" title="Minimize" data-close="dashboard-window">—</button><button class="ctrl max" title="Maximize" data-max="dashboard-window">▢</button><div class="snap-layouts" data-snap-menu="dashboard-window"><button data-snap="left">½</button><button data-snap="top">▔</button><button data-snap="right">½</button><button data-snap="left-third">⅓</button><button data-snap="center-third">⅓</button><button data-snap="right-third">⅓</button></div>
       <b>Dashboard</b><div style="margin-left:auto"></div><button class="btn" id="sync-now">Sync</button>
     </div>
     <div class="app-body">
@@ -104,7 +142,7 @@
 
   <section id="notes-window" class="window glass" style="left:120px;top:84px;">
     <div class="titlebar" data-window="notes-window">
-      <button class="ctrl close" data-close="notes-window"></button><button class="ctrl min" data-close="notes-window"></button><button class="ctrl max" data-max="notes-window"></button>
+      <button class="ctrl close" title="Close" data-close="notes-window">✕</button><button class="ctrl min" title="Minimize" data-close="notes-window">—</button><button class="ctrl max" title="Maximize" data-max="notes-window">▢</button><div class="snap-layouts" data-snap-menu="notes-window"><button data-snap="left">½</button><button data-snap="top">▔</button><button data-snap="right">½</button><button data-snap="left-third">⅓</button><button data-snap="center-third">⅓</button><button data-snap="right-third">⅓</button></div>
       <b>Notes</b><div style="margin-left:auto"></div>
       <button class="btn" id="note-new">New</button><button class="btn" id="note-delete">Delete</button><button class="btn" id="note-save">Save Note</button><button class="btn primary" id="note-cards">Flashcards</button>
     </div>
@@ -115,10 +153,11 @@
         <textarea id="note-content" class="field" style="min-height:360px;resize:vertical;" placeholder="Type notes, formulas, and key:value pairs for flashcards."></textarea>
       </section>
     </div>
+    <div class="app-body panel" id="task-list"></div>
   </section>
 
   <section id="planner-window" class="window glass" style="left:150px;top:96px;width:min(760px,92vw);height:min(640px,78vh);">
-    <div class="titlebar" data-window="planner-window"><button class="ctrl close" data-close="planner-window"></button><button class="ctrl min" data-close="planner-window"></button><button class="ctrl max" data-max="planner-window"></button><b>Planner</b></div>
+    <div class="titlebar" data-window="planner-window"><button class="ctrl close" title="Close" data-close="planner-window">✕</button><button class="ctrl min" title="Minimize" data-close="planner-window">—</button><button class="ctrl max" title="Maximize" data-max="planner-window">▢</button><div class="snap-layouts" data-snap-menu="planner-window"><button data-snap="left">½</button><button data-snap="top">▔</button><button data-snap="right">½</button><button data-snap="left-third">⅓</button><button data-snap="center-third">⅓</button><button data-snap="right-third">⅓</button></div><b>Planner</b></div>
     <div class="toolbar">
       <input id="task-title" class="field" placeholder="Task" style="flex:1;"><input id="task-subject" class="field" placeholder="Subject" style="width:140px;"><input id="task-due" class="field" type="date"><button class="btn primary" id="task-add">Add</button>
     </div>
@@ -126,7 +165,7 @@
   </section>
 
   <section id="browser-window" class="window glass" style="left:180px;top:88px;width:min(1100px,94vw);height:min(740px,86vh);">
-    <div class="titlebar" data-window="browser-window"><button class="ctrl close" data-close="browser-window"></button><button class="ctrl min" data-close="browser-window"></button><button class="ctrl max" data-max="browser-window"></button><b>Study Browser</b></div>
+    <div class="titlebar" data-window="browser-window"><button class="ctrl close" title="Close" data-close="browser-window">✕</button><button class="ctrl min" title="Minimize" data-close="browser-window">—</button><button class="ctrl max" title="Maximize" data-max="browser-window">▢</button><div class="snap-layouts" data-snap-menu="browser-window"><button data-snap="left">½</button><button data-snap="top">▔</button><button data-snap="right">½</button><button data-snap="left-third">⅓</button><button data-snap="center-third">⅓</button><button data-snap="right-third">⅓</button></div><b>Study Browser</b></div>
     <div class="toolbar">
       <input id="browser-url" class="field" placeholder="Enter URL or search" style="flex:1;">
       <button class="btn primary" id="browser-go">Go</button>
@@ -136,7 +175,7 @@
   </section>
 
   <section id="assistant-window" class="window glass" style="left:200px;top:110px;width:min(780px,92vw);height:min(650px,82vh);">
-    <div class="titlebar" data-window="assistant-window"><button class="ctrl close" data-close="assistant-window"></button><button class="ctrl min" data-close="assistant-window"></button><button class="ctrl max" data-max="assistant-window"></button><b>AI Assistant</b></div>
+    <div class="titlebar" data-window="assistant-window"><button class="ctrl close" title="Close" data-close="assistant-window">✕</button><button class="ctrl min" title="Minimize" data-close="assistant-window">—</button><button class="ctrl max" title="Maximize" data-max="assistant-window">▢</button><div class="snap-layouts" data-snap-menu="assistant-window"><button data-snap="left">½</button><button data-snap="top">▔</button><button data-snap="right">½</button><button data-snap="left-third">⅓</button><button data-snap="center-third">⅓</button><button data-snap="right-third">⅓</button></div><b>AI Assistant</b></div>
     <div class="app-body" style="display:flex;flex-direction:column;gap:8px;">
       <div id="assistant-messages"></div>
       <textarea id="assistant-input" class="field" placeholder="Ask your study question..." style="min-height:90px;"></textarea>
@@ -145,7 +184,7 @@
   </section>
 
   <section id="flashcards-window" class="window glass" style="left:220px;top:120px;width:min(700px,90vw);height:min(560px,76vh);">
-    <div class="titlebar" data-window="flashcards-window"><button class="ctrl close" data-close="flashcards-window"></button><button class="ctrl min" data-close="flashcards-window"></button><button class="ctrl max" data-max="flashcards-window"></button><b>Flashcards</b><div style="margin-left:auto"></div><button class="btn" id="card-prev">Prev</button><button class="btn" id="card-flip">Flip</button><button class="btn" id="card-next">Next</button></div>
+    <div class="titlebar" data-window="flashcards-window"><button class="ctrl close" title="Close" data-close="flashcards-window">✕</button><button class="ctrl min" title="Minimize" data-close="flashcards-window">—</button><button class="ctrl max" title="Maximize" data-max="flashcards-window">▢</button><div class="snap-layouts" data-snap-menu="flashcards-window"><button data-snap="left">½</button><button data-snap="top">▔</button><button data-snap="right">½</button><button data-snap="left-third">⅓</button><button data-snap="center-third">⅓</button><button data-snap="right-third">⅓</button></div><b>Flashcards</b><div style="margin-left:auto"></div><button class="btn" id="card-prev">Prev</button><button class="btn" id="card-flip">Flip</button><button class="btn" id="card-next">Next</button></div>
     <div class="app-body" style="display:flex;flex-direction:column;gap:10px;">
       <div id="flash-card" class="panel" style="min-height:260px;display:grid;place-items:center;padding:14px;text-align:center;"></div>
       <div style="display:flex;gap:8px;justify-content:center;"><button class="btn" data-rate="again">Again</button><button class="btn" data-rate="hard">Hard</button><button class="btn primary" data-rate="good">Good</button><button class="btn" data-rate="easy">Easy</button></div>
@@ -154,7 +193,7 @@
   </section>
 
   <section id="pdf-window" class="window glass" style="left:140px;top:100px;width:min(1080px,94vw);height:min(740px,86vh);">
-    <div class="titlebar" data-window="pdf-window"><button class="ctrl close" data-close="pdf-window"></button><button class="ctrl min" data-close="pdf-window"></button><button class="ctrl max" data-max="pdf-window"></button><b>Bookshelf & PDF Reader</b></div>
+    <div class="titlebar" data-window="pdf-window"><button class="ctrl close" title="Close" data-close="pdf-window">✕</button><button class="ctrl min" title="Minimize" data-close="pdf-window">—</button><button class="ctrl max" title="Maximize" data-max="pdf-window">▢</button><div class="snap-layouts" data-snap-menu="pdf-window"><button data-snap="left">½</button><button data-snap="top">▔</button><button data-snap="right">½</button><button data-snap="left-third">⅓</button><button data-snap="center-third">⅓</button><button data-snap="right-third">⅓</button></div><b>Bookshelf & PDF Reader</b></div>
     <div class="toolbar">
       <input type="file" id="pdf-upload" class="field" accept="application/pdf">
       <input id="book-title" class="field" placeholder="Book title" style="width:180px;">
@@ -167,7 +206,7 @@
   </section>
 
   <section id="focus-window" class="window glass" style="left:250px;top:120px;width:min(560px,92vw);height:min(500px,72vh);">
-    <div class="titlebar" data-window="focus-window"><button class="ctrl close" data-close="focus-window"></button><button class="ctrl min" data-close="focus-window"></button><button class="ctrl max" data-max="focus-window"></button><b>Focus Timer</b></div>
+    <div class="titlebar" data-window="focus-window"><button class="ctrl close" title="Close" data-close="focus-window">✕</button><button class="ctrl min" title="Minimize" data-close="focus-window">—</button><button class="ctrl max" title="Maximize" data-max="focus-window">▢</button><div class="snap-layouts" data-snap-menu="focus-window"><button data-snap="left">½</button><button data-snap="top">▔</button><button data-snap="right">½</button><button data-snap="left-third">⅓</button><button data-snap="center-third">⅓</button><button data-snap="right-third">⅓</button></div><b>Focus Timer</b></div>
     <div class="app-body" style="display:grid;place-items:center;gap:10px;">
       <div id="focus-timer" style="font-size:58px;font-weight:800;">25:00</div>
       <div style="display:flex;gap:8px;"><button class="btn primary" id="focus-start">Start</button><button class="btn" id="focus-pause">Pause</button><button class="btn" id="focus-reset">Reset</button></div>
@@ -176,7 +215,7 @@
   </section>
 
   <section id="settings-window" class="window glass" style="left:180px;top:95px;width:min(820px,92vw);height:min(660px,82vh);">
-    <div class="titlebar" data-window="settings-window"><button class="ctrl close" data-close="settings-window"></button><button class="ctrl min" data-close="settings-window"></button><button class="ctrl max" data-max="settings-window"></button><b>Settings</b></div>
+    <div class="titlebar" data-window="settings-window"><button class="ctrl close" title="Close" data-close="settings-window">✕</button><button class="ctrl min" title="Minimize" data-close="settings-window">—</button><button class="ctrl max" title="Maximize" data-max="settings-window">▢</button><div class="snap-layouts" data-snap-menu="settings-window"><button data-snap="left">½</button><button data-snap="top">▔</button><button data-snap="right">½</button><button data-snap="left-third">⅓</button><button data-snap="center-third">⅓</button><button data-snap="right-third">⅓</button></div><b>Settings</b></div>
     <div class="app-body" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
       <div class="panel" style="padding:10px;display:flex;flex-direction:column;gap:8px;">
         <h4 style="margin:0;">Desktop Customization</h4>
@@ -196,7 +235,7 @@
   </section>
 
   <section id="quiz-window" class="window glass" style="left:240px;top:86px;width:min(780px,92vw);height:min(620px,80vh);">
-    <div class="titlebar" data-window="quiz-window"><button class="ctrl close" data-close="quiz-window"></button><button class="ctrl min" data-close="quiz-window"></button><button class="ctrl max" data-max="quiz-window"></button><b>Adaptive Quiz</b><div style="margin-left:auto"></div><button class="btn" id="quiz-generate">Generate</button><button class="btn primary" id="quiz-submit">Submit</button></div>
+    <div class="titlebar" data-window="quiz-window"><button class="ctrl close" title="Close" data-close="quiz-window">✕</button><button class="ctrl min" title="Minimize" data-close="quiz-window">—</button><button class="ctrl max" title="Maximize" data-max="quiz-window">▢</button><div class="snap-layouts" data-snap-menu="quiz-window"><button data-snap="left">½</button><button data-snap="top">▔</button><button data-snap="right">½</button><button data-snap="left-third">⅓</button><button data-snap="center-third">⅓</button><button data-snap="right-third">⅓</button></div><b>Adaptive Quiz</b><div style="margin-left:auto"></div><button class="btn" id="quiz-generate">Generate</button><button class="btn primary" id="quiz-submit">Submit</button></div>
     <div class="app-body" id="quiz-body"></div>
   </section>
 
@@ -265,6 +304,7 @@
       startMenu: document.getElementById('start-menu'),
       startSearch: document.getElementById('start-search'),
       startGrid: document.getElementById('start-grid'),
+      recommendedList: document.getElementById('recommended-list'),
       spaces: document.getElementById('spaces'),
       userPill: document.getElementById('user-pill'),
       status: document.getElementById('status-pill'),
@@ -411,8 +451,40 @@
 
     function renderStart(filter='') {
       const q = filter.trim().toLowerCase();
-      el.startGrid.innerHTML = allApps().filter(a => !q || a.name.toLowerCase().includes(q)).map(a => `<div class="start-item" data-open="${a.id}">${a.icon || '🌐'}<div>${a.name}</div></div>`).join('');
-      [...el.startGrid.querySelectorAll('[data-open]')].forEach(n => n.onclick = () => { launchApp(n.dataset.open); el.startMenu.style.display='none'; });
+      const noteHits = Object.values(state.spaces)
+        .flatMap(sp => sp.notes || [])
+        .filter(n => q && (`${n.title} ${n.content}`).toLowerCase().includes(q))
+        .slice(0, 6)
+        .map(n => ({ id: `note:${n.id}`, name: `Note: ${n.title || 'Untitled'}`, icon: '📄' }));
+
+      const entries = [...allApps(), ...noteHits].filter(a => !q || a.name.toLowerCase().includes(q)).slice(0, 18);
+      el.startGrid.innerHTML = entries.map(a => `<div class="start-item" data-open="${a.id}">${a.icon || '🌐'}<div>${a.name}</div></div>`).join('');
+      [...el.startGrid.querySelectorAll('[data-open]')].forEach(n => n.onclick = () => {
+        if (n.dataset.open.startsWith('note:')) {
+          const id = n.dataset.open.slice(5);
+          const targetSpace = SPACES.find(sp => (state.spaces[sp].notes || []).some(x => x.id === id));
+          if (targetSpace) {
+            state.currentSpace = targetSpace;
+            state.spaces[targetSpace].selectedNoteId = id;
+            renderAll();
+            openWindow('notes-window');
+          }
+        } else {
+          launchApp(n.dataset.open);
+        }
+        el.startMenu.classList.remove('open');
+        setTimeout(() => el.startMenu.style.display='none', 220);
+      });
+
+      const rec = [...getSpace().notes].sort((a,b)=>b.updatedAt-a.updatedAt).slice(0,5);
+      el.recommendedList.innerHTML = rec.map(n => `<div class="rec-item" data-rec-note="${n.id}">${esc(n.title || 'Untitled')}<small style="display:block;opacity:.8;">Recent note</small></div>`).join('');
+      [...el.recommendedList.querySelectorAll('[data-rec-note]')].forEach(n => n.onclick = () => {
+        getSpace().selectedNoteId = n.dataset.recNote;
+        renderNotes();
+        openWindow('notes-window');
+        el.startMenu.classList.remove('open');
+        setTimeout(() => el.startMenu.style.display='none', 220);
+      });
     }
 
     function launchApp(id) {
@@ -431,6 +503,7 @@
       if (!node) return;
       node.style.display = 'flex';
       node.classList.add('active');
+      document.querySelectorAll('.tb-btn[data-open]').forEach(b => b.classList.toggle('active', b.dataset.open === id));
       const rect = getSpace().windows[id];
       if (rect) { node.style.left = rect.left; node.style.top = rect.top; node.style.width = rect.width; node.style.height = rect.height; }
     }
@@ -440,7 +513,22 @@
       if (!node) return;
       node.style.display = 'none';
       node.classList.remove('active');
+      document.querySelectorAll('.tb-btn[data-open]').forEach(b => b.classList.toggle('active', b.dataset.open === (document.querySelector('.window.active')?.id || '')));
       saveWindowRect(id);
+    }
+
+    function applySnap(id, mode) {
+      const w = document.getElementById(id);
+      if (!w) return;
+      const fullW = window.innerWidth;
+      const fullH = window.innerHeight - 84;
+      if (mode === 'left') { w.style.left = '8px'; w.style.top = '8px'; w.style.width = `calc(50vw - 12px)`; w.style.height = `${fullH}px`; }
+      if (mode === 'right') { w.style.left = `calc(50vw + 4px)`; w.style.top = '8px'; w.style.width = `calc(50vw - 12px)`; w.style.height = `${fullH}px`; }
+      if (mode === 'top') { w.style.left = '8px'; w.style.top = '8px'; w.style.width = `calc(100vw - 16px)`; w.style.height = `${Math.floor(fullH/2)}px`; }
+      if (mode === 'left-third') { w.style.left = '8px'; w.style.top = '8px'; w.style.width = `${Math.floor(fullW/3)-12}px`; w.style.height = `${fullH}px`; }
+      if (mode === 'center-third') { w.style.left = `${Math.floor(fullW/3)+2}px`; w.style.top = '8px'; w.style.width = `${Math.floor(fullW/3)-12}px`; w.style.height = `${fullH}px`; }
+      if (mode === 'right-third') { w.style.left = `${Math.floor(fullW*2/3)-4}px`; w.style.top = '8px'; w.style.width = `${Math.floor(fullW/3)-12}px`; w.style.height = `${fullH}px`; }
+      saveWindowRect(id); queueSave();
     }
 
     function saveWindowRect(id) {
@@ -454,6 +542,15 @@
     function persistWindowRects(){ document.querySelectorAll('.window').forEach(w => saveWindowRect(w.id)); }
 
     function bindWindowUX() {
+      document.querySelectorAll('.window').forEach(w => {
+        ['n','s','e','w','ne','nw','se','sw'].forEach(dir => {
+          const h = document.createElement('div');
+          h.className = `resize-handle ${dir}`;
+          h.dataset.resize = dir;
+          w.appendChild(h);
+        });
+      });
+
       document.querySelectorAll('.titlebar').forEach(bar => {
         bar.addEventListener('mousedown', e => {
           if (e.target.closest('button,input,textarea,select')) return;
@@ -464,6 +561,26 @@
           window.addEventListener('mousemove', move); window.addEventListener('mouseup', up);
         });
       });
+
+      document.querySelectorAll('.resize-handle').forEach(h => {
+        h.addEventListener('mousedown', e => {
+          e.stopPropagation();
+          const w = h.closest('.window');
+          const dir = h.dataset.resize;
+          const sx=e.clientX, sy=e.clientY, sl=w.offsetLeft, st=w.offsetTop, sw=w.offsetWidth, sh=w.offsetHeight;
+          const move = ev => {
+            let l=sl, t=st, ww=sw, hh=sh;
+            if (dir.includes('e')) ww = Math.max(360, sw + ev.clientX - sx);
+            if (dir.includes('s')) hh = Math.max(260, sh + ev.clientY - sy);
+            if (dir.includes('w')) { ww = Math.max(360, sw - (ev.clientX - sx)); l = sl + (ev.clientX - sx); }
+            if (dir.includes('n')) { hh = Math.max(260, sh - (ev.clientY - sy)); t = st + (ev.clientY - sy); }
+            w.style.left=`${l}px`; w.style.top=`${t}px`; w.style.width=`${ww}px`; w.style.height=`${hh}px`;
+          };
+          const up = () => { window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up); saveWindowRect(w.id); queueSave(); };
+          window.addEventListener('mousemove', move); window.addEventListener('mouseup', up);
+        });
+      });
+
       document.querySelectorAll('[data-close]').forEach(b => b.onclick = () => closeWindow(b.dataset.close));
       document.querySelectorAll('[data-max]').forEach(b => b.onclick = () => {
         const id = b.dataset.max, w = document.getElementById(id);
@@ -478,6 +595,21 @@
         }
         saveWindowRect(id); queueSave();
       });
+
+      document.querySelectorAll('[data-max]').forEach(btn => {
+        const id = btn.dataset.max;
+        const menu = document.querySelector(`[data-snap-menu="${id}"]`);
+        if (!menu) return;
+        let hideTimer = null;
+        const show = () => { clearTimeout(hideTimer); menu.style.display = 'grid'; };
+        const hide = () => { hideTimer = setTimeout(() => menu.style.display='none', 180); };
+        btn.addEventListener('mouseenter', show);
+        btn.addEventListener('mouseleave', hide);
+        menu.addEventListener('mouseenter', show);
+        menu.addEventListener('mouseleave', hide);
+        menu.querySelectorAll('[data-snap]').forEach(n => n.onclick = () => applySnap(id, n.dataset.snap));
+      });
+      [...el.taskList.querySelectorAll('[data-del]')].forEach(n => n.onclick = () => { sp.tasks=sp.tasks.filter(x=>x.id!==n.dataset.del); renderTasks(); queueSave(); });
     }
 
     function esc(v=''){ return v.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;'); }
@@ -683,7 +815,16 @@
     }
 
     function bindEvents() {
-      document.getElementById('tb-start').onclick = () => { el.startMenu.style.display = el.startMenu.style.display === 'block' ? 'none' : 'block'; renderStart(el.startSearch.value); };
+      document.getElementById('tb-start').onclick = () => {
+        if (el.startMenu.style.display === 'block') {
+          el.startMenu.classList.remove('open');
+          setTimeout(() => el.startMenu.style.display = 'none', 220);
+        } else {
+          el.startMenu.style.display = 'block';
+          requestAnimationFrame(() => el.startMenu.classList.add('open'));
+          renderStart(el.startSearch.value);
+        }
+      };
       el.startSearch.oninput = () => renderStart(el.startSearch.value);
       [...document.querySelectorAll('.tb-btn[data-open]')].forEach(n => n.onclick = () => launchApp(n.dataset.open));
 
@@ -767,7 +908,12 @@
         queueSave();
       };
 
-      document.addEventListener('keydown', e => { if (e.key === 'Escape') el.startMenu.style.display='none'; });
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+          el.startMenu.classList.remove('open');
+          setTimeout(() => el.startMenu.style.display='none', 220);
+        }
+      });
     }
 
     function renderSettingsValues() {
