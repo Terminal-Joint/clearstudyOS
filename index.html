@@ -397,8 +397,30 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       .window { width: calc(100vw - 16px); height: calc(100vh - 72px); left: 8px; top: 8px; }
     }
 
+
+    .app-letterpad {
+      position: absolute;
+      right: 8px;
+      top: 44px;
+      width: min(300px, 36%);
+      max-height: calc(100% - 54px);
+      display: grid;
+      grid-template-rows: auto 1fr 1fr;
+      gap: 6px;
+      padding: 8px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: rgba(7,12,22,.78);
+      backdrop-filter: blur(8px);
+      z-index: 3;
+    }
+    .app-letterpad textarea { width: 100%; min-height: 80px; resize: vertical; }
+    .app-letterpad .lp-preview { overflow:auto; font-size:12px; border:1px solid var(--line); border-radius:8px; padding:6px; }
+    .window .app-body { position: relative; }
+
     @media (max-width: 900px) {
       #pdf-window .app-body { grid-template-columns: 1fr !important; grid-template-rows: 180px minmax(0,1fr) 220px; }
+      .app-letterpad { position: static; width: 100%; max-height: none; }
       #notes-window .app-body { grid-template-columns: 1fr !important; }
       #tb-right { gap: 4px; }
       #tb-right .pill { padding: 4px 7px; font-size: 11px; }
@@ -497,7 +519,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
   <section id="pdf-window" class="window" style="left:150px;top:80px;width:min(1200px,96vw);height:min(760px,88vh);">
     <div class="titlebar" data-window="pdf-window"><div class="title">Bookshelf + PDF Workspace</div><div class="w-controls"><button class="ctrl min" data-close="pdf-window">—</button><button class="ctrl max" data-max="pdf-window">▢</button><button class="ctrl close" data-close="pdf-window">✕</button></div></div>
     <div class="toolbar">
-<input id="pdf-upload" type="file" accept=".pdf,.txt,.md,.png,.jpg,.jpeg,.webp,.gif,.docx">
+<input id="pdf-upload" type="file" accept=".pdf,.txt,.md,.html,.htm,.mhtml,.png,.jpg,.jpeg,.webp,.gif,.docx">
 <input id="book-title" class="field" placeholder="Book title">
 <button class="btn primary" id="add-book">Add Book</button>
 <button class="btn" id="pdf-prev">◀ Page</button>
@@ -524,6 +546,8 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
           <canvas id="pdf-canvas-2" style="display:none;"></canvas>
           <pre id="doc-text-viewer" class="field" style="display:none;white-space:pre-wrap;min-height:320px;"></pre>
           <img id="doc-image-viewer" style="display:none;max-width:100%;height:auto;border-radius:8px;">
+          <textarea id="doc-html-editor" class="field" style="display:none;min-height:220px;"></textarea>
+          <iframe id="doc-html-preview" style="display:none;width:100%;min-height:280px;border:1px solid rgba(255,255,255,.2);border-radius:8px;"></iframe>
         </div>
       </section>
       <aside class="panel" style="display:grid;grid-template-rows:minmax(0,1fr) 130px 130px 130px;gap:8px;padding:8px;">
@@ -533,12 +557,6 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
         <div id="pdf-search-results" style="overflow:auto;"></div>
       </aside>
     </div>
-  </section>
-
-  <section id="studio-window" class="window" style="left:180px;top:90px;width:min(920px,94vw);height:min(690px,84vh);">
-    <div class="titlebar" data-window="studio-window"><div class="title">Study Studio</div><div class="w-controls"><button class="ctrl min" data-close="studio-window">—</button><button class="ctrl max" data-max="studio-window">▢</button><button class="ctrl close" data-close="studio-window">✕</button></div></div>
-    <div class="toolbar"><button class="btn" id="studio-clear">Clear</button><button class="btn" id="studio-add-sticky">Add Sticky</button><button class="btn primary" id="studio-save">Save Studio</button></div>
-    <div class="app-body split"><section class="panel" style="position:relative;overflow:hidden;"><canvas id="studio-canvas" style="width:100%;height:100%;display:block;background:white;"></canvas></section><aside id="studio-stickies" class="panel" style="overflow:auto;"></aside></div>
   </section>
 
   <section id="vault-window" class="window" style="left:220px;top:110px;width:min(700px,92vw);height:min(580px,78vh);">
@@ -558,6 +576,12 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
   <section id="graph-window" class="window" style="left:250px;top:110px;width:min(760px,92vw);height:min(540px,74vh);">
     <div class="titlebar" data-window="graph-window"><div class="title">Knowledge Graph</div><div class="w-controls"><button class="ctrl min" data-close="graph-window">—</button><button class="ctrl max" data-max="graph-window">▢</button><button class="ctrl close" data-close="graph-window">✕</button></div></div>
     <div class="app-body panel" id="knowledge-graph"></div>
+  </section>
+
+  <section id="ocr-window" class="window" style="left:200px;top:100px;width:min(760px,92vw);height:min(560px,76vh);">
+    <div class="titlebar" data-window="ocr-window"><div class="title">OCR Center</div><div class="w-controls"><button class="ctrl min" data-close="ocr-window">—</button><button class="ctrl max" data-max="ocr-window">▢</button><button class="ctrl close" data-close="ocr-window">✕</button></div></div>
+    <div class="toolbar"><button class="btn" id="ocr-run-current">OCR Current View</button><button class="btn" id="ocr-send-to-notes">Send OCR to Notes</button></div>
+    <div class="app-body panel" id="ocr-center-text" style="overflow:auto;white-space:pre-wrap;"></div>
   </section>
 
   <section id="focus-window" class="window" style="left:170px;top:120px;width:min(600px,88vw);height:min(460px,70vh);">
@@ -621,9 +645,9 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       <button class="tb-btn" data-open="planner-window" title="Planner">📅</button>
       <button class="tb-btn" data-open="browser-window" title="Browser">🌐</button>
       <button class="tb-btn" data-open="pdf-window" title="Bookshelf">📚</button>
-      <button class="tb-btn" data-open="studio-window" title="Studio">🖊️</button>
+
       <button class="tb-btn" data-open="vault-window" title="Vault">⭐</button>
-      <button class="tb-btn" data-open="settings-window" title="Settings">⚙️</button><button class="tb-btn" data-open="flashcards-window" title="Flashcards">🃏</button><button class="tb-btn" data-open="graph-window" title="Concept Map">🕸️</button><button class="tb-btn" data-open="focus-window" title="Focus">⏱️</button>
+      <button class="tb-btn" data-open="settings-window" title="Settings">⚙️</button><button class="tb-btn" data-open="flashcards-window" title="Flashcards">🃏</button><button class="tb-btn" data-open="graph-window" title="Concept Map">🕸️</button><button class="tb-btn" data-open="focus-window" title="Focus">⏱️</button><button class="tb-btn" data-open="ocr-window" title="OCR Center">🔎</button>
     </div>
     <div id="tb-right"><button class="tb-btn" id="tb-quick-note" title="Quick note">🗒️</button><div class="pill" id="space-pill">Space</div><div class="pill" id="status-pill">Saved</div><div class="pill" id="custom-timer-pill" title="Click start/pause • Right click customize">Timer 25:00</div><div class="pill" id="clock-pill"></div><button class="tb-btn" id="btn-login" title="Login">👤</button><button class="tb-btn" id="btn-logout" title="Logout" style="display:none;">⇦</button></div>
   </div>
@@ -661,12 +685,12 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       { id:'planner-window', name:'Planner', icon:'📅' },
       { id:'browser-window', name:'Browser', icon:'🌐' },
       { id:'pdf-window', name:'Bookshelf', icon:'📚' },
-      { id:'studio-window', name:'Studio', icon:'🖊️' },
       { id:'vault-window', name:'Vault', icon:'⭐' },
       { id:'settings-window', name:'Settings', icon:'⚙️' },
       { id:'flashcards-window', name:'Flashcards', icon:'🃏' },
       { id:'graph-window', name:'Knowledge Graph', icon:'🕸️' },
-      { id:'focus-window', name:'Focus', icon:'⏱️' }
+      { id:'focus-window', name:'Focus', icon:'⏱️' },
+      { id:'ocr-window', name:'OCR Center', icon:'🔎' }
     ];
 
     const $ = id => document.getElementById(id);
@@ -677,7 +701,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       notesList: $('notes-list'), noteTitle: $('note-title'), noteContent: $('note-content'), taskList: $('task-list'),
       notesHighlights: $('notes-highlights'), noteLinks: $('note-links'), startPinned: $('start-pinned'), knowledgeCardsList: $('knowledge-cards-list'),
       browserTabs: $('browser-tabs'), browserUrl: $('browser-url'), browserFrame: $('browser-frame'),
-      studioCanvas: $('studio-canvas'), studioStickies: $('studio-stickies'), vaultList: $('vault-list'),
+      vaultList: $('vault-list'),
       status: $('status-pill'), clock: $('clock-pill'), customTimer: $('custom-timer-pill'), spacePill: $('space-pill'),
       annotOverlay: $('annot-overlay'), annotCanvas: $('annot-canvas'), annotTools: $('annot-tools')
       ,toast: $('toast')
@@ -1391,6 +1415,8 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       $('pdf-canvas-2').style.display = showPdf && splitPDF ? 'block' : 'none';
       $('doc-text-viewer').style.display = mode === 'text' ? 'block' : 'none';
       $('doc-image-viewer').style.display = mode === 'image' ? 'block' : 'none';
+      $('doc-html-editor').style.display = mode === 'html' ? 'block' : 'none';
+      $('doc-html-preview').style.display = mode === 'html' ? 'block' : 'none';
       if (!showPdf) { pdfDoc = null; pdfDoc2 = null; $('pdf-page-info').textContent = 'Page -'; }
     }
 
@@ -1433,6 +1459,24 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
         return;
       }
 
+      if (['html','htm','mhtml'].includes(ext) || mime.includes('html')) {
+        setStudyViewerMode('html');
+        try {
+          const text = atob(url.split(',')[1] || '');
+          $('doc-html-editor').value = text;
+          $('doc-html-preview').srcdoc = text;
+          getSpace().ocrCache[`doc:${book.id}`] = text.replace(/<[^>]+>/g, ' ');
+        } catch {
+          $('doc-html-editor').value = 'Unable to decode html/mhtml file.';
+        }
+        $('doc-html-editor').oninput = () => {
+          $('doc-html-preview').srcdoc = $('doc-html-editor').value;
+          getSpace().ocrCache[`doc:${book.id}`] = $('doc-html-editor').value.replace(/<[^>]+>/g, ' ');
+          queueSave();
+        };
+        return;
+      }
+
       if (mime.startsWith('text/') || ['txt','md','csv','json'].includes(ext)) {
         setStudyViewerMode('text');
         try {
@@ -1456,34 +1500,6 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
         const b = sp.books.find(x => x.id === n.dataset.book);
         openStudyBook(b);
       });
-    }
-
-    function renderStudio() {
-      const sp = getSpace();
-      el.studioStickies.innerHTML = sp.studio.stickies.map((s, i) => `<div class="sticky-item"><div>${esc(s.text)}</div><small>${new Date(s.at).toLocaleString()}</small><div><button class="btn" data-del-sticky="${i}">Delete</button></div></div>`).join('') || '<div class="sticky-item">No stickies yet.</div>';
-      [...el.studioStickies.querySelectorAll('[data-del-sticky]')].forEach(n => n.onclick = () => {
-        sp.studio.stickies.splice(Number(n.dataset.delSticky), 1);
-        renderStudio();
-        queueSave();
-      });
-
-      const c = el.studioCanvas;
-      const r = c.getBoundingClientRect();
-      c.width = Math.max(320, Math.floor(r.width));
-      c.height = Math.max(220, Math.floor(r.height));
-      const ctx = c.getContext('2d');
-      ctx.fillStyle = '#fff';
-      ctx.fillRect(0,0,c.width,c.height);
-      if (sp.studio.drawing) {
-        const img = new Image();
-        img.onload = () => ctx.drawImage(img, 0, 0, c.width, c.height);
-        img.src = sp.studio.drawing;
-      }
-    }
-
-    function persistStudioCanvas() {
-      getSpace().studio.drawing = el.studioCanvas.toDataURL('image/png');
-      queueSave();
     }
 
     function renderVault() {
@@ -1544,323 +1560,6 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
     function bindAnnotationOverlay() {
       const c = el.annotCanvas;
       const ctx = c.getContext('2d');
-      let drawing = false;
-      let mode = 'pen';
-      let size = 3;
-      let color = '#ff0000';
-      let lx = 0, ly = 0;
-
-      function resizeAnnot() {
-        c.width = window.innerWidth;
-        c.height = window.innerHeight;
-      }
-      resizeAnnot();
-      window.addEventListener('resize', resizeAnnot);
-
-      c.addEventListener('mousedown', e => {
-        drawing = true;
-        lx = e.clientX; ly = e.clientY;
-      });
-      window.addEventListener('mouseup', () => drawing = false);
-      c.addEventListener('mousemove', e => {
-        if (!drawing) return;
-        ctx.lineWidth = size;
-        ctx.lineCap = 'round';
-        if (mode === 'eraser') {
-          ctx.globalCompositeOperation = 'destination-out';
-          ctx.strokeStyle = 'rgba(0,0,0,1)';
-        } else {
-          ctx.globalCompositeOperation = 'source-over';
-          ctx.strokeStyle = color;
-        }
-        ctx.beginPath();
-        ctx.moveTo(lx, ly);
-        ctx.lineTo(e.clientX, e.clientY);
-        ctx.stroke();
-        lx = e.clientX; ly = e.clientY;
-      });
-
-      $('annot-pen').onclick = () => mode = 'pen';
-      $('annot-eraser').onclick = () => mode = 'eraser';
-      $('annot-size').oninput = e => size = Number(e.target.value);
-      $('annot-color').oninput = e => color = e.target.value;
-      $('annot-clear').onclick = () => { ctx.clearRect(0,0,c.width,c.height); };
-      $('annot-exit').onclick = () => {
-        el.annotOverlay.style.display = 'none';
-        el.annotTools.style.display = 'none';
-      };
-    }
-
-    function bindEvents() {
-      $('tb-start').onclick = () => {
-        if (el.startMenu.style.display === 'block') hideStart();
-        else { showStart(); renderStart(el.startSearch.value || ''); }
-      };
-      el.customTimer.onclick = () => {
-        const t = state.prefs.customTimer;
-        t.running = !t.running;
-        t.lastTick = Date.now();
-        renderCustomTimer();
-        queueSave();
-      };
-      el.customTimer.ondblclick = () => {
-        const t = state.prefs.customTimer;
-        t.running = false;
-        t.seconds = 25 * 60;
-        renderCustomTimer();
-        queueSave();
-      };
-      el.customTimer.oncontextmenu = e => {
-        e.preventDefault();
-        const mins = Number(prompt('Timer minutes', String(Math.ceil((state.prefs.customTimer.seconds||1500)/60))) || 25);
-        const label = prompt('Timer label', state.prefs.customTimer.label || 'Study');
-        state.prefs.customTimer.seconds = Math.max(1, mins) * 60;
-        state.prefs.customTimer.label = (label || 'Study').slice(0,16);
-        state.prefs.customTimer.running = false;
-        renderCustomTimer();
-        queueSave();
-      };
-
-      $('tb-quick-note').onclick = () => {
-        if (el.quickNotePop.style.display === 'block') hideQuickNote();
-        else showQuickNote();
-      };
-      $('tb-show-desktop').onclick = () => {
-        document.querySelectorAll('.window').forEach(w => { w.style.display = 'none'; w.classList.remove('active'); });
-        activeWindowId = '';
-        setActiveTaskbar('');
-      renderCustomTimer();
-      };
-      $('tb-annot').onclick = () => {
-        el.annotOverlay.style.display = 'block';
-        el.annotTools.style.display = 'flex';
-      };
-
-      $('add-space').onclick = () => {
-        const name = prompt('New space name?');
-        if (!name?.trim()) return;
-        const n = name.trim();
-        if (state.spaceOrder.includes(n)) return;
-        state.spaceOrder.push(n);
-        const sp = baseSpace(n);
-        sp.selectedNoteId = sp.notes[0].id;
-        sp.browser.activeTabId = sp.browser.tabs[0].id;
-        state.spaces[n] = sp;
-        state.currentSpace = n;
-        renderAll();
-        queueSave();
-      };
-      $('rename-space').onclick = () => {
-        const cur = state.currentSpace;
-        const next = prompt('Rename space', cur);
-        if (!next?.trim() || next.trim() === cur || state.spaceOrder.includes(next.trim())) return;
-        const n = next.trim();
-        state.spaces[n] = state.spaces[cur];
-        delete state.spaces[cur];
-        state.spaceOrder = state.spaceOrder.map(x => x === cur ? n : x);
-        state.currentSpace = n;
-        renderAll();
-        queueSave();
-      };
-      $('delete-space').onclick = () => {
-        if (state.spaceOrder.length <= 1) return;
-        if (!confirm(`Delete space ${state.currentSpace}?`)) return;
-        delete state.spaces[state.currentSpace];
-        state.spaceOrder = state.spaceOrder.filter(x => x !== state.currentSpace);
-        state.currentSpace = state.spaceOrder[0];
-        renderAll();
-        queueSave();
-      };
-
-      el.startSearch.oninput = () => renderStart(el.startSearch.value || '');
-
-      [...document.querySelectorAll('.tb-btn[data-open]')].forEach(n => n.onclick = () => launchApp(n.dataset.open));
-
-      $('btn-login').onclick = async () => signInWithPopup(auth, provider);
-      $('btn-logout').onclick = async () => signOut(auth);
-
-      $('sync-now').onclick = saveNow;
-      $('open-desktop-from-dashboard').onclick = () => $('tb-show-desktop').click();
-
-      $('quick-note-save').onclick = () => {
-        const text = el.quickNoteText.value.trim();
-        if (!text) return;
-        const sp = getSpace();
-        sp.quickNotes.unshift({ id: crypto.randomUUID(), text, at: Date.now() });
-        sp.vault.unshift({ text, at: Date.now() });
-        el.quickNoteText.value = '';
-        addHighlight('quick-note', text, 'Quick note');
-        renderVault();
-        renderDashboard();
-        logStudyEvent('quick-note', { len: text.length });
-        queueSave();
-      };
-
-      $('note-new').onclick = () => {
-        const sp = getSpace();
-        const n = { id: crypto.randomUUID(), title:'', content:'', updatedAt: Date.now() };
-        sp.notes.unshift(n);
-        sp.selectedNoteId = n.id;
-        renderNotes();
-        queueSave();
-      };
-      $('note-delete').onclick = () => {
-        const sp = getSpace();
-        if (sp.notes.length <= 1) return;
-        sp.notes = sp.notes.filter(n => n.id !== sp.selectedNoteId);
-        sp.selectedNoteId = sp.notes[0].id;
-        renderNotes();
-        queueSave();
-      };
-      $('note-save').onclick = saveCurrentNote;
-      $('note-highlight').onclick = () => {
-        const start = el.noteContent.selectionStart || 0;
-        const end = el.noteContent.selectionEnd || 0;
-        if (end <= start) return;
-        const selected = el.noteContent.value.slice(start, end);
-        el.noteContent.setRangeText(`==${selected}==`, start, end, 'end');
-        addHighlight('notes', selected, el.noteTitle.value || 'Untitled');
-        saveCurrentNote();
-      };
-      $('pin-to-vault').onclick = () => {
-        saveCurrentNote();
-        const sp = getSpace();
-        const cur = sp.notes.find(n => n.id === sp.selectedNoteId);
-        if (!cur) return;
-        sp.vault.unshift({ text: `${cur.title || 'Untitled'}: ${cur.content.slice(0, 250)}`, at: Date.now() });
-        addHighlight('notes-pin', cur.title || 'Untitled', 'Pinned summary');
-        renderVault();
-        queueSave();
-      };
-      el.noteTitle.addEventListener('input', () => { if (state.prefs.autosave) saveCurrentNote(); });
-      el.noteContent.addEventListener('input', () => { if (state.prefs.autosave) saveCurrentNote(); });
-
-      $('task-add').onclick = () => {
-        const t = $('task-title').value.trim();
-        if (!t) return;
-        getSpace().tasks.unshift({ id: crypto.randomUUID(), title:t, subject:$('task-subject').value.trim(), due:$('task-due').value || '', done:false, at:Date.now() });
-        $('task-title').value = '';
-        renderTasks();
-        queueSave();
-      };
-
-      $('browser-new-tab').onclick = () => {
-        const b = getSpace().browser;
-        const t = { id: crypto.randomUUID(), title:'New Tab', url: state.prefs.homepage || 'https://www.google.com' };
-        b.tabs.push(t);
-        b.activeTabId = t.id;
-        renderBrowserTabs();
-        loadActiveTab();
-        queueSave();
-      };
-      $('browser-go').onclick = () => navigateBrowser(el.browserUrl.value);
-      $('browser-highlight').onclick = () => {
-        const text = prompt('Save important point from this site:');
-        if (!text?.trim()) return;
-        const tab = getActiveTab();
-        addHighlight('browser', text.trim(), tab?.url || '');
-        getSpace().vault.unshift({ text: `[Web] ${text.trim()}`, at: Date.now() });
-        renderVault();
-      };
-      el.browserUrl.addEventListener('keydown', e => e.key === 'Enter' && navigateBrowser(el.browserUrl.value));
-      $('browser-open-external').onclick = () => {
-        const url = getActiveTab()?.url;
-        if (url) window.open(url, '_blank');
-      };
-      $('install-webapp').onclick = () => {
-        const url = (el.browserUrl.value || '').trim();
-        if (!url) return;
-        let host = 'Web App';
-        try { host = new URL(url).hostname.replace('www.',''); } catch {}
-        const name = prompt('App name', host);
-        if (!name?.trim()) return;
-        const id = `webapp:${crypto.randomUUID()}`;
-        getSpace().apps.push({ id, name: name.trim(), icon:'🌐', type:'webapp', url });
-        logStudyEvent('install-app', { name: name.trim(), url });
-        renderDesktop();
-        renderStart(el.startSearch.value || '');
-        queueSave();
-      };
-      $('uninstall-webapp').onclick = () => {
-        const apps = getSpace().apps.filter(a => a.type === 'webapp');
-        if (!apps.length) return alert('No installed apps in this space.');
-        const picked = prompt(`Uninstall which app?\n${apps.map((a,i)=>`${i+1}. ${a.name}`).join('\n')}`);
-        const idx = Number(picked) - 1;
-        if (!Number.isInteger(idx) || idx < 0 || idx >= apps.length) return;
-        const target = apps[idx];
-        getSpace().apps = getSpace().apps.filter(a => a.id !== target.id);
-        logStudyEvent('uninstall-app', { name: target.name });
-        renderDesktop();
-        renderStart(el.startSearch.value || '');
-        queueSave();
-      };
-
-      $('add-book').onclick = async () => {
-        const file = $('pdf-upload').files?.[0];
-        if (!file) return;
-        const ext = (file.name.split('.').pop() || '').toLowerCase();
-        const title = $('book-title').value.trim() || file.name.replace(/\.[^.]+$/i, '');
-        const dataUrl = await new Promise((resolve, reject) => {
-          const fr = new FileReader();
-          fr.onload = () => resolve(fr.result);
-          fr.onerror = reject;
-          fr.readAsDataURL(file);
-        });
-        const sp = getSpace();
-        const bookId = crypto.randomUUID();
-        sp.books.unshift({ id: bookId, title, dataUrl, addedAt: Date.now(), mime: file.type || '', ext });
-        await savePDFToDB(bookId, dataUrl);
-        currentBookTitle = title;
-        logStudyEvent('book-add', { title, type: ext });
-        renderBooks();
-        await openStudyBook(sp.books[0]);
-        queueSave();
-      };
-      $('pdf-highlight').onclick = () => {
-        const text = prompt('Save important point from this PDF:');
-        if (!text?.trim()) return;
-        addHighlight('pdf', text.trim(), $('book-title').value || 'PDF');
-        getSpace().vault.unshift({ text: `[PDF] ${text.trim()}`, at: Date.now() });
-        renderVault();
-      };
-
-      let drawing = false;
-      let lx = 0, ly = 0;
-      const sctx = () => el.studioCanvas.getContext('2d');
-      el.studioCanvas.addEventListener('mousedown', e => {
-        drawing = true;
-        const r = el.studioCanvas.getBoundingClientRect();
-        lx = e.clientX - r.left; ly = e.clientY - r.top;
-      });
-      window.addEventListener('mouseup', () => { if (drawing) { drawing = false; persistStudioCanvas(); } });
-      el.studioCanvas.addEventListener('mousemove', e => {
-        if (!drawing) return;
-        const r = el.studioCanvas.getBoundingClientRect();
-        const x = e.clientX - r.left, y = e.clientY - r.top;
-        const ctx = sctx();
-        ctx.strokeStyle = '#1d4ed8';
-        ctx.lineWidth = 2;
-        ctx.lineCap = 'round';
-        ctx.beginPath();
-        ctx.moveTo(lx, ly);
-        ctx.lineTo(x, y);
-        ctx.stroke();
-        lx = x; ly = y;
-      });
-      $('studio-clear').onclick = () => {
-        const ctx = sctx();
-        ctx.fillStyle = '#fff';
-        ctx.fillRect(0,0,el.studioCanvas.width,el.studioCanvas.height);
-        persistStudioCanvas();
-      };
-      $('studio-add-sticky').onclick = () => {
-        const text = prompt('Sticky text');
-        if (!text?.trim()) return;
-        getSpace().studio.stickies.unshift({ text:text.trim(), at:Date.now() });
-        renderStudio();
-        queueSave();
-      };
-      $('studio-save').onclick = () => { persistStudioCanvas(); renderStudio(); };
 
       $('vault-add').onclick = () => {
         const text = $('vault-input').value.trim();
@@ -1935,7 +1634,6 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       renderNotes();
       renderTasks();
       renderBooks();
-      renderStudio();
       renderVault();
       renderDashboard();
       renderBrowserTabs();
@@ -2082,6 +1780,60 @@ function renderRevisionSummary() {
   $('revision-output').innerHTML = `<div class="panel" style="padding:8px;"><b>Quick Revision Deck</b><br>Important formulas:<br>${formulas || 'No formulas yet'}<br><br>Important highlights:<br>${highlights || 'No highlights yet'}<br><br>Concept summaries:<br>${concepts || 'No concepts yet'}</div>`;
 }
 
+
+function injectLetterpads() {
+  document.querySelectorAll('.window').forEach(w => {
+    if (w.querySelector('.app-letterpad')) return;
+    const pad = document.createElement('div');
+    pad.className = 'app-letterpad';
+    pad.innerHTML = `<div style="display:flex;gap:6px;align-items:center;"><b style="margin-right:auto;">Letterpad</b><button class="btn" data-lp-save>Save→Notes</button><button class="btn" data-lp-ocr>OCR→Tab</button></div><textarea class="field" data-lp-input placeholder="Quick idea / formula / derivation"></textarea><div class="lp-preview" data-lp-preview>Live LaTeX preview</div>`;
+    w.appendChild(pad);
+    const input = pad.querySelector('[data-lp-input]');
+    const preview = pad.querySelector('[data-lp-preview]');
+    const update = () => {
+      const v = input.value || '';
+      preview.innerHTML = esc(v).replace(/\n/g, '<br>');
+      if (window.MathJax?.typesetPromise) MathJax.typesetPromise([preview]).catch(()=>{});
+    };
+    input.addEventListener('input', update);
+    update();
+    pad.querySelector('[data-lp-save]').onclick = () => {
+      const txt = input.value.trim();
+      if (!txt) return;
+      const sp = getSpace();
+      const cur = sp.notes.find(n => n.id === sp.selectedNoteId) || sp.notes[0];
+      if (!cur) return;
+      cur.content = `${cur.content || ''}
+
+[Letterpad • ${w.id}]
+${txt}`.trim();
+      cur.blocks = cur.blocks || [];
+      cur.blocks.push({ type:'text', text: txt, at: Date.now(), source:w.id });
+      cur.updatedAt = Date.now();
+      addKnowledgeFromText(txt, `Letterpad:${w.id}`, '');
+      renderNotes();
+      queueSave();
+      showToast('Letterpad saved to Notes');
+    };
+    pad.querySelector('[data-lp-ocr]').onclick = async () => {
+      let txt = input.value.trim();
+      if (!txt && pdfDoc) txt = await runOCRForPage(pdfPage);
+      if (!txt) txt = (w.querySelector('textarea.field')?.value || w.innerText || '').slice(0, 4000);
+      $('ocr-center-text').textContent = txt || 'No OCR text available.';
+      openWindow('ocr-window');
+      queueSave();
+    };
+  });
+}
+
+async function runOCROnCurrentView() {
+  if (pdfDoc) return runOCRForPage(pdfPage);
+  const active = document.querySelector('.window.active');
+  if (!active) return '';
+  const t = (active.querySelector('textarea.field')?.value || active.innerText || '').slice(0, 5000);
+  return t;
+}
+
 function setupContextMenus() {
   const desktopCtx = $('desktop-context');
   const winCtx = $('window-context');
@@ -2190,15 +1942,6 @@ function setupAdvancedBindings() {
   $('pdf-prev').onclick = () => { if (!pdfDoc || pdfPage <= 1) return; pdfPage--; renderPage(); renderThumbnails(); };
   $('pdf-zoom-in').onclick = () => { pdfScale += 0.15; renderPage(); if (splitPDF) renderPage(true); };
   $('pdf-zoom-out').onclick = () => { pdfScale = Math.max(0.6, pdfScale - 0.15); renderPage(); if (splitPDF) renderPage(true); };
-  $('pdf-toggle-split').onclick = () => {
-    splitPDF = !splitPDF;
-    $('pdf-canvas-2').style.display = splitPDF ? 'block' : 'none';
-    if (splitPDF) {
-      const sp = getSpace();
-      const second = sp.books[1]?.dataUrl;
-      if (second) loadPDF(second, true);
-    }
-  };
   $('pdf-run-search').onclick = async () => {
     const q = ($('pdf-search').value || '').trim().toLowerCase();
     if (!q) return;
@@ -2324,6 +2067,24 @@ ${quiz}`.trim();
   };
   $('focus-stop').onclick = () => clearInterval(pomodoroTimer);
   $('focus-fullscreen').onclick = () => document.documentElement.requestFullscreen?.();
+  $('ocr-run-current').onclick = async () => {
+    $('ocr-center-text').textContent = 'Processing OCR...';
+    const txt = await runOCROnCurrentView();
+    $('ocr-center-text').textContent = txt || 'No OCR content found for current app.';
+  };
+  $('ocr-send-to-notes').onclick = () => {
+    const txt = ($('ocr-center-text').textContent || '').trim();
+    if (!txt) return;
+    const sp = getSpace();
+    const cur = sp.notes.find(n => n.id === sp.selectedNoteId) || sp.notes[0];
+    if (!cur) return;
+    cur.content = `${cur.content || ''}\n\n[OCR Capture]\n${txt.slice(0,2000)}`.trim();
+    cur.updatedAt = Date.now();
+    addKnowledgeFromText(txt.slice(0,600), 'OCR', pdfPage || '');
+    renderNotes();
+    queueSave();
+    showToast('OCR sent to Notes');
+  };
 
 
   $('pdf-canvas').addEventListener('contextmenu', e => {
@@ -2415,6 +2176,7 @@ async function getPDFFromDB(id) {
   } catch { return null; }
 }
 
+injectLetterpads();
 setupContextMenus();
 setupAdvancedBindings();
 
