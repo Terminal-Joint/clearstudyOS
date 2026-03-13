@@ -404,7 +404,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       max-height: calc(100vh - 90px);
       z-index: 15000;
       display: none;
-      grid-template-rows: auto auto 1fr auto;
+      grid-template-rows: auto 1fr auto auto;
       gap: 8px;
       padding: 10px;
       border-radius: 12px;
@@ -414,7 +414,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       box-shadow: 0 22px 60px rgba(0,0,0,.45);
     }
     .global-letterpad textarea { width:100%; min-height:120px; resize:vertical; }
-    .global-letterpad .lp-preview { overflow:auto; min-height:80px; border:1px solid var(--line); border-radius:8px; padding:8px; }
+    #mobile-letterpad-fab { display:none; position:fixed; right:14px; bottom:74px; z-index:15500; background:var(--accent); border-color:transparent; }
     .window .app-body { position: relative; }
 
     #bookshelf { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:12px; padding:10px; align-content:start; }
@@ -444,6 +444,14 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       #tb-center .tb-btn { min-width: 30px; padding: 0 6px; }
       #pdf-window .toolbar { gap: 4px; }
       .toolbar .btn, .toolbar .field { padding: 5px 7px; }
+      #mobile-letterpad-fab { display:grid; place-items:center; }
+      #tb-letterpad { display:none; }
+      #notes-window .toolbar { grid-template-columns: 1fr !important; }
+      #notes-window .app-body > aside:last-child { display:none; }
+      #notes-mobile-tabs { display:flex !important; }
+      #notes-layout.mobile-pane-list > section, #notes-layout.mobile-pane-list > aside:last-child { display:none; }
+      #notes-layout.mobile-pane-editor > aside:first-child, #notes-layout.mobile-pane-editor > aside:last-child { display:none; }
+      #notes-layout.mobile-pane-knowledge > aside:first-child, #notes-layout.mobile-pane-knowledge > section { display:none; }
     }
 
   </style>
@@ -501,15 +509,20 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
     <div class="titlebar" data-window="notes-window"><div class="title">Notes</div><div class="w-controls"><button class="ctrl min" data-close="notes-window">—</button><button class="ctrl max" data-max="notes-window">▢</button><button class="ctrl close" data-close="notes-window">✕</button></div></div>
     <div class="toolbar" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;">
       <div class="panel" style="padding:6px;display:flex;gap:6px;flex-wrap:wrap;"><b>File</b><button class="btn" id="note-new">New</button><button class="btn primary" id="note-save">Save</button><button class="btn" id="note-delete">Delete</button></div>
-      <div class="panel" style="padding:6px;display:flex;gap:6px;flex-wrap:wrap;"><b>Blocks</b><select id="note-block-type" class="field" style="max-width:120px;"><option value="text">Text</option><option value="heading">Heading</option><option value="formula">Formula</option><option value="checklist">Checklist</option><option value="quote">Quote</option><option value="code">Code</option><option value="image">Image</option></select><button class="btn" id="note-add-block">Add</button></div>
+      <div class="panel" style="padding:6px;display:flex;gap:6px;flex-wrap:wrap;"><b>Blocks</b><select id="note-block-type" class="field" style="max-width:120px;"><option value="heading">Heading</option><option value="text">Text</option><option value="concept">Concept</option><option value="formula">Formula</option><option value="example">Example</option><option value="question">Question</option><option value="image">Image</option><option value="checklist">Checklist</option></select><button class="btn" id="note-add-block">Add</button></div>
       <div class="panel" style="padding:6px;display:flex;gap:6px;flex-wrap:wrap;"><b>Study</b><button class="btn" id="note-generate-flashcards">Flashcards</button><button class="btn" id="note-quick-revision">Revision</button><button class="btn" id="note-generate-quiz">Quiz</button></div>
       <div class="panel" style="padding:6px;display:flex;gap:6px;flex-wrap:wrap;"><b>Format</b><button class="btn" id="note-bold">B</button><button class="btn" id="note-italic">I</button><button class="btn" id="note-h1">H1</button><button class="btn" id="note-h2">H2</button><button class="btn" id="note-code">Code</button><button class="btn" id="note-quote">Quote</button></div>
     </div>
-    <div class="app-body" style="display:grid;grid-template-columns:220px 1fr 280px;gap:8px;min-height:0;">
+    <div id="notes-mobile-tabs" class="toolbar" style="display:none;gap:6px;padding-top:0;">
+      <button class="btn" data-note-pane="list">Notes</button>
+      <button class="btn" data-note-pane="editor">Editor</button>
+      <button class="btn" data-note-pane="knowledge">Knowledge</button>
+    </div>
+    <div class="app-body" id="notes-layout" style="display:grid;grid-template-columns:220px 1fr 280px;gap:8px;min-height:0;">
       <aside class="panel" style="overflow:auto;"><div id="notes-list" style="overflow:auto;"></div></aside>
       <section class="panel" style="display:flex;flex-direction:column;gap:8px;padding:8px;">
         <input id="note-title" class="field" placeholder="Title">
-        <input id="note-block-input" class="field" placeholder="Type /concept, /formula, /example, /mistake then Enter">
+        <input id="note-block-input" class="field" placeholder="Type /concept, /formula, /example, /question then Enter">
         <div id="note-blocks" style="display:grid;gap:8px;overflow:auto;min-height:220px;"></div>
         <input type="hidden" id="note-content" value="">
       </section>
@@ -535,7 +548,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       <div id="browser-tabs"></div>
     </div>
     <div class="toolbar"><button class="btn" id="browser-new-tab">+ Tab</button><input id="browser-url" class="field" style="flex:1;" placeholder="Search Google or enter URL"><button class="btn primary" id="browser-go">Go</button><button class="btn" id="browser-highlight">Save Highlight</button><button class="btn" id="browser-open-external">Open External</button><button class="btn" id="install-webapp">Install App</button><button class="btn" id="uninstall-webapp">Uninstall App</button></div>
-    <div class="app-body" style="padding:8px;"><iframe id="browser-frame" src="https://www.wikipedia.org" referrerpolicy="no-referrer"></iframe></div>
+    <div class="app-body" style="padding:8px;"><iframe id="browser-frame" src="about:blank" referrerpolicy="no-referrer"></iframe></div>
   </section>
 
   <section id="pdf-window" class="window" style="left:150px;top:80px;width:min(1200px,96vw);height:min(760px,88vh);">
@@ -674,11 +687,11 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
     <div id="tb-right"><button class="tb-btn" id="tb-quick-note" title="Quick note">🗒️</button><div class="pill" id="space-pill">Space</div><div class="pill" id="status-pill">Saved</div><div class="pill" id="custom-timer-pill" title="Click start/pause • Right click customize">Timer 25:00</div><div class="pill" id="clock-pill"></div><button class="tb-btn" id="btn-login" title="Login">👤</button><button class="tb-btn" id="btn-logout" title="Logout" style="display:none;">⇦</button></div>
   </div>
 
+  <button id="mobile-letterpad-fab" class="tb-btn" title="Quick capture">✏️</button>
   <aside id="global-letterpad" class="global-letterpad">
     <div style="display:flex;align-items:center;gap:8px;"><b style="margin-right:auto;">Letterpad</b><button class="btn" id="lp-close">Close</button></div>
-    <textarea id="lp-input" class="field" placeholder="Write idea quickly..."></textarea>
+    <textarea id="lp-input" class="field" placeholder="Write idea / formula / concept..."></textarea>
     <select id="lp-tag" class="field"><option value="concept">Concept</option><option value="formula">Formula</option><option value="doubt">Doubt</option><option value="idea">Idea</option></select>
-    <div id="lp-preview" class="lp-preview">Live preview</div>
     <div style="display:flex;gap:6px;"><button class="btn primary" id="lp-save-notes">Save → Notes</button><button class="btn" id="lp-save-vault">Save → Vault</button><button class="btn" id="lp-clear">Clear</button></div>
   </aside>
 
@@ -729,7 +742,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       desktop: $('desktop'), startMenu: $('start-menu'), startSearch: $('start-search'), startGrid: $('start-grid'),
       spaces: $('spaces'), recommendedList: $('recommended-list'), quickNotePop: $('quick-note-pop'), quickNoteText: $('quick-note-text'),
       notesList: $('notes-list'), noteTitle: $('note-title'), noteContent: $('note-content'), taskList: $('task-list'),
-      notesHighlights: $('notes-highlights'), noteLinks: $('note-links'), startPinned: $('start-pinned'), knowledgeCardsList: $('knowledge-cards-list'), noteLivePreview: $('note-live-preview'), noteBlockInput: $('note-block-input'), floatingHl: $('floating-highlight-toolbar'), pdfSlider: $('pdf-page-slider'), detectedConcepts: $('detected-concepts'), lpPanel: $('global-letterpad'), lpInput: $('lp-input'), lpTag: $('lp-tag'), lpPreview: $('lp-preview'),
+      notesHighlights: $('notes-highlights'), noteLinks: $('note-links'), startPinned: $('start-pinned'), knowledgeCardsList: $('knowledge-cards-list'), noteLivePreview: $('note-live-preview'), noteBlockInput: $('note-block-input'), floatingHl: $('floating-highlight-toolbar'), pdfSlider: $('pdf-page-slider'), detectedConcepts: $('detected-concepts'), lpPanel: $('global-letterpad'), lpInput: $('lp-input'), lpTag: $('lp-tag'),
       browserTabs: $('browser-tabs'), browserUrl: $('browser-url'), browserFrame: $('browser-frame'),
       vaultList: $('vault-list'),
       status: $('status-pill'), clock: $('clock-pill'), customTimer: $('custom-timer-pill'), spacePill: $('space-pill'),
@@ -1438,6 +1451,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       const tab = getActiveTab();
       if (!tab) return;
       el.browserUrl.value = tab.url;
+      if (!tab.url || tab.url === 'about:blank') { el.browserFrame.src = 'about:blank'; return; }
       if (isKnownFrameBlocked(tab.url)) {
         setBrowserBlockedMessage(tab.url);
       } else {
@@ -1626,20 +1640,8 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
         activeWindowId = '';
         setActiveTaskbar('');
       };
-      $('tb-letterpad').onclick = () => { el.lpPanel.style.display = 'grid'; el.lpInput.focus(); };
-
-      $('quick-note-save').onclick = () => {
-        const text = (el.quickNoteText.value || '').trim();
-        if (!text) return;
-        const sp = getSpace();
-        sp.quickNotes.unshift({ text, at: Date.now() });
-        sp.notes.unshift({ id: crypto.randomUUID(), title: 'Quick note', content: text, updatedAt: Date.now(), blocks: [{ type:'text', text, at: Date.now() }] });
-        sp.selectedNoteId = sp.notes[0].id;
-        el.quickNoteText.value = '';
-        renderNotes();
-        hideQuickNote();
-        queueSave();
-      };
+      if ($('tb-letterpad')) $('tb-letterpad').onclick = () => { el.lpPanel.style.display = 'grid'; el.lpInput.focus(); };
+      if ($('mobile-letterpad-fab')) $('mobile-letterpad-fab').onclick = () => { el.lpPanel.style.display = 'grid'; el.lpInput.focus(); };
 
       $('quick-note-save').onclick = () => {
         const text = (el.quickNoteText.value || '').trim();
@@ -1717,7 +1719,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
         e.preventDefault();
         const raw = (el.noteBlockInput.value || '').trim();
         if (!raw) return;
-        const map = { '/concept':'heading', '/formula':'formula', '/example':'quote', '/mistake':'checklist', '/question':'text' };
+        const map = { '/concept':'concept', '/formula':'formula', '/example':'example', '/question':'question' };
         const cmd = raw.split(' ')[0].toLowerCase();
         const type = map[cmd] || $('note-block-type').value || 'text';
         const text = map[cmd] ? raw.slice(cmd.length).trim() || 'New block' : raw;
@@ -1730,14 +1732,14 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
         renderNoteBlocks();
         saveCurrentNote();
       };
-      $('pin-to-vault').onclick = () => {
+      if ($('pin-to-vault')) $('pin-to-vault').onclick = () => {
         const t = currentNoteText();
         if (!t) return;
         getSpace().vault.unshift({ text: t.slice(0,300), at: Date.now() });
         renderVault();
         queueSave();
       };
-      $('note-highlight').onclick = () => {
+      if ($('note-highlight')) $('note-highlight').onclick = () => {
         const sel = window.getSelection?.().toString().trim();
         if (!sel) return;
         addHighlight('notes', sel, 'selection');
@@ -1755,7 +1757,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
 
       $('browser-new-tab').onclick = () => {
         const b = getSpace().browser;
-        const t = { id: crypto.randomUUID(), title:'New Tab', url: state.prefs.homepage || 'https://www.wikipedia.org' };
+        const t = { id: crypto.randomUUID(), title:'New Tab', url: state.prefs.homepage || 'about:blank' };
         b.tabs.push(t);
         b.activeTabId = t.id;
         renderBrowserTabs();
@@ -1800,7 +1802,7 @@ ${sel}
           if (state.prefs.autosave) saveCurrentNote();
         };
       });
-      $('open-split-study').onclick = () => {
+      if ($('open-split-study')) $('open-split-study').onclick = () => {
         openWindow('pdf-window');
         const p = $('pdf-window');
         const n = $('notes-window');
@@ -2312,6 +2314,10 @@ function setupAdvancedBindings() {
     renderRevisionSummary(); queueSave();
   };
 
+  $('[data-note-pane="list"]')?.addEventListener('click', ()=> { const nl = $('notes-layout'); if (nl) nl.className='app-body mobile-pane-list'; });
+  $('[data-note-pane="editor"]')?.addEventListener('click', ()=> { const nl = $('notes-layout'); if (nl) nl.className='app-body mobile-pane-editor'; });
+  $('[data-note-pane="knowledge"]')?.addEventListener('click', ()=> { const nl = $('notes-layout'); if (nl) nl.className='app-body mobile-pane-knowledge'; });
+
   $('note-add-block').onclick = () => {
     const sp = getSpace();
     const cur = sp.notes.find(n => n.id === sp.selectedNoteId);
@@ -2323,7 +2329,7 @@ function setupAdvancedBindings() {
     renderNoteBlocks(); saveCurrentNote();
   };
   $('note-generate-flashcards').onclick = () => { createFlashcardsFromContent(); openWindow('flashcards-window'); };
-  $('note-exam-template').onclick = () => {
+  if ($('note-exam-template')) $('note-exam-template').onclick = () => {
     const tpl = `# Chapter
 ## Definitions
 -
@@ -2369,14 +2375,8 @@ function setupAdvancedBindings() {
   };
   $('focus-stop').onclick = () => clearInterval(pomodoroTimer);
   $('focus-fullscreen').onclick = () => document.documentElement.requestFullscreen?.();
-  const lpRender = () => {
-    const t = el.lpInput.value || '';
-    el.lpPreview.innerHTML = esc(t).replace(/\n/g,'<br>');
-    if (window.MathJax?.typesetPromise) MathJax.typesetPromise([el.lpPreview]).catch(()=>{});
-  };
-  el.lpInput.oninput = lpRender; lpRender();
-  $('lp-close').onclick = () => el.lpPanel.style.display = 'none';
-  $('lp-clear').onclick = () => { el.lpInput.value=''; lpRender(); };
+    $('lp-close').onclick = () => el.lpPanel.style.display = 'none';
+  $('lp-clear').onclick = () => { el.lpInput.value=''; };
   $('lp-save-vault').onclick = () => {
     const txt = (el.lpInput.value || '').trim(); if (!txt) return;
     getSpace().vault.unshift({ text: `[${el.lpTag.value}] ${txt}`, at: Date.now() });
@@ -2386,8 +2386,15 @@ function setupAdvancedBindings() {
     const txt = (el.lpInput.value || '').trim(); if (!txt) return;
     const sp = getSpace(); const cur = sp.notes.find(n => n.id === sp.selectedNoteId) || sp.notes[0]; if (!cur) return;
     cur.blocks = cur.blocks || [];
-    const typeMap = { concept:'heading', formula:'formula', doubt:'quote', idea:'text' };
-    cur.blocks.push({ type:typeMap[el.lpTag.value] || 'text', text: txt, at: Date.now(), source:'letterpad' });
+        const detectTypeFromText = (text, selected='idea') => {
+      if (selected && selected !== 'idea') return selected === 'doubt' ? 'question' : selected;
+      const t = String(text || '').trim();
+      if (/=|∑|∫|\b(sigma|delta|vector)\b|\^|\\frac|\\sum|\\int/i.test(t)) return 'formula';
+      if (/\?$/.test(t)) return 'question';
+      if (t.length < 140) return 'concept';
+      return 'text';
+    };
+    cur.blocks.push({ type: detectTypeFromText(txt, el.lpTag.value), text: txt, at: Date.now(), source:'letterpad' });
     addKnowledgeFromText(txt, 'Letterpad', '');
     renderNoteBlocks(); saveCurrentNote();
     showToast('Saved to Notes');
