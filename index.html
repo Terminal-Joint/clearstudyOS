@@ -396,6 +396,21 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       #taskbar { height: 52px; }
       .window { width: calc(100vw - 16px); height: calc(100vh - 72px); left: 8px; top: 8px; }
     }
+
+    @media (max-width: 900px) {
+      #pdf-window .app-body { grid-template-columns: 1fr !important; grid-template-rows: 180px minmax(0,1fr) 220px; }
+      #notes-window .app-body { grid-template-columns: 1fr !important; }
+      #tb-right { gap: 4px; }
+      #tb-right .pill { padding: 4px 7px; font-size: 11px; }
+    }
+    @media (max-width: 560px) {
+      #taskbar { left: 4px; right: 4px; bottom: 4px; padding: 0 6px; }
+      #tb-center { gap: 4px; }
+      #tb-center .tb-btn { min-width: 30px; padding: 0 6px; }
+      #pdf-window .toolbar { gap: 4px; }
+      .toolbar .btn, .toolbar .field { padding: 5px 7px; }
+    }
+
   </style>
 </head>
 <body>
@@ -449,7 +464,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
 
   <section id="notes-window" class="window" style="left:100px;top:70px;">
     <div class="titlebar" data-window="notes-window"><div class="title">Notes</div><div class="w-controls"><button class="ctrl min" data-close="notes-window">—</button><button class="ctrl max" data-max="notes-window">▢</button><button class="ctrl close" data-close="notes-window">✕</button></div></div>
-    <div class="toolbar"><button class="btn" id="note-new">New</button><button class="btn" id="note-delete">Delete</button><button class="btn primary" id="note-save">Save</button><button class="btn" id="note-highlight">Highlight Selection</button><button class="btn" id="pin-to-vault">Pin to Vault</button><select id="note-block-type" class="field" style="max-width:140px;"><option value="text">Text</option><option value="heading">Heading</option><option value="formula">Formula</option><option value="checklist">Checklist</option><option value="quote">Quote</option><option value="code">Code</option><option value="image">Image</option></select><button class="btn" id="note-add-block">Add Block</button><button class="btn" id="note-generate-flashcards">Flashcards</button><button class="btn" id="note-exam-template">Exam Template</button><button class="btn" id="note-quick-revision">Quick Revision Note</button></div>
+    <div class="toolbar"><button class="btn" id="note-new">New</button><button class="btn" id="note-delete">Delete</button><button class="btn primary" id="note-save">Save</button><button class="btn" id="note-highlight">Highlight Selection</button><button class="btn" id="pin-to-vault">Pin to Vault</button><select id="note-block-type" class="field" style="max-width:140px;"><option value="text">Text</option><option value="heading">Heading</option><option value="formula">Formula</option><option value="checklist">Checklist</option><option value="quote">Quote</option><option value="code">Code</option><option value="image">Image</option></select><button class="btn" id="note-add-block">Add Block</button><button class="btn" id="note-generate-flashcards">Flashcards</button><button class="btn" id="note-exam-template">Exam Template</button><button class="btn" id="note-quick-revision">Quick Revision Note</button><button class="btn" id="note-generate-quiz">Generate Quiz</button></div>
     <div class="app-body split">
       <aside class="panel" style="display:grid;grid-template-rows:1fr 150px 150px;min-height:0;">
         <div id="notes-list" style="overflow:auto;"></div>
@@ -835,28 +850,83 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       return mins;
     }
 
+    function buildCloudPayload(srcState) {
+      const payload = {
+        theme: { ...srcState.theme },
+        prefs: {
+          autosave: !!srcState.prefs.autosave,
+          openStartOnLoad: !!srcState.prefs.openStartOnLoad,
+          homepage: srcState.prefs.homepage || 'https://www.wikipedia.org',
+          customTimer: { ...(srcState.prefs.customTimer || { label:'Study', seconds:1500, running:false, lastTick:0 }) }
+        },
+        currentSpace: srcState.currentSpace,
+        spaceOrder: [...srcState.spaceOrder],
+        spaces: {}
+      };
+      srcState.spaceOrder.forEach(name => {
+        const sp = srcState.spaces[name];
+        payload.spaces[name] = {
+          notes: (sp.notes || []).map(n => ({
+            id: n.id,
+            title: n.title || '',
+            content: n.content || '',
+            blocks: n.blocks || [],
+            updatedAt: n.updatedAt || Date.now()
+          })),
+          selectedNoteId: sp.selectedNoteId || null
+        };
+      });
+      return payload;
+    }
+
+    function mergeCloudIntoLocal(localState, cloudPayload) {
+      if (!cloudPayload) return localState;
+      const merged = normalize(localState);
+      if (cloudPayload.theme) merged.theme = { ...merged.theme, ...cloudPayload.theme };
+      if (cloudPayload.prefs) merged.prefs = { ...merged.prefs, ...cloudPayload.prefs };
+      if (cloudPayload.spaceOrder?.length) merged.spaceOrder = cloudPayload.spaceOrder;
+      if (cloudPayload.currentSpace) merged.currentSpace = cloudPayload.currentSpace;
+      (merged.spaceOrder || []).forEach(name => {
+        const cloudSpace = cloudPayload.spaces?.[name];
+        if (!cloudSpace) return;
+        merged.spaces[name] = merged.spaces[name] || baseSpace(name);
+        merged.spaces[name].notes = (cloudSpace.notes || []).map(n => ({ ...n, updatedAt: n.updatedAt || Date.now() }));
+        if (cloudSpace.selectedNoteId) merged.spaces[name].selectedNoteId = cloudSpace.selectedNoteId;
+      });
+      return normalize(merged);
+    }
+
     async function loadState(user) {
-      if (!user) {
-        try { return normalize(JSON.parse(localStorage.getItem(LOCAL_KEY) || 'null')); }
-        catch { return normalize(null); }
-      }
+      let local = null;
+      try { local = JSON.parse(localStorage.getItem(LOCAL_KEY) || 'null'); }
+      catch { local = null; }
+      if (!user) return normalize(local);
+
       const ref = doc(db, 'users', user.uid, 'studyos', 'state');
       const snap = await getDoc(ref);
-      return normalize(snap.exists() ? snap.data()?.payload : null);
+      const cloud = snap.exists() ? snap.data()?.payload : null;
+      return mergeCloudIntoLocal(local, cloud);
     }
 
     async function saveNow() {
       if (!state) return;
       el.status.textContent = 'Saving...';
       try {
+        localStorage.setItem(LOCAL_KEY, JSON.stringify(state));
         if (!currentUser) {
-          localStorage.setItem(LOCAL_KEY, JSON.stringify(state));
+          el.status.textContent = 'Saved local';
+          return;
+        }
+        const payload = buildCloudPayload(state);
+        const digest = JSON.stringify(payload);
+        if (saveNow._lastCloudDigest === digest) {
           el.status.textContent = 'Saved local';
           return;
         }
         const ref = doc(db, 'users', currentUser.uid, 'studyos', 'state');
-        await setDoc(ref, { payload: state, uid: currentUser.uid, updatedAt: serverTimestamp() }, { merge: true });
-        el.status.textContent = 'Saved Firebase';
+        await setDoc(ref, { payload, uid: currentUser.uid, updatedAt: serverTimestamp() }, { merge: true });
+        saveNow._lastCloudDigest = digest;
+        el.status.textContent = 'Saved Firebase (limited)';
       } catch (err) {
         el.status.textContent = 'Save failed';
         showToast(`Save failed: ${err?.message || 'unknown error'}`, 4200);
@@ -865,7 +935,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
 
     function queueSave() {
       clearTimeout(saveTimer);
-      saveTimer = setTimeout(saveNow, 300);
+      saveTimer = setTimeout(saveNow, 900);
     }
 
     function esc(v='') {
@@ -2226,6 +2296,16 @@ ${tpl}`.trim();
 
 [QUICK REVISION]
 ${summary}`.trim();
+    saveCurrentNote();
+  };
+  $('note-generate-quiz').onclick = () => {
+    const sp = getSpace();
+    const cards = (sp.knowledgeCards || []).slice(0, 6);
+    const quiz = cards.map((c, i) => `${i+1}. Define ${c.concept}.`).join('\n') || '1. Add some knowledge cards first.';
+    el.noteContent.value = `${el.noteContent.value}
+
+[SELF TEST QUIZ]
+${quiz}`.trim();
     saveCurrentNote();
   };
   $('flash-prev').onclick = () => { flashIndex = Math.max(0, flashIndex - 1); renderFlashcardReview(); };
