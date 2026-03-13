@@ -466,7 +466,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
 
 
     @media (max-width: 900px) {
-      #pdf-window .app-body { grid-template-columns: 1fr !important; grid-template-rows: 180px minmax(0,1fr) 220px; }
+      #bookshelf-window .app-body { grid-template-columns: 1fr !important; grid-template-rows: 180px minmax(0,1fr) 220px; }
       .global-letterpad { right: 4px; left: 4px; top: auto; bottom: 64px; width: auto; max-height: 52vh; }
       #notes-window .app-body { grid-template-columns: 1fr !important; }
       #tb-right { gap: 4px; }
@@ -476,7 +476,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       #taskbar { left: 4px; right: 4px; bottom: 4px; padding: 0 6px; }
       #tb-center { gap: 4px; }
       #tb-center .tb-btn { min-width: 30px; padding: 0 6px; }
-      #pdf-window .toolbar { gap: 4px; }
+      #bookshelf-window .toolbar { gap: 4px; }
       .toolbar .btn, .toolbar .field { padding: 5px 7px; }
       #mobile-letterpad-fab { display:grid; place-items:center; }
       #tb-letterpad { display:none; }
@@ -486,9 +486,8 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       #note-add-block-fab { display:grid; }
       #note-blocks .note-block { padding: 12px; }
       #note-blocks .btn { min-height: 34px; }
-      #notes-layout.mobile-pane-list > section, #notes-layout.mobile-pane-list > aside:last-child { display:none; }
-      #notes-layout.mobile-pane-editor > aside:first-child, #notes-layout.mobile-pane-editor > aside:last-child { display:none; }
-      #notes-layout.mobile-pane-knowledge > aside:first-child, #notes-layout.mobile-pane-knowledge > section { display:none; }
+      #notes-layout.mobile-pane-list > section { display:none; }
+      #notes-layout.mobile-pane-editor > aside:first-child { display:none; }
     }
 
   </style>
@@ -553,9 +552,9 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
     <div id="notes-mobile-tabs" class="toolbar" style="display:none;gap:6px;padding-top:0;">
       <button class="btn" data-note-pane="list">Notes</button>
       <button class="btn" data-note-pane="editor">Editor</button>
-      <button class="btn" data-note-pane="knowledge">Knowledge</button>
+
     </div>
-    <div class="app-body" id="notes-layout" style="display:grid;grid-template-columns:220px 1fr 280px;gap:8px;min-height:0;">
+    <div class="app-body" id="notes-layout" style="display:grid;grid-template-columns:260px 1fr;gap:8px;min-height:0;">
       <aside class="panel" style="overflow:auto;"><div id="notes-list" style="overflow:auto;"></div></aside>
       <section class="panel" style="display:flex;flex-direction:column;gap:8px;padding:8px;">
         <input id="note-title" class="field" placeholder="Title">
@@ -566,7 +565,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
         <button class="btn primary" id="note-add-block-fab" title="Add block">+</button>
         <input type="hidden" id="note-content" value="">
       </section>
-      <aside class="panel" style="display:grid;grid-template-rows:1fr 1fr 1fr;gap:8px;overflow:hidden;">
+      <aside class="panel" style="display:none;grid-template-rows:1fr 1fr 1fr;gap:8px;overflow:hidden;">
         <div id="notes-highlights" style="overflow:auto;"></div>
         <div id="note-links" style="overflow:auto;display:none;"></div>
         <div id="note-live-preview" class="panel" style="padding:8px;overflow:auto;"></div>
@@ -591,8 +590,8 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
     <div class="app-body" style="padding:8px;"><iframe id="browser-frame" src="about:blank" referrerpolicy="no-referrer"></iframe></div>
   </section>
 
-  <section id="pdf-window" class="window" style="left:150px;top:80px;width:min(1200px,96vw);height:min(760px,88vh);">
-    <div class="titlebar" data-window="pdf-window"><div class="title">Bookshelf + PDF Workspace</div><div class="w-controls"><button class="ctrl min" data-close="pdf-window">—</button><button class="ctrl max" data-max="pdf-window">▢</button><button class="ctrl close" data-close="pdf-window">✕</button></div></div>
+  <section id="bookshelf-window" class="window" style="left:150px;top:80px;width:min(1200px,96vw);height:min(760px,88vh);">
+    <div class="titlebar" data-window="bookshelf-window"><div class="title">Bookshelf + PDF Workspace</div><div class="w-controls"><button class="ctrl min" data-close="bookshelf-window">—</button><button class="ctrl max" data-max="bookshelf-window">▢</button><button class="ctrl close" data-close="bookshelf-window">✕</button></div></div>
     <div class="toolbar">
 <input id="pdf-upload" type="file" accept=".pdf,.txt,.md,.html,.htm,.mhtml,.png,.jpg,.jpeg,.webp,.gif,.docx">
 <input id="book-title" class="field" placeholder="Book title">
@@ -719,7 +718,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       <button class="tb-btn" data-open="notes-window" title="Notes">📝</button>
       <button class="tb-btn" data-open="planner-window" title="Planner">📅</button>
       <button class="tb-btn" data-open="browser-window" title="Browser">🌐</button>
-      <button class="tb-btn" data-open="pdf-window" title="Bookshelf">📚</button>
+      <button class="tb-btn" data-open="bookshelf-window" title="Bookshelf">📚</button>
 
       <button class="tb-btn" data-open="vault-window" title="Vault">⭐</button>
       <button class="tb-btn" data-open="settings-window" title="Settings">⚙️</button><button class="tb-btn" data-open="flashcards-window" title="Flashcards">🃏</button><button class="tb-btn" data-open="graph-window" title="Concept Map">🕸️</button><button class="tb-btn" data-open="focus-window" title="Focus">⏱️</button><button class="tb-btn" data-open="ocr-window" title="OCR Center">🔎</button>
@@ -765,7 +764,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
     const CORE_APPS = [
       { id:'dashboard-window', name:'Dashboard', icon:'📊' },
       { id:'notes-window', name:'Notes', icon:'📝' },
-      { id:'pdf-window', name:'Bookshelf', icon:'📚' },
+      { id:'bookshelf-window', name:'Bookshelf', icon:'📚' },
       { id:'focus-window', name:'Focus', icon:'⏱️' },
       { id:'settings-window', name:'Settings', icon:'⚙️' }
     ];
@@ -1670,6 +1669,13 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
         activeWindowId = '';
         setActiveTaskbar('');
       };
+      const startTimer = () => { const t = state.prefs.customTimer; if (t.running) return; t.running = true; t.lastTick = Date.now(); renderCustomTimer(); queueSave(); };
+      const pauseTimer = () => { const t = state.prefs.customTimer; t.running = false; renderCustomTimer(); queueSave(); };
+      const resetTimer = () => { const t = state.prefs.customTimer; t.running = false; t.seconds = 25*60; t.lastTick = 0; t.label = t.label || 'Study'; renderCustomTimer(); queueSave(); };
+      if (el.customTimer) {
+        el.customTimer.onclick = () => { const t = state.prefs.customTimer; t.running ? pauseTimer() : startTimer(); };
+        el.customTimer.ondblclick = () => resetTimer();
+      }
       if ($('tb-letterpad')) $('tb-letterpad').onclick = () => { el.lpPanel.style.display = 'grid'; el.lpInput.focus(); };
       if ($('mobile-letterpad-fab')) $('mobile-letterpad-fab').onclick = () => { el.lpPanel.style.display = 'grid'; el.lpInput.focus(); };
 
@@ -1849,8 +1855,8 @@ ${sel}
         };
       });
       if ($('open-split-study')) $('open-split-study').onclick = () => {
-        openWindow('pdf-window');
-        const p = $('pdf-window');
+        openWindow('bookshelf-window');
+        const p = $('bookshelf-window');
         const n = $('notes-window');
         const f = $('flashcards-window');
         p.style.left='6px'; p.style.top='8px'; p.style.width='calc(42vw - 8px)'; p.style.height='calc(100vh - var(--taskbar-h) - 20px)';
@@ -2136,55 +2142,13 @@ function renderNoteBlocks() {
 }
 
 
-function createFlashcardsFromContent() {
-  const sp = getSpace();
-  const source = [...(sp.highlights||[]).slice(0,15).map(h=>h.text), ...(sp.notes||[]).slice(0,6).map(n=>n.content || ''), ...(sp.knowledgeCards||[]).slice(0,20).map(c=>`${c.concept}: ${c.definition || c.formula}`), ...(sp.formulaVault||[]).slice(0,10).map(f=>f.formula)].join('\n');
-  const lines = source.split(/\n+/).map(x=>x.trim()).filter(Boolean);
-  sp.flashcards = lines.slice(0,24).map((line,i)=>({ id: crypto.randomUUID(), front: line.split(':')[0].slice(0,80) || `Card ${i+1}`, back: line.slice(0,180) }));
-  flashIndex = 0; flashFlipped = false;
-  renderFlashcardReview();
-  queueSave();
-}
+function createFlashcardsFromContent() { /* removed for simplicity */ }
 
-function renderFlashcardReview() {
-  const sp = getSpace();
-  const cards = sp.flashcards || [];
-  const target = $('flashcard-review');
-  if (!cards.length) { target.innerHTML = '<div class="panel" style="padding:12px;">No flashcards. Generate from notes/highlights.</div>'; return; }
-  const card = cards[Math.max(0, Math.min(flashIndex, cards.length - 1))];
-  target.innerHTML = `<div class="panel" style="padding:14px;"><div style="opacity:.8;">${flashIndex+1}/${cards.length}</div><h3>${esc(card.front)}</h3><hr><div>${esc(flashFlipped ? card.back : 'Click Flip to reveal')}</div></div>`;
-}
+function renderFlashcardReview() { /* removed for simplicity */ }
 
-function renderKnowledgeGraph() {
-  const sp = getSpace();
-  const cards = (sp.knowledgeCards || []).slice(0, 40);
-  const concepts = [...new Set(cards.map(c => c.concept).filter(Boolean))];
-  const edges = [];
-  concepts.forEach(a => {
-    concepts.forEach(b => {
-      if (a === b) return;
-      const aWords = a.toLowerCase().split(/\s+/);
-      if (aWords.some(w => w.length > 3 && b.toLowerCase().includes(w))) edges.push(`${a}→${b}`);
-    });
-  });
-  const edgeList = [...new Set(edges)].slice(0, 22);
-  $('knowledge-graph').innerHTML = `<div style="padding:6px;font-weight:700;">Concept Nodes</div>` +
-    (concepts.slice(0,16).map(c => `<button class="pill" data-concept-open="${esc(c)}" style="margin:4px;">${esc(c)}</button>`).join('') || 'Graph will appear from knowledge cards.') +
-    `<div style="padding:8px 6px;font-weight:700;">Connections</div>` +
-    (edgeList.map(e => `<div class="thumb-item">${esc(e.replace('→','  →  '))}</div>`).join('') || '<div class="thumb-item">No edges yet.</div>');
-  [...$('knowledge-graph').querySelectorAll('[data-concept-open]')].forEach(n => n.onclick = () => {
-    const hit = (sp.notes || []).find(note => `${note.title} ${note.content}`.toLowerCase().includes(n.dataset.conceptOpen.toLowerCase()));
-    if (hit) { sp.selectedNoteId = hit.id; openWindow('notes-window'); renderNotes(); }
-  });
-}
+function renderKnowledgeGraph() { /* removed for simplicity */ }
 
-function renderRevisionSummary() {
-  const sp = getSpace();
-  const formulas = (sp.formulaVault||[]).slice(0,5).map(f => `• ${f.formula} (${f.book} p.${f.page})`).join('<br>');
-  const highlights = (sp.highlights||[]).slice(0,5).map(h => `• ${esc(h.text.slice(0,90))}`).join('<br>');
-  const concepts = (sp.knowledgeCards||[]).slice(0,6).map(c => `• ${esc(c.concept)}: ${esc((c.definition || c.formula || '').slice(0,70))}`).join('<br>');
-  $('revision-output').innerHTML = `<div class="panel" style="padding:8px;"><b>Quick Revision Deck</b><br>Important formulas:<br>${formulas || 'No formulas yet'}<br><br>Important highlights:<br>${highlights || 'No highlights yet'}<br><br>Concept summaries:<br>${concepts || 'No concepts yet'}</div>`;
-}
+function renderRevisionSummary() { /* removed for simplicity */ }
 
 async function runOCROnCurrentView() {
   if (pdfDoc) return runOCRForPage(pdfPage);
@@ -2367,7 +2331,7 @@ function setupAdvancedBindings() {
     sp.vault.unshift({ text: `${prefix}${meta.text}`, at: Date.now() });
     $('workspace-notes').innerText += `\n${prefix}${meta.text}`;
 
-    renderHighlightsPanel(); renderVault(); renderKnowledgeGraph(); renderRevisionSummary(); renderPDFSidebars(); queueSave();
+    renderHighlightsPanel(); renderVault();   renderPDFSidebars(); queueSave();
   };
 
   $('pdf-bookmark-page').onclick = () => {
@@ -2378,13 +2342,13 @@ function setupAdvancedBindings() {
   };
 
   $('pdf-open-notes-side').onclick = () => {
-    openWindow('pdf-window');
-    const p = $('pdf-window');
+    openWindow('bookshelf-window');
+    const p = $('bookshelf-window');
     const n = $('notes-window');
     p.style.left='8px'; p.style.top='8px'; p.style.width='calc(55vw - 12px)'; p.style.height='calc(100vh - var(--taskbar-h) - 20px)';
     openWindow('notes-window');
     n.style.left='calc(55vw + 2px)'; n.style.top='8px'; n.style.width='calc(45vw - 12px)'; n.style.height='calc(100vh - var(--taskbar-h) - 20px)';
-    saveWindowRect('pdf-window'); saveWindowRect('notes-window');
+    saveWindowRect('bookshelf-window'); saveWindowRect('notes-window');
     queueSave();
   };
 
@@ -2392,12 +2356,11 @@ function setupAdvancedBindings() {
     const text = prompt('Formula');
     if (!text?.trim()) return;
     getSpace().formulaVault.unshift({ formula: text.trim(), book: currentBookTitle || 'Book', page: pdfPage, at: Date.now() });
-    renderRevisionSummary(); queueSave();
+     queueSave();
   };
 
   $('[data-note-pane="list"]')?.addEventListener('click', ()=> { const nl = $('notes-layout'); if (nl) nl.className='app-body mobile-pane-list'; });
   $('[data-note-pane="editor"]')?.addEventListener('click', ()=> { const nl = $('notes-layout'); if (nl) nl.className='app-body mobile-pane-editor'; });
-  $('[data-note-pane="knowledge"]')?.addEventListener('click', ()=> { const nl = $('notes-layout'); if (nl) nl.className='app-body mobile-pane-knowledge'; });
 
   $('note-add-block').onclick = () => {
     const sp = getSpace();
@@ -2412,7 +2375,7 @@ function setupAdvancedBindings() {
     saveCurrentNote();
   };
   $('note-add-block-fab').onclick = () => $('note-add-block').click();
-  $('note-generate-flashcards').onclick = () => { createFlashcardsFromContent(); openWindow('flashcards-window'); };
+  if ($('note-generate-flashcards')) $('note-generate-flashcards').onclick = () => {};
   if ($('note-exam-template')) $('note-exam-template').onclick = () => {
     const tpl = `# Chapter
 ## Definitions
@@ -2428,24 +2391,13 @@ function setupAdvancedBindings() {
     cur.blocks = cur.blocks || []; cur.blocks.push({ type:'heading', text:'Exam Template', at:Date.now() }); cur.blocks.push({ type:'text', text: tpl, at:Date.now() });
     renderNoteBlocks(); saveCurrentNote();
   };
-  $('note-quick-revision').onclick = () => {
-    const sp = getSpace();
-    const summary = (sp.knowledgeCards || []).slice(0,8).map(c => `• ${c.concept}: ${c.definition || c.formula || c.kind}`).join('\n');
-    const sp2 = getSpace(); const cur2 = sp2.notes.find(n => n.id === sp2.selectedNoteId); if (!cur2) return;
-    cur2.blocks = cur2.blocks || []; cur2.blocks.push({ type:'heading', text:'Quick Revision', at:Date.now() }); cur2.blocks.push({ type:'text', text: summary, at:Date.now() });
-    renderNoteBlocks(); saveCurrentNote();
-  };
-  $('note-generate-quiz').onclick = () => {
-    const sp = getSpace();
-    const cards = (sp.knowledgeCards || []).slice(0, 6);
-    const quiz = cards.map((c, i) => `${i+1}. Define ${c.concept}.`).join('\n') || '1. Add some knowledge cards first.';
-    const sp3 = getSpace(); const cur3 = sp3.notes.find(n => n.id === sp3.selectedNoteId); if (!cur3) return;
-    cur3.blocks = cur3.blocks || []; cur3.blocks.push({ type:'heading', text:'Self Test Quiz', at:Date.now() }); cur3.blocks.push({ type:'text', text: quiz, at:Date.now() });
-    renderNoteBlocks(); saveCurrentNote();
-  };
-  $('flash-prev').onclick = () => { flashIndex = Math.max(0, flashIndex - 1); renderFlashcardReview(); };
-  $('flash-next').onclick = () => { flashIndex = Math.min((getSpace().flashcards||[]).length - 1, flashIndex + 1); renderFlashcardReview(); };
-  $('flash-flip').onclick = () => { flashFlipped = !flashFlipped; renderFlashcardReview(); };
+  if ($('note-quick-revision')) $('note-quick-revision').onclick = () => {};
+
+  if ($('note-generate-quiz')) $('note-generate-quiz').onclick = () => {};
+
+  $('flash-prev').onclick = () => { flashIndex = Math.max(0, flashIndex - 1);  };
+  $('flash-next').onclick = () => { flashIndex = Math.min((getSpace().flashcards||[]).length - 1, flashIndex + 1);  };
+  $('flash-flip').onclick = () => { flashFlipped = !flashFlipped;  };
 
   $('focus-start').onclick = () => {
     clearInterval(pomodoroTimer);
@@ -2528,7 +2480,6 @@ ${txt}`.trim();
     const grouped = {
       Notes: (sp.notes || []).filter(n => `${n.title} ${n.content}`.toLowerCase().includes(q)).map(n => n.title || 'Untitled'),
       Highlights: (sp.highlights || []).filter(h => (h.text || '').toLowerCase().includes(q)).map(h => `p${h.page || '?'} • ${h.text.slice(0,60)}`),
-      'Knowledge Cards': (sp.knowledgeCards || []).filter(c => `${c.concept} ${c.definition} ${c.formula}`.toLowerCase().includes(q)).map(c => `${c.concept} (${c.kind})`),
       Formulas: (sp.formulaVault || []).filter(f => (f.formula || '').toLowerCase().includes(q)).map(f => `${f.formula} • p${f.page}`),
       OCR: Object.entries(sp.ocrCache || {}).filter(([,v]) => (v || '').toLowerCase().includes(q)).map(([k]) => k)
     };
@@ -2538,16 +2489,16 @@ ${txt}`.trim();
 }
 
 const renderNotesOriginal = renderNotes;
-renderNotes = function(){ renderNotesOriginal(); renderRevisionSummary(); };
+renderNotes = function(){ renderNotesOriginal(); };
 
 const renderAllOriginal = renderAll;
 renderAll = function() {
   renderAllOriginal();
   markRunningIndicators();
   renderNoteBlocks();
-  renderKnowledgeGraph();
-  renderRevisionSummary();
-  renderFlashcardReview();
+
+
+
   renderPDFSidebars();
   renderKnowledgeCardsList();
   $('focus-analytics').innerHTML = Object.entries(getSpace().analytics.appMinutes || {}).map(([k,v]) => `<div>${k.replace('-window','')}: ${Math.round(v)} minutes</div>`).join('') || 'No analytics yet.';
