@@ -731,6 +731,18 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       ,toast: $('toast')
     };
 
+    let pdfDoc = null;
+    let pdfDoc2 = null;
+    let pdfPage = 1;
+    let pdfPage2 = 1;
+    let pdfScale = 1.35;
+    let splitPDF = false;
+    let currentBookTitle = '';
+    let flashIndex = 0;
+    let flashFlipped = false;
+    let pomodoroTimer = null;
+    let pomodoroRemaining = 25 * 60;
+
     function showToast(msg, ms=2400) {
       el.toast.textContent = msg;
       el.toast.style.display = 'block';
@@ -1750,29 +1762,31 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
         renderHighlightsPanel();
       };
 
-      $('add-book').onclick = () => {
-        const file = $('pdf-upload').files[0];
-        if (!file) return showToast('Please select a file');
-        const title = ($('book-title').value || file.name).trim();
-        const reader = new FileReader();
-        reader.onload = async e => {
-          const id = crypto.randomUUID();
-          try {
-            await savePDFToDB(id, e.target.result);
-            const ext = file.name.split('.').pop().toLowerCase();
-            getSpace().books.unshift({ id, title, ext, mime: file.type, openedAt: Date.now(), totalPages:0, lastPage:1 });
-            $('pdf-upload').value = '';
-            $('book-title').value = '';
-            renderBooks();
-            queueSave();
-            showToast('Book added');
-          } catch (err) {
-            console.error(err);
-            showToast('Error saving book: ' + err.message);
-          }
+      if ($('add-book')) {
+        $('add-book').onclick = () => {
+          const file = $('pdf-upload').files[0];
+          if (!file) return showToast('Please select a file');
+          const title = ($('book-title').value || file.name).trim();
+          const reader = new FileReader();
+          reader.onload = async e => {
+            const id = crypto.randomUUID();
+            try {
+              await savePDFToDB(id, e.target.result);
+              const ext = file.name.split('.').pop().toLowerCase();
+              getSpace().books.unshift({ id, title, ext, mime: file.type, openedAt: Date.now(), totalPages:0, lastPage:1 });
+              $('pdf-upload').value = '';
+              $('book-title').value = '';
+              renderBooks();
+              queueSave();
+              showToast('Book added');
+            } catch (err) {
+              console.error(err);
+              showToast('Error saving book: ' + err.message);
+            }
+          };
+          reader.readAsDataURL(file);
         };
-        reader.readAsDataURL(file);
-      };
+      }
 
       $('task-add').onclick = () => {
         const t = $('task-title').value.trim();
@@ -2018,18 +2032,6 @@ ${sel}
       addAppMinutes(activeWindowId, 0.25);
       if (Math.random() < 0.2) queueSave();
     }, 15000);
-
-let pdfDoc = null;
-let pdfDoc2 = null;
-let pdfPage = 1;
-let pdfPage2 = 1;
-let pdfScale = 1.35;
-let splitPDF = false;
-let currentBookTitle = '';
-let flashIndex = 0;
-let flashFlipped = false;
-let pomodoroTimer = null;
-let pomodoroRemaining = 25 * 60;
 
 function markRunningIndicators() {
   const open = new Set([...document.querySelectorAll('.window')].filter(w => w.style.display !== 'none').map(w => w.id));
