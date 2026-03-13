@@ -4,9 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='52' font-size='52'%3E%F0%9F%93%98%3C/text%3E%3C/svg%3E" />
-  <title>For Clear Studies</title>
+  <title>For Clear PCM - Personal Study Workspace</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 <script src="https://unpkg.com/mammoth/mammoth.browser.min.js"></script>
 <script>
@@ -334,14 +333,8 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
     #note-add-block-fab { position: absolute; right: 14px; bottom: 14px; border-radius: 999px; width: 42px; height: 42px; display:none; place-items:center; font-size:20px; }
     .bookshelf-section-title { padding:6px 4px; font-weight:700; opacity:.95; }
 
-    #tb-center .tb-btn[data-open="planner-window"],
-    #tb-center .tb-btn[data-open="browser-window"],
-    #tb-center .tb-btn[data-open="vault-window"],
-    #tb-center .tb-btn[data-open="flashcards-window"],
-    #tb-center .tb-btn[data-open="graph-window"],
-    #tb-center .tb-btn[data-open="ocr-window"] { display:none; }
-    #notes-window .toolbar > .panel:nth-child(2),
-    #notes-window .toolbar > .panel:nth-child(3) { display:none; }
+
+
     .book-meta { display:flex; justify-content:space-between; gap:8px; font-size:11px; opacity:.86; margin-top:6px; }
     .book-progress { height:6px; border-radius:999px; background:rgba(255,255,255,.12); margin-top:6px; overflow:hidden; }
     .book-progress > i { display:block; height:100%; background:linear-gradient(90deg, #69a1ff, #8d63ff); }
@@ -523,9 +516,6 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       <div class="cards">
         <div class="card"><div>Today Minutes</div><b id="m-today">0m</b></div>
         <div class="card"><div>Streak</div><b id="m-streak">0d</b></div>
-        <div class="card"><div>Tasks Done</div><b id="m-tasks">0</b></div>
-        <div class="card"><div>Vault Items</div><b id="m-vault">0</b></div>
-        <div class="card"><div>Concepts Today</div><b id="m-concepts">0</b></div>
       </div>
       <div class="panel" style="margin-top:10px;padding:10px;">
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
@@ -538,16 +528,15 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
         <div id="study-activity" style="margin-top:8px;display:grid;gap:5px;font-size:12px;"></div>
       </div>
     </div>
-    <div class="app-body panel" id="dashboard-task-list"></div>
+
   </section>
 
   <section id="notes-window" class="window" style="left:100px;top:70px;">
     <div class="titlebar" data-window="notes-window"><div class="title">Notes</div><div class="w-controls"><button class="ctrl min" data-close="notes-window">—</button><button class="ctrl max" data-max="notes-window">▢</button><button class="ctrl close" data-close="notes-window">✕</button></div></div>
-    <div class="toolbar" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;">
+    <div class="toolbar" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;">
       <div class="panel" style="padding:6px;display:flex;gap:6px;flex-wrap:wrap;"><b>File</b><button class="btn" id="note-new">New</button><button class="btn primary" id="note-save">Save</button><button class="btn" id="note-delete">Delete</button></div>
-      <div class="panel" style="padding:6px;display:flex;gap:6px;flex-wrap:wrap;"><b>Blocks</b><select id="note-block-type" class="field" style="max-width:120px;"><option value="heading">Heading</option><option value="text">Text</option><option value="concept">Concept</option><option value="formula">Formula</option><option value="example">Example</option><option value="question">Question</option><option value="image">Image</option><option value="checklist">Checklist</option></select><button class="btn" id="note-add-block">Add</button></div>
-      <div class="panel" style="padding:6px;display:flex;gap:6px;flex-wrap:wrap;"><b>Study</b><button class="btn" id="note-generate-flashcards">Flashcards</button><button class="btn" id="note-quick-revision">Revision</button><button class="btn" id="note-generate-quiz">Quiz</button></div>
-      <div class="panel" style="padding:6px;display:flex;gap:6px;flex-wrap:wrap;"><b>Format</b><button class="btn" id="note-bold">B</button><button class="btn" id="note-italic">I</button><button class="btn" id="note-h1">H1</button><button class="btn" id="note-h2">H2</button><button class="btn" id="note-code">Code</button><button class="btn" id="note-quote">Quote</button></div>
+      <div class="panel" style="padding:6px;display:flex;gap:6px;flex-wrap:wrap;"><b>Blocks</b><select id="note-block-type" class="field" style="max-width:120px;"><option value="text">Text</option><option value="heading">Heading</option><option value="list">List</option></select><button class="btn" id="note-add-block">Add</button></div>
+      <div class="panel" style="padding:6px;display:flex;gap:6px;flex-wrap:wrap;"><b>Format</b><button class="btn" id="note-bold">B</button><button class="btn" id="note-italic">I</button><button class="btn" id="note-h1">H1</button><button class="btn" id="note-h2">H2</button></div>
     </div>
     <div id="notes-mobile-tabs" class="toolbar" style="display:none;gap:6px;padding-top:0;">
       <button class="btn" data-note-pane="list">Notes</button>
@@ -575,20 +564,9 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
     </div>
   </section>
 
-  <section id="planner-window" class="window" style="left:130px;top:84px;width:min(760px,94vw);height:min(620px,82vh);">
-    <div class="titlebar" data-window="planner-window"><div class="title">Planner</div><div class="w-controls"><button class="ctrl min" data-close="planner-window">—</button><button class="ctrl max" data-max="planner-window">▢</button><button class="ctrl close" data-close="planner-window">✕</button></div></div>
-    <div class="toolbar"><input id="task-title" class="field" placeholder="Task" style="flex:1;"><input id="task-subject" class="field" placeholder="Subject" style="width:140px;"><input id="task-due" class="field" type="date"><button class="btn primary" id="task-add">Add</button></div>
-    <div class="app-body panel" id="task-list"></div>
-  </section>
 
-  <section id="browser-window" class="window" style="left:140px;top:62px;width:min(1150px,96vw);height:min(760px,88vh);">
-    <div class="titlebar" data-window="browser-window"><div class="title">Study Browser</div><div class="w-controls"><button class="ctrl min" data-close="browser-window">—</button><button class="ctrl max" data-max="browser-window">▢</button><button class="ctrl close" data-close="browser-window">✕</button></div></div>
-    <div id="browser-top">
-      <div id="browser-tabs"></div>
-    </div>
-    <div class="toolbar"><button class="btn" id="browser-new-tab">+ Tab</button><input id="browser-url" class="field" style="flex:1;" placeholder="Search Google or enter URL"><button class="btn primary" id="browser-go">Go</button><button class="btn" id="browser-highlight">Save Highlight</button><button class="btn" id="browser-open-external">Open External</button><button class="btn" id="install-webapp">Install App</button><button class="btn" id="uninstall-webapp">Uninstall App</button></div>
-    <div class="app-body" style="padding:8px;"><iframe id="browser-frame" src="about:blank" referrerpolicy="no-referrer"></iframe></div>
-  </section>
+
+
 
   <section id="bookshelf-window" class="window" style="left:150px;top:80px;width:min(1200px,96vw);height:min(760px,88vh);">
     <div class="titlebar" data-window="bookshelf-window"><div class="title">Bookshelf + PDF Workspace</div><div class="w-controls"><button class="ctrl min" data-close="bookshelf-window">—</button><button class="ctrl max" data-max="bookshelf-window">▢</button><button class="ctrl close" data-close="bookshelf-window">✕</button></div></div>
@@ -598,18 +576,15 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
 <button class="btn primary" id="add-book">Add Book</button>
 <button class="btn" id="pdf-prev">◀ Page</button>
 <button class="btn" id="pdf-next">Page ▶</button>
-<span class="pill" id="pdf-page-info">Page 0 / 0</span><input id="pdf-page-slider" type="range" min="1" max="1" value="1" style="width:150px;">
+<span class="pill" id="pdf-page-info">Page 0 / 0</span>
 <button class="btn" id="pdf-zoom-in">Zoom +</button>
 <button class="btn" id="pdf-zoom-out">Zoom −</button>
-<button class="btn" id="pdf-toggle-split">Split View</button>
-<button class="btn" id="pdf-fullscreen">Fullscreen</button>
-<input id="pdf-search" class="field" placeholder="Search in PDF/OCR" style="max-width:170px;">
+<input id="pdf-search" class="field" placeholder="Search" style="max-width:170px;">
 <button class="btn" id="pdf-run-search">Search</button>
-<select id="pdf-highlight-color" class="field" style="max-width:120px;"><option value="concept">Yellow Concept</option><option value="formula">Blue Formula</option><option value="example">Green Example</option><option value="doubt">Red Doubt</option></select>
-<button class="btn" id="pdf-highlight">Save Highlight</button><button class="btn" id="pdf-bookmark-page">Bookmark Page</button>
-<button class="btn" id="save-formula-vault">Save to Formula Vault</button><button class="btn" id="pdf-open-notes-side">PDF + Notes</button>
+<button class="btn" id="pdf-highlight">Highlight</button>
+<button class="btn" id="pdf-bookmark-page">Bookmark</button>
 </div>
-    <div class="app-body" style="display:grid;grid-template-columns:240px minmax(0,1fr) 280px;gap:8px;padding:8px;min-height:0;">
+    <div class="app-body" style="display:grid;grid-template-columns:240px 1fr;gap:8px;padding:8px;min-height:0;">
       <aside class="panel" style="display:grid;grid-template-rows:130px minmax(0,1fr) 110px 110px;overflow:hidden;">
         <div id="bookshelf" style="overflow:auto;border-bottom:1px solid rgba(255,255,255,.14);"></div>
         <div id="pdf-thumbnails" style="overflow:auto;padding:6px;display:grid;gap:6px;"></div><div id="pdf-bookmarks" style="overflow:auto;padding:6px;border-top:1px solid rgba(255,255,255,.14);"></div><div id="pdf-highlight-list" style="overflow:auto;padding:6px;border-top:1px solid rgba(255,255,255,.14);"></div>
@@ -624,44 +599,23 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
           <iframe id="doc-html-preview" style="display:none;width:100%;min-height:280px;border:1px solid rgba(255,255,255,.2);border-radius:8px;"></iframe>
         </div>
       </section>
-      <aside class="panel" style="display:grid;grid-template-rows:minmax(0,1fr) 130px 130px 130px;gap:8px;padding:8px;">
-        <div id="workspace-notes" contenteditable="true" class="field" style="overflow:auto;min-height:120px;">Drop highlights here to build connections...</div>
-        <div id="workspace-links" style="overflow:auto;"></div><div class="highlight-legend"><div>🟡 Highlight</div><div>🔵 Important</div><div>🟢 Example</div><div>🔴 Doubt</div></div><div id="detected-concepts" style="overflow:auto;display:none;"></div>
-        <div id="knowledge-cards-list" style="overflow:auto;border-top:1px solid rgba(255,255,255,.14);display:none;"></div>
-        <div id="pdf-search-results" style="overflow:auto;"></div>
-      </aside>
     </div>
   </section>
 
-  <section id="vault-window" class="window" style="left:220px;top:110px;width:min(700px,92vw);height:min(580px,78vh);">
-    <div class="titlebar" data-window="vault-window"><div class="title">Important Vault</div><div class="w-controls"><button class="ctrl min" data-close="vault-window">—</button><button class="ctrl max" data-max="vault-window">▢</button><button class="ctrl close" data-close="vault-window">✕</button></div></div>
-    <div class="toolbar"><input id="vault-input" class="field" style="flex:1;" placeholder="Save important point instantly"><button class="btn primary" id="vault-add">Save</button></div>
-    <div class="app-body panel" id="vault-list"></div>
-  </section>
 
 
 
-  <section id="flashcards-window" class="window" style="left:210px;top:90px;width:min(780px,92vw);height:min(560px,78vh);">
-    <div class="titlebar" data-window="flashcards-window"><div class="title">Flashcards</div><div class="w-controls"><button class="ctrl min" data-close="flashcards-window">—</button><button class="ctrl max" data-max="flashcards-window">▢</button><button class="ctrl close" data-close="flashcards-window">✕</button></div></div>
-    <div class="toolbar"><button class="btn" id="flash-prev">Prev</button><button class="btn" id="flash-next">Next</button><button class="btn" id="flash-flip">Flip</button></div>
-    <div class="app-body panel" id="flashcard-review"></div>
-  </section>
 
-  <section id="graph-window" class="window" style="left:250px;top:110px;width:min(760px,92vw);height:min(540px,74vh);">
-    <div class="titlebar" data-window="graph-window"><div class="title">Knowledge Graph</div><div class="w-controls"><button class="ctrl min" data-close="graph-window">—</button><button class="ctrl max" data-max="graph-window">▢</button><button class="ctrl close" data-close="graph-window">✕</button></div></div>
-    <div class="app-body panel" id="knowledge-graph"></div>
-  </section>
 
-  <section id="ocr-window" class="window" style="left:200px;top:100px;width:min(760px,92vw);height:min(560px,76vh);">
-    <div class="titlebar" data-window="ocr-window"><div class="title">OCR Center</div><div class="w-controls"><button class="ctrl min" data-close="ocr-window">—</button><button class="ctrl max" data-max="ocr-window">▢</button><button class="ctrl close" data-close="ocr-window">✕</button></div></div>
-    <div class="toolbar"><button class="btn" id="ocr-run-current">OCR Current View</button><button class="btn" id="ocr-send-to-notes">Send OCR to Notes</button></div>
-    <div class="app-body panel" id="ocr-center-text" style="overflow:auto;white-space:pre-wrap;"></div>
-  </section>
+
+
+
+
 
   <section id="focus-window" class="window" style="left:170px;top:120px;width:min(600px,88vw);height:min(460px,70vh);">
     <div class="titlebar" data-window="focus-window"><div class="title">Focus Mode</div><div class="w-controls"><button class="ctrl min" data-close="focus-window">—</button><button class="ctrl max" data-max="focus-window">▢</button><button class="ctrl close" data-close="focus-window">✕</button></div></div>
     <div class="toolbar"><button class="btn primary" id="focus-start">Start Pomodoro</button><button class="btn" id="focus-stop">Stop</button><button class="btn" id="focus-fullscreen">Fullscreen</button></div>
-    <div class="app-body panel"><h2 id="focus-timer">25:00</h2><div id="focus-analytics"></div><div id="revision-output" style="margin-top:8px;"></div></div>
+    <div class="app-body panel"><h2 id="focus-timer">25:00</h2></div>
   </section>
 
 
@@ -716,12 +670,9 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
     <div id="tb-center">
       <button class="tb-btn" data-open="dashboard-window" title="Dashboard">📊</button>
       <button class="tb-btn" data-open="notes-window" title="Notes">📝</button>
-      <button class="tb-btn" data-open="planner-window" title="Planner">📅</button>
-      <button class="tb-btn" data-open="browser-window" title="Browser">🌐</button>
       <button class="tb-btn" data-open="bookshelf-window" title="Bookshelf">📚</button>
-
-      <button class="tb-btn" data-open="vault-window" title="Vault">⭐</button>
-      <button class="tb-btn" data-open="settings-window" title="Settings">⚙️</button><button class="tb-btn" data-open="flashcards-window" title="Flashcards">🃏</button><button class="tb-btn" data-open="graph-window" title="Concept Map">🕸️</button><button class="tb-btn" data-open="focus-window" title="Focus">⏱️</button><button class="tb-btn" data-open="ocr-window" title="OCR Center">🔎</button>
+      <button class="tb-btn" data-open="focus-window" title="Focus">⏱️</button>
+      <button class="tb-btn" data-open="settings-window" title="Settings">⚙️</button>
     </div>
     <div id="tb-right"><button class="tb-btn" id="tb-quick-note" title="Quick note">🗒️</button><div class="pill" id="space-pill">Space</div><div class="pill" id="status-pill">Saved</div><div class="pill" id="custom-timer-pill" title="Click start/pause • Right click customize">Timer 25:00</div><div class="pill" id="clock-pill"></div><button class="tb-btn" id="btn-login" title="Login">👤</button><button class="tb-btn" id="btn-logout" title="Logout" style="display:none;">⇦</button></div>
   </div>
@@ -1796,6 +1747,25 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
         if (!sel) return;
         addHighlight('notes', sel, 'selection');
         renderHighlightsPanel();
+      };
+
+      $('add-book').onclick = () => {
+        const file = $('pdf-upload').files[0];
+        if (!file) return showToast('Please select a file');
+        const title = ($('book-title').value || file.name).trim();
+        const reader = new FileReader();
+        reader.onload = async e => {
+          const id = crypto.randomUUID();
+          await savePDFToDB(id, e.target.result);
+          const ext = file.name.split('.').pop().toLowerCase();
+          getSpace().books.unshift({ id, title, ext, mime: file.type, openedAt: Date.now(), totalPages:0, lastPage:1 });
+          $('pdf-upload').value = '';
+          $('book-title').value = '';
+          renderBooks();
+          queueSave();
+          showToast('Book added');
+        };
+        reader.readAsDataURL(file);
       };
 
       $('task-add').onclick = () => {
