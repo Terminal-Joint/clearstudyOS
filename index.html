@@ -311,6 +311,31 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       cursor: pointer;
     }
     .note-item.active { background: rgba(79,140,255,.32); }
+    .note-block {
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 10px;
+      padding: 10px;
+      background: rgba(255,255,255,.04);
+      display: grid;
+      gap: 6px;
+    }
+    .note-block .block-top { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .note-block .block-tag { font-size: 11px; text-transform: uppercase; letter-spacing:.04em; opacity:.85; padding:2px 8px; border-radius:999px; border:1px solid var(--line); }
+    .note-block[data-type="concept"] .block-tag { background: rgba(255,214,10,.18); }
+    .note-block[data-type="formula"] .block-tag { background: rgba(50,150,255,.2); }
+    .note-block[data-type="example"] .block-tag { background: rgba(62,190,100,.2); }
+    .note-block[data-type="question"] .block-tag { background: rgba(255,110,110,.2); }
+    .note-block .block-controls { display:none; gap:5px; }
+    .note-block:hover .block-controls, .note-block:focus-within .block-controls { display:flex; }
+    .note-block .block-content { min-height: 28px; outline:none; white-space: pre-wrap; }
+    #note-slash-menu { display:none; position:absolute; z-index:20; max-width:210px; padding:6px; border-radius:10px; border:1px solid var(--line); background:rgba(10,18,33,.96); }
+    #note-slash-menu .slash-item { padding:6px 8px; border-radius:6px; cursor:pointer; }
+    #note-slash-menu .slash-item:hover { background: rgba(255,255,255,.12); }
+    #note-add-block-fab { position: absolute; right: 14px; bottom: 14px; border-radius: 999px; width: 42px; height: 42px; display:none; place-items:center; font-size:20px; }
+    .bookshelf-section-title { padding:6px 4px; font-weight:700; opacity:.95; }
+    .book-meta { display:flex; justify-content:space-between; gap:8px; font-size:11px; opacity:.86; margin-top:6px; }
+    .book-progress { height:6px; border-radius:999px; background:rgba(255,255,255,.12); margin-top:6px; overflow:hidden; }
+    .book-progress > i { display:block; height:100%; background:linear-gradient(90deg, #69a1ff, #8d63ff); }
 
     .cards { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; }
     .card { padding: 10px; border-radius: 10px; border: 1px solid var(--line); background: rgba(255,255,255,.08); }
@@ -449,6 +474,9 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       #notes-window .toolbar { grid-template-columns: 1fr !important; }
       #notes-window .app-body > aside:last-child { display:none; }
       #notes-mobile-tabs { display:flex !important; }
+      #note-add-block-fab { display:grid; }
+      #note-blocks .note-block { padding: 12px; }
+      #note-blocks .btn { min-height: 34px; }
       #notes-layout.mobile-pane-list > section, #notes-layout.mobile-pane-list > aside:last-child { display:none; }
       #notes-layout.mobile-pane-editor > aside:first-child, #notes-layout.mobile-pane-editor > aside:last-child { display:none; }
       #notes-layout.mobile-pane-knowledge > aside:first-child, #notes-layout.mobile-pane-knowledge > section { display:none; }
@@ -523,7 +551,9 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       <section class="panel" style="display:flex;flex-direction:column;gap:8px;padding:8px;">
         <input id="note-title" class="field" placeholder="Title">
         <input id="note-block-input" class="field" placeholder="Type /concept, /formula, /example, /question then Enter">
+        <div id="note-slash-menu"></div>
         <div id="note-blocks" style="display:grid;gap:8px;overflow:auto;min-height:220px;"></div>
+        <button class="btn primary" id="note-add-block-fab" title="Add block">+</button>
         <input type="hidden" id="note-content" value="">
       </section>
       <aside class="panel" style="display:grid;grid-template-rows:1fr 1fr 1fr;gap:8px;overflow:hidden;">
@@ -1492,6 +1522,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
     async function openStudyBook(book) {
       if (!book) return;
       currentBookTitle = book.title;
+      book.openedAt = Date.now();
       const mime = (book.mime || '').toLowerCase();
       const ext = (book.ext || '').toLowerCase();
       const loader = book.dataUrl ? Promise.resolve(book.dataUrl) : getPDFFromDB(book.id);
@@ -1565,7 +1596,20 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
     function renderBooks() {
       const sp = getSpace();
       const coverFor = (title='') => /physics/i.test(title) ? '📘' : /chem/i.test(title) ? '📗' : /math|algebra|calculus/i.test(title) ? '📙' : '📕';
-      el.bookshelf.innerHTML = sp.books.map(b => `<div class="book-card" data-book="${b.id}"><div class="book-cover">${coverFor(b.title)}</div><div style="font-weight:600;">${esc(b.title)}</div><small>${(b.ext || 'pdf').toUpperCase()}</small></div>`).join('') || '<div class="book-card">No books yet.</div>';
+      const cardHtml = b => {
+        const total = Number(b.totalPages || 0);
+        const last = Number(b.lastPage || 0);
+        const progress = total ? Math.max(0, Math.min(100, Math.round((last / total) * 100))) : 0;
+        return `<div class="book-card" data-book="${b.id}"><div class="book-cover">${coverFor(b.title)}</div><div style="font-weight:600;">${esc(b.title)}</div><small>${(b.ext || 'pdf').toUpperCase()}</small><div class="book-meta"><span>Page ${last || 1}${total ? ` / ${total}` : ''}</span><span>${progress}%</span></div><div class="book-progress"><i style="width:${progress}%;"></i></div></div>`;
+      };
+      const books = sp.books || [];
+      const continueBooks = books.filter(b => Number(b.lastPage || 0) > 1).slice(0, 6);
+      const recentBooks = [...books].sort((a,b)=>Number(b.openedAt||0)-Number(a.openedAt||0)).slice(0,6);
+      el.bookshelf.innerHTML = books.length ?
+        `<div class="bookshelf-section-title">Continue Reading</div>${continueBooks.map(cardHtml).join('') || '<div class="book-card">No in-progress books yet.</div>'}` +
+        `<div class="bookshelf-section-title">Recent Books</div>${recentBooks.map(cardHtml).join('')}` +
+        `<div class="bookshelf-section-title">All Books</div>${books.map(cardHtml).join('')}`
+        : '<div class="book-card">No books yet.</div>';
       [...el.bookshelf.querySelectorAll('[data-book]')].forEach(n => n.onclick = () => {
         const b = sp.books.find(x => x.id === n.dataset.book);
         openStudyBook(b);
@@ -1714,21 +1758,36 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       };
       $('note-save').onclick = saveCurrentNote;
       el.noteTitle.oninput = () => state.prefs.autosave && saveCurrentNote();
+      const slashMap = { '/concept':'concept', '/formula':'formula', '/example':'example', '/question':'question', '/image':'image', '/check':'checklist', '/text':'text', '/heading':'heading' };
+      if (el.noteBlockInput) el.noteBlockInput.oninput = () => {
+        const menu = $('note-slash-menu');
+        const raw = (el.noteBlockInput.value || '').trim().toLowerCase();
+        if (!menu) return;
+        if (!raw.startsWith('/')) { menu.style.display = 'none'; return; }
+        const items = Object.keys(slashMap).filter(k => k.startsWith(raw)).slice(0,8);
+        menu.innerHTML = items.map(i => `<div class="slash-item" data-slash="${i}">${i}</div>`).join('') || '<div class="slash-item">No command</div>';
+        menu.style.display = 'block';
+        [...menu.querySelectorAll('[data-slash]')].forEach(n => n.onclick = () => {
+          el.noteBlockInput.value = `${n.dataset.slash} `;
+          el.noteBlockInput.focus();
+          menu.style.display = 'none';
+        });
+      };
       if (el.noteBlockInput) el.noteBlockInput.onkeydown = e => {
         if (e.key !== 'Enter') return;
         e.preventDefault();
         const raw = (el.noteBlockInput.value || '').trim();
         if (!raw) return;
-        const map = { '/concept':'concept', '/formula':'formula', '/example':'example', '/question':'question' };
         const cmd = raw.split(' ')[0].toLowerCase();
-        const type = map[cmd] || $('note-block-type').value || 'text';
-        const text = map[cmd] ? raw.slice(cmd.length).trim() || 'New block' : raw;
+        const type = slashMap[cmd] || $('note-block-type').value || 'text';
+        const text = slashMap[cmd] ? raw.slice(cmd.length).trim() || 'New block' : raw;
         const sp = getSpace();
         const cur = sp.notes.find(n => n.id === sp.selectedNoteId);
         if (!cur) return;
         cur.blocks = cur.blocks || [];
         cur.blocks.push({ type, text, at: Date.now() });
         el.noteBlockInput.value = '';
+        if ($('note-slash-menu')) $('note-slash-menu').style.display = 'none';
         renderNoteBlocks();
         saveCurrentNote();
       };
@@ -1979,8 +2038,11 @@ ${sel}
     setInterval(() => {
       tickCustomTimer();
       el.clock.textContent = new Date().toLocaleString([], { hour:'2-digit', minute:'2-digit', day:'numeric', month:'short' });
-      renderDashboard();
     }, 1000);
+
+    setInterval(() => {
+      renderDashboard();
+    }, 30000);
 
     setInterval(() => {
       if (!activeWindowId) return;
@@ -2015,34 +2077,60 @@ function renderNoteBlocks() {
   if (!cur) return;
   cur.blocks = cur.blocks || [];
   const c = $('note-blocks');
-  c.innerHTML = cur.blocks.map((b, i) => `<div class="note-block" draggable="true" data-block-index="${i}"><b>${esc(b.type)}</b><div>${b.type==='formula' ? esc(b.text) : esc(b.text || '')}</div><div style="display:flex;gap:6px;margin-top:6px;"><button class="btn" data-edit-block="${i}">Edit</button><button class="btn" data-up-block="${i}">↑</button><button class="btn" data-down-block="${i}">↓</button><button class="btn" data-del-block="${i}">Delete</button></div></div>`).join('') || '<div class="note-block">No blocks yet.</div>';
-  [...c.querySelectorAll('[data-del-block]')].forEach(n => n.onclick = () => {
+  c.innerHTML = cur.blocks.map((b, i) => `
+    <div class="note-block" draggable="true" data-type="${esc(b.type || 'text')}" data-block-index="${i}">
+      <div class="block-top">
+        <span class="block-tag">${esc(b.type || 'text')}</span>
+        <div class="block-controls">
+          <button class="btn" data-up-block="${i}" title="Move up">↑</button>
+          <button class="btn" data-down-block="${i}" title="Move down">↓</button>
+          <button class="btn" data-del-block="${i}" title="Delete">✕</button>
+        </div>
+      </div>
+      <div class="block-content" contenteditable="true" data-editable-block="${i}">${esc(b.text || '')}</div>
+    </div>
+  `).join('') || '<div class="note-block">No blocks yet. Type /concept in the editor bar and press Enter.</div>';
+
+  c.querySelectorAll('[data-del-block]').forEach(n => n.onclick = () => {
     cur.blocks.splice(Number(n.dataset.delBlock),1);
     renderNoteBlocks();
     saveCurrentNote();
   });
-  [...c.querySelectorAll('[data-edit-block]')].forEach(n => n.onclick = () => {
-    const i = Number(n.dataset.editBlock);
-    const val = prompt('Edit block', cur.blocks[i]?.text || '');
-    if (val == null) return;
-    cur.blocks[i].text = val;
-    renderNoteBlocks();
-    saveCurrentNote();
-  });
-  [...c.querySelectorAll('[data-up-block]')].forEach(n => n.onclick = () => {
+  c.querySelectorAll('[data-up-block]').forEach(n => n.onclick = () => {
     const i = Number(n.dataset.upBlock);
     if (i <= 0) return;
     [cur.blocks[i-1], cur.blocks[i]] = [cur.blocks[i], cur.blocks[i-1]];
     renderNoteBlocks();
     saveCurrentNote();
   });
-  [...c.querySelectorAll('[data-down-block]')].forEach(n => n.onclick = () => {
+  c.querySelectorAll('[data-down-block]').forEach(n => n.onclick = () => {
     const i = Number(n.dataset.downBlock);
     if (i >= cur.blocks.length - 1) return;
     [cur.blocks[i+1], cur.blocks[i]] = [cur.blocks[i], cur.blocks[i+1]];
     renderNoteBlocks();
     saveCurrentNote();
   });
+
+  c.querySelectorAll('[data-editable-block]').forEach(n => {
+    n.oninput = () => {
+      const i = Number(n.dataset.editableBlock);
+      if (!cur.blocks[i]) return;
+      cur.blocks[i].text = n.innerText;
+    };
+    n.onblur = () => saveCurrentNote();
+    n.onkeydown = e => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        const i = Number(n.dataset.editableBlock);
+        cur.blocks.splice(i + 1, 0, { type:'text', text:'', at:Date.now() });
+        renderNoteBlocks();
+        const nx = c.querySelector(`[data-editable-block="${i+1}"]`);
+        nx?.focus();
+        saveCurrentNote();
+      }
+    };
+  });
+
   const blocks = [...c.querySelectorAll('[data-block-index]')];
   let dragIdx = -1;
   blocks.forEach(node => {
@@ -2059,6 +2147,7 @@ function renderNoteBlocks() {
   });
   if (window.MathJax?.typesetPromise) MathJax.typesetPromise([c]).catch(()=>{});
 }
+
 
 function createFlashcardsFromContent() {
   const sp = getSpace();
@@ -2190,6 +2279,13 @@ async function renderPage(second = false){
     $('pdf-page-info').textContent = `Page ${pdfPage} / ${pdfDoc.numPages}`;
     if (el.pdfSlider) { el.pdfSlider.max = String(pdfDoc.numPages || 1); el.pdfSlider.value = String(pdfPage); }
     localStorage.setItem(`pdf-last-page:${currentBookTitle}`, String(pdfPage));
+    const sp = getSpace();
+    const book = (sp.books || []).find(b => b.title === currentBookTitle);
+    if (book) {
+      book.lastPage = pdfPage;
+      book.totalPages = pdfDoc.numPages || book.totalPages || 0;
+      book.openedAt = Date.now();
+    }
   }
   renderPDFSidebars();
 }
@@ -2324,10 +2420,13 @@ function setupAdvancedBindings() {
     if (!cur) return;
     cur.blocks = cur.blocks || [];
     const t = $('note-block-type').value;
-    const val = prompt(`Enter ${t} block content:`) || '';
-    cur.blocks.push({ type: t, text: val, at: Date.now() });
-    renderNoteBlocks(); saveCurrentNote();
+    cur.blocks.push({ type: t, text: '', at: Date.now() });
+    renderNoteBlocks();
+    const idx = cur.blocks.length - 1;
+    $('note-blocks')?.querySelector(`[data-editable-block="${idx}"]`)?.focus();
+    saveCurrentNote();
   };
+  $('note-add-block-fab').onclick = () => $('note-add-block').click();
   $('note-generate-flashcards').onclick = () => { createFlashcardsFromContent(); openWindow('flashcards-window'); };
   if ($('note-exam-template')) $('note-exam-template').onclick = () => {
     const tpl = `# Chapter
@@ -2386,7 +2485,7 @@ function setupAdvancedBindings() {
     const txt = (el.lpInput.value || '').trim(); if (!txt) return;
     const sp = getSpace(); const cur = sp.notes.find(n => n.id === sp.selectedNoteId) || sp.notes[0]; if (!cur) return;
     cur.blocks = cur.blocks || [];
-        const detectTypeFromText = (text, selected='idea') => {
+    const detectTypeFromText = (text, selected='idea') => {
       if (selected && selected !== 'idea') return selected === 'doubt' ? 'question' : selected;
       const t = String(text || '').trim();
       if (/=|∑|∫|\b(sigma|delta|vector)\b|\^|\\frac|\\sum|\\int/i.test(t)) return 'formula';
@@ -2394,9 +2493,16 @@ function setupAdvancedBindings() {
       if (t.length < 140) return 'concept';
       return 'text';
     };
-    cur.blocks.push({ type: detectTypeFromText(txt, el.lpTag.value), text: txt, at: Date.now(), source:'letterpad' });
-    addKnowledgeFromText(txt, 'Letterpad', '');
+    const blockType = detectTypeFromText(txt, el.lpTag.value);
+    const sourceMeta = `${currentBookTitle || 'General Capture'}${pdfDoc ? ` • p${pdfPage}` : ''}`;
+    cur.blocks.push({ type: blockType, text: txt, at: Date.now(), source:'letterpad', meta:{ book: currentBookTitle || '', page: pdfPage || '', timestamp: Date.now() } });
+    if (blockType === 'formula') {
+      sp.formulaVault = sp.formulaVault || [];
+      sp.formulaVault.unshift({ formula: txt, book: currentBookTitle || 'Letterpad', page: pdfPage || '', at: Date.now() });
+    }
+    addKnowledgeFromText(txt, `Letterpad (${sourceMeta})`, pdfDoc ? pdfPage : '');
     renderNoteBlocks(); saveCurrentNote();
+    el.lpInput.value = '';
     showToast('Saved to Notes');
   };
   $('ocr-run-current').onclick = async () => {
