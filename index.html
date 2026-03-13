@@ -516,6 +516,9 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       <div class="cards">
         <div class="card"><div>Today Minutes</div><b id="m-today">0m</b></div>
         <div class="card"><div>Streak</div><b id="m-streak">0d</b></div>
+        <div class="card"><div>Tasks Done</div><b id="m-tasks">0</b></div>
+        <div class="card"><div>Vault Items</div><b id="m-vault">0</b></div>
+        <div class="card"><div>Concepts</div><b id="m-concepts">0</b></div>
       </div>
       <div class="panel" style="margin-top:10px;padding:10px;">
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
@@ -526,6 +529,19 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
         </div>
         <div id="coach-text" style="margin-top:8px;opacity:.9;"></div>
         <div id="study-activity" style="margin-top:8px;display:grid;gap:5px;font-size:12px;"></div>
+        <div id="dashboard-task-list" style="margin-top:8px;display:grid;gap:5px;font-size:12px;"></div>
+        <div id="dashboard-task-list" style="margin-top:8px;display:grid;gap:5px;font-size:12px;"></div>
+        <div id="dashboard-task-list" style="margin-top:8px;display:grid;gap:5px;font-size:12px;"></div>
+        <div id="dashboard-task-list" style="margin-top:8px;display:grid;gap:5px;font-size:12px;"></div>
+      </div>
+      <div class="panel" style="margin-top:10px;padding:10px;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;">
+          <input id="task-title" class="field" placeholder="Task" style="flex:1;">
+          <input id="task-subject" class="field" placeholder="Subject" style="width:140px;">
+          <input id="task-due" class="field" type="date" style="width:160px;">
+          <button class="btn primary" id="task-add">Add Task</button>
+        </div>
+        <div id="task-list" style="margin-top:10px;max-height:220px;overflow:auto;"></div>
       </div>
     </div>
 
@@ -534,9 +550,9 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
   <section id="notes-window" class="window" style="left:100px;top:70px;">
     <div class="titlebar" data-window="notes-window"><div class="title">Notes</div><div class="w-controls"><button class="ctrl min" data-close="notes-window">—</button><button class="ctrl max" data-max="notes-window">▢</button><button class="ctrl close" data-close="notes-window">✕</button></div></div>
     <div class="toolbar" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;">
-      <div class="panel" style="padding:6px;display:flex;gap:6px;flex-wrap:wrap;"><b>File</b><button class="btn" id="note-new">New</button><button class="btn primary" id="note-save">Save</button><button class="btn" id="note-delete">Delete</button></div>
+      <div class="panel" style="padding:6px;display:flex;gap:6px;flex-wrap:wrap;"><b>File</b><button class="btn" id="note-new">New</button><button class="btn primary" id="note-save">Save</button><button class="btn" id="note-delete">Delete</button><button class="btn" id="pin-to-vault">Pin to Vault</button></div>
       <div class="panel" style="padding:6px;display:flex;gap:6px;flex-wrap:wrap;"><b>Blocks</b><select id="note-block-type" class="field" style="max-width:120px;"><option value="text">Text</option><option value="heading">Heading</option><option value="list">List</option></select><button class="btn" id="note-add-block">Add</button></div>
-      <div class="panel" style="padding:6px;display:flex;gap:6px;flex-wrap:wrap;"><b>Format</b><button class="btn" id="note-bold">B</button><button class="btn" id="note-italic">I</button><button class="btn" id="note-h1">H1</button><button class="btn" id="note-h2">H2</button></div>
+      <div class="panel" style="padding:6px;display:flex;gap:6px;flex-wrap:wrap;"><b>Format</b><button class="btn" id="note-bold">B</button><button class="btn" id="note-italic">I</button><button class="btn" id="note-h1">H1</button><button class="btn" id="note-h2">H2</button><button class="btn" id="note-highlight">Highlight</button><button class="btn" id="note-generate-flashcards">Flashcards</button><button class="btn" id="note-exam-template">Exam</button><button class="btn" id="note-quick-revision">Revise</button><button class="btn" id="note-generate-quiz">Quiz</button></div>
     </div>
     <div id="notes-mobile-tabs" class="toolbar" style="display:none;gap:6px;padding-top:0;">
       <button class="btn" data-note-pane="list">Notes</button>
@@ -554,10 +570,17 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
         <button class="btn primary" id="note-add-block-fab" title="Add block">+</button>
         <input type="hidden" id="note-content" value="">
       </section>
-      <aside class="panel" style="display:none;grid-template-rows:1fr 1fr 1fr;gap:8px;overflow:hidden;">
+      <aside class="panel" style="grid-template-rows:1fr 1fr 1fr 1fr 1fr;gap:8px;overflow:hidden;">
         <div id="notes-highlights" style="overflow:auto;"></div>
-        <div id="note-links" style="overflow:auto;display:none;"></div>
+        <div id="note-links" style="overflow:auto;"></div>
+        <div style="padding:8px;display:flex;gap:8px;align-items:flex-end;">
+          <input id="vault-input" class="field" placeholder="Quick save to vault" style="flex:1;">
+          <button class="btn" id="vault-add">Save</button>
+        </div>
+        <div id="vault-list" style="overflow:auto;"></div>
         <div id="note-live-preview" class="panel" style="padding:8px;overflow:auto;"></div>
+        <div id="detected-concepts" style="overflow:auto;padding:8px;" ></div>
+        <div id="knowledge-cards-list" style="overflow:auto;padding:8px;"></div>
       </aside>
     </div>
   </section>
@@ -575,12 +598,17 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
 <button class="btn" id="pdf-prev">◀ Page</button>
 <button class="btn" id="pdf-next">Page ▶</button>
 <span class="pill" id="pdf-page-info">Page 0 / 0</span>
+<input id="pdf-page-slider" type="range" min="1" value="1" style="flex:1;max-width:220px;">
 <button class="btn" id="pdf-zoom-in">Zoom +</button>
 <button class="btn" id="pdf-zoom-out">Zoom −</button>
 <input id="pdf-search" class="field" placeholder="Search" style="max-width:170px;">
 <button class="btn" id="pdf-run-search">Search</button>
 <button class="btn" id="pdf-highlight">Highlight</button>
+<input id="pdf-highlight-color" type="color" value="#ffe550" title="Highlight color" style="height:34px;width:34px;padding:0;border-radius:8px;">
 <button class="btn" id="pdf-bookmark-page">Bookmark</button>
+<button class="btn" id="pdf-open-notes-side">Open Notes</button>
+<button class="btn" id="save-formula-vault">Save Formula</button>
+<button class="btn" id="open-split-study">Split Study</button>
 </div>
     <div class="app-body" style="display:grid;grid-template-columns:240px 1fr;gap:8px;padding:8px;min-height:0;">
       <aside class="panel" style="display:grid;grid-template-rows:130px minmax(0,1fr) 110px 110px;overflow:hidden;">
@@ -592,6 +620,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
           <canvas id="pdf-canvas"></canvas>
           <canvas id="pdf-canvas-2" style="display:none;"></canvas>
           <pre id="doc-text-viewer" class="field" style="display:none;white-space:pre-wrap;min-height:320px;"></pre>
+        <div id="pdf-search-results" style="margin-top:8px;max-height:180px;overflow:auto;padding:8px;border:1px solid rgba(255,255,255,.14);border-radius:10px;background:rgba(255,255,255,.05);"></div>
           <img id="doc-image-viewer" style="display:none;max-width:100%;height:auto;border-radius:8px;">
           <textarea id="doc-html-editor" class="field" style="display:none;min-height:220px;"></textarea>
           <iframe id="doc-html-preview" style="display:none;width:100%;min-height:280px;border:1px solid rgba(255,255,255,.2);border-radius:8px;"></iframe>
@@ -610,7 +639,63 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
 
 
 
-  <section id="focus-window" class="window" style="left:170px;top:120px;width:min(600px,88vw);height:min(460px,70vh);">
+  <section id="browser-window" class="window" style="left:160px;top:90px;width:min(1100px,94vw);height:min(720px,80vh);">
+    <div class="titlebar" data-window="browser-window"><div class="title">Browser</div><div class="w-controls"><button class="ctrl min" data-close="browser-window">—</button><button class="ctrl max" data-max="browser-window">▢</button><button class="ctrl close" data-close="browser-window">✕</button></div></div>
+    <div class="toolbar" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
+      <button class="btn" id="browser-new-tab">New Tab</button>
+      <input id="browser-url" class="field" placeholder="https://..." style="flex:1;min-width:220px;">
+      <button class="btn primary" id="browser-go">Go</button>
+      <button class="btn" id="browser-open-external">Open External</button>
+      <button class="btn" id="install-webapp">Install</button>
+      <button class="btn" id="uninstall-webapp">Uninstall</button>
+      <button class="btn" id="browser-highlight">Highlight</button>
+    </div>
+    <div class="app-body" style="display:flex;flex-direction:column;gap:8px;min-height:0;">
+      <div id="browser-tabs" style="display:flex;gap:6px;overflow:auto;padding:6px;"></div>
+      <iframe id="browser-frame" style="flex:1;border:1px solid rgba(255,255,255,.18);border-radius:10px;background:#000;" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
+    </div>
+  </section>
+
+  <section id="flashcards-window" class="window" style="left:180px;top:110px;width:min(520px,90vw);height:min(520px,70vh);">
+    <div class="titlebar" data-window="flashcards-window"><div class="title">Flashcards</div><div class="w-controls"><button class="ctrl min" data-close="flashcards-window">—</button><button class="ctrl max" data-max="flashcards-window">▢</button><button class="ctrl close" data-close="flashcards-window">✕</button></div></div>
+    <div class="toolbar" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+      <button class="btn" id="flash-prev">◀</button>
+      <button class="btn" id="flash-flip">Flip</button>
+      <button class="btn" id="flash-next">▶</button>
+      <span style="flex:1;"></span>
+      <span style="opacity:.8;font-size:12px;">Use Notes → Generate Flashcards</span>
+    </div>
+    <div class="app-body panel" style="display:flex;align-items:center;justify-content:center;padding:16px;">
+      <div id="flashcard-content" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;text-align:center;font-size:18px;padding:8px;">
+        No flashcards yet.
+      </div>
+    </div>
+  </section>
+
+  <section id="ocr-window" class="window" style="left:180px;top:140px;width:min(640px,90vw);height:min(520px,72vh);">
+    <div class="titlebar" data-window="ocr-window"><div class="title">OCR</div><div class="w-controls"><button class="ctrl min" data-close="ocr-window">—</button><button class="ctrl max" data-max="ocr-window">▢</button><button class="ctrl close" data-close="ocr-window">✕</button></div></div>
+    <div class="toolbar" style="display:flex;gap:6px;flex-wrap:wrap;">
+      <button class="btn" id="ocr-run-current">Run OCR</button>
+      <button class="btn" id="ocr-send-to-notes">Send to Notes</button>
+    </div>
+    <div class="app-body panel" style="padding:10px;display:flex;flex-direction:column;gap:8px;">
+      <div id="ocr-center-text" style="flex:1;overflow:auto;padding:10px;border:1px solid rgba(255,255,255,.14);border-radius:10px;background:rgba(0,0,0,.3);white-space:pre-wrap;">Select text or run OCR to see results.</div>
+    </div>
+
+  <section id="
+
+  <section id="ocr-window" clas style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;"><h2 id="focus-timer">25:00</h2><div id="focus-analytics" style="font-size:12px;opacity:.8;">No analytics yet.</divp:140px;width:min(640px,90vw);height:min(520px,72vh);">
+    <div class="titlebar" data-window="ocr-window"><div class="title">OCR</div><div class="w-controls"><button class="ctrl min" data-close="ocr-window">—</button><button class="ctrl max" data-max="ocr-window">▢</button><button class="ctrl close" data-close="ocr-window">✕</button></div></div>
+    <div class="toolbar" style="display:flex;gap:6px;flex-wrap:wrap;">
+      <button class="btn" id="ocr-run-current">Run OCR</button>
+      <button class="btn" id="ocr-send-to-notes">Send to Notes</button>
+    </div>
+    <div class="app-body panel" style="padding:10px;display:flex;flex-direction:column;gap:8px;">
+      <div id="ocr-center-text" style="flex:1;overflow:auto;padding:10px;border:1px solid rgba(255,255,255,.14);border-radius:10px;background:rgba(0,0,0,.3);white-space:pre-wrap;">Select text or run OCR to see results.</div>
+    </div>
+  </section>
+
+  <section id="focus-window" class="window" style="left:200px;top:120px;width:min(600px,88vw);height:min(460px,70vh);">
     <div class="titlebar" data-window="focus-window"><div class="title">Focus Mode</div><div class="w-controls"><button class="ctrl min" data-close="focus-window">—</button><button class="ctrl max" data-max="focus-window">▢</button><button class="ctrl close" data-close="focus-window">✕</button></div></div>
     <div class="toolbar"><button class="btn primary" id="focus-start">Start Pomodoro</button><button class="btn" id="focus-stop">Stop</button><button class="btn" id="focus-fullscreen">Fullscreen</button></div>
     <div class="app-body panel"><h2 id="focus-timer">25:00</h2></div>
@@ -656,12 +741,12 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
     <button class="btn" id="annot-pen">Pen</button>
     <button class="btn" id="annot-eraser">Eraser</button>
     <input id="annot-size" type="range" min="2" max="28" value="3">
-    <input id="annot-color" type="color" value="#ff0000">
+    <input id="annot-color" type="color" value="#ff4444" title="Annotation color">
     <button class="btn" id="annot-clear">Clear</button>
-    <button class="btn primary" id="annot-exit">Exit Draw</button>
+    <button class="btn" id="annot-exit">Exit</button>
   </div>
 
-  <div id="toast" style="position:fixed;right:14px;top:14px;z-index:13000;display:none;max-width:380px;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:rgba(13,20,37,.9);color:#fff;"></div>
+  <div id="toast" style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:19000;display:none;max-width:380px;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:rgba(13,20,37,.9);color:#fff;"></div>
 
   <div id="taskbar" class="glass">
     <div id="tb-left"><button class="tb-btn" id="tb-start" title="Start">⊞</button><button class="tb-btn" id="tb-show-desktop" title="Show desktop">🖥️</button><button class="tb-btn" id="tb-letterpad" title="Letterpad">✏️</button></div>
@@ -669,6 +754,9 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       <button class="tb-btn" data-open="dashboard-window" title="Dashboard">📊</button>
       <button class="tb-btn" data-open="notes-window" title="Notes">📝</button>
       <button class="tb-btn" data-open="bookshelf-window" title="Bookshelf">📚</button>
+      <button class="tb-btn" data-open="browser-window" title="Browser">🌐</button>
+      <button class="tb-btn" data-open="flashcards-window" title="Flashcards">🧠</button>
+      <button class="tb-btn" data-open="ocr-window" title="OCR">🔎</button>
       <button class="tb-btn" data-open="focus-window" title="Focus">⏱️</button>
       <button class="tb-btn" data-open="settings-window" title="Settings">⚙️</button>
     </div>
@@ -681,6 +769,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
     <textarea id="lp-input" class="field" placeholder="Write idea / formula / concept..."></textarea>
     <select id="lp-tag" class="field" style="display:none;"><option value="idea">Idea</option></select>
     <div style="display:flex;gap:6px;"><button class="btn primary" id="lp-save-notes">Save → Notes</button><button class="btn" id="lp-save-vault">Save → Vault</button><button class="btn" id="lp-clear">Clear</button></div>
+  <textarea id="workspace-notes" style="display:none;"></textarea>
   </aside>
 
   <div id="desktop-context"><div class="ctx-item" data-ctx="refresh">Refresh Desktop</div><div class="ctx-item" data-ctx="new-note">New Note</div><div class="ctx-item" data-ctx="focus">Open Focus Mode</div></div>
@@ -714,6 +803,9 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       { id:'dashboard-window', name:'Dashboard', icon:'📊' },
       { id:'notes-window', name:'Notes', icon:'📝' },
       { id:'bookshelf-window', name:'Bookshelf', icon:'📚' },
+      { id:'browser-window', name:'Browser', icon:'🌐' },
+      { id:'flashcards-window', name:'Flashcards', icon:'🧠' },
+      { id:'ocr-window', name:'OCR', icon:'🔎' },
       { id:'focus-window', name:'Focus', icon:'⏱️' },
       { id:'settings-window', name:'Settings', icon:'⚙️' }
     ];
@@ -1788,6 +1880,14 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
         };
       }
 
+      $('task-add').onclick = () => {
+        const t = $('task-title').value.trim();
+        if (!t) return;
+        getSpace().tasks.unshift({ id: crypto.randomUUID(), title:t, subject:$('task-subject').value.trim(), due:$('task-due').value || '', done:false, at:Date.now() });
+        $('task-title').value = '';
+        renderTasks();
+        queueSave();
+      };
       if ($('task-add')) {
         $('task-add').onclick = () => {
           const t = $('task-title').value.trim();
@@ -2118,13 +2218,44 @@ function renderNoteBlocks() {
       saveCurrentNote();
     };
   });
-  if (window.MathJax?.typesetPromise) MathJax.typesetPromise([c]).catch(()=>{});
 }
 
+function generateFlashcardsFromCurrentNote() {
+  const sp = getSpace();
+  const cur = sp.notes.find(n => n.id === sp.selectedNoteId);
+  if (!cur) return;
+  const lines = (cur.content || '').split(/\n+/).map(l => l.trim()).filter(Boolean);
+  const cards = [];
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.endsWith('?') && i + 1 < lines.length) {
+      cards.push({ id: crypto.randomUUID(), q: line, a: lines[i+1], createdAt: Date.now() });
+      i += 1;
+    }
+  }
+  if (!cards.length) return;
+  sp.flashcards = cards;
+  flashIndex = 0;
+  flashFlipped = false;
+  queueSave();
+  renderFlashcardReview();
+  showToast(`Generated ${cards.length} flashcards`);
+}
 
-function createFlashcardsFromContent() { /* removed for simplicity */ }
-
-function renderFlashcardReview() { /* removed for simplicity */ }
+function renderFlashcardReview() {
+  const sp = getSpace();
+  const list = sp.flashcards || [];
+  const container = document.getElementById('flashcard-content');
+  if (!container) return;
+  if (!list.length) {
+    container.textContent = 'No flashcards available. Use Notes → Generate Flashcards.';
+    return;
+  }
+  flashIndex = Math.max(0, Math.min(flashIndex, list.length - 1));
+  const card = list[flashIndex];
+  const text = flashFlipped ? card.a : card.q;
+  container.innerHTML = `<div style="width:100%;"><div style="font-size:12px;opacity:.7;margin-bottom:6px;">${flashIndex+1}/${list.length}</div><div style="white-space:pre-wrap;">${esc(text)}</div></div>`;
+}
 
 function renderKnowledgeGraph() { /* removed for simplicity */ }
 
@@ -2141,13 +2272,10 @@ async function runOCROnCurrentView() {
 function setupContextMenus() {
   const desktopCtx = $('desktop-context');
   const winCtx = $('window-context');
-  el.desktop.addEventListener('contextmenu', e => {
-    e.preventDefault();
-    desktopCtx.style.display = 'block';
-    desktopCtx.style.left = `${e.clientX}px`;
-    desktopCtx.style.top = `${e.clientY}px`;
-  });
-  document.querySelectorAll('.window .titlebar').forEach(bar => bar.addEventListener('contextmenu', e => {
+      el.desktop.addEventListener('contextmenu', e => {
+        e.preventDefault();
+      });
+      document.querySelectorAll('.window .titlebar').forEach(bar => bar.addEventListener('contextmenu', e => {
     e.preventDefault();
     const id = bar.dataset.window;
     winCtx.dataset.window = id;
@@ -2155,7 +2283,7 @@ function setupContextMenus() {
     winCtx.style.left = `${e.clientX}px`;
     winCtx.style.top = `${e.clientY}px`;
   }));
-  document.addEventListener('click', () => { desktopCtx.style.display='none'; winCtx.style.display='none'; });
+      document.addEventListener('click', () => { if(desktopCtx) {desktopCtx.style.display='none';} if(winCtx) {winCtx.style.display='none';} });
   [...desktopCtx.querySelectorAll('[data-ctx]')].forEach(i => i.onclick = () => {
     if (i.dataset.ctx === 'refresh') renderDesktop();
     if (i.dataset.ctx === 'new-note') $('note-new').click();
@@ -2177,7 +2305,7 @@ async function runOCRForPage(pageNumber) {
   const key = `${currentBookTitle || 'book'}:${pageNumber}`;
   if (sp.ocrCache[key]) return sp.ocrCache[key];
   const page = await pdfDoc.getPage(pageNumber);
-  const vp = page.getViewport({ scale: 1.4 });
+  const vp = page.getViewport({ scale: 1.4, });
   const c = document.createElement('canvas');
   c.width = vp.width; c.height = vp.height;
   await page.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
@@ -2187,7 +2315,7 @@ async function runOCRForPage(pageNumber) {
   return sp.ocrCache[key];
 }
 
-async function loadPDF(url, second = false){
+async function loadPDF(url, second = false) {
   if (!second) setStudyViewerMode('pdf');
   const loadingTask = pdfjsLib.getDocument(url);
   const doc = await loadingTask.promise;
@@ -2196,7 +2324,7 @@ async function loadPDF(url, second = false){
   if (!second) renderThumbnails();
 }
 
-async function renderPage(second = false){
+async function renderPage(second = false) {
   const doc = second ? pdfDoc2 : pdfDoc;
   if (!doc) return;
   const pageNo = second ? pdfPage2 : pdfPage;
@@ -2221,7 +2349,7 @@ async function renderPage(second = false){
   renderPDFSidebars();
 }
 
-async function renderThumbnails() {
+async function renderThumbnails(){
   if (!pdfDoc) return;
   const container = $('pdf-thumbnails');
   const total = pdfDoc.numPages;
@@ -2235,7 +2363,7 @@ async function renderThumbnails() {
   }
 }
 
-function detectFormula(text='') {
+function detectFormula(text=''){
   return /=|∫|Σ|sigma|\\vec|vector|Δ/i.test(text);
 }
 
@@ -2318,44 +2446,7 @@ function setupAdvancedBindings() {
     const sp = getSpace();
     sp.bookmarks.unshift({ id: crypto.randomUUID(), page: pdfPage, book: currentBookTitle || 'Book', at: Date.now() });
     renderPDFSidebars();
-    queueSave();
-  };
-
-  $('pdf-open-notes-side').onclick = () => {
-    openWindow('bookshelf-window');
-    const p = $('bookshelf-window');
-    const n = $('notes-window');
-    p.style.left='8px'; p.style.top='8px'; p.style.width='calc(55vw - 12px)'; p.style.height='calc(100vh - var(--taskbar-h) - 20px)';
-    openWindow('notes-window');
-    n.style.left='calc(55vw + 2px)'; n.style.top='8px'; n.style.width='calc(45vw - 12px)'; n.style.height='calc(100vh - var(--taskbar-h) - 20px)';
-    saveWindowRect('bookshelf-window'); saveWindowRect('notes-window');
-    queueSave();
-  };
-
-  $('save-formula-vault').onclick = () => {
-    const text = prompt('Formula');
-    if (!text?.trim()) return;
-    getSpace().formulaVault.unshift({ formula: text.trim(), book: currentBookTitle || 'Book', page: pdfPage, at: Date.now() });
-     queueSave();
-  };
-
-  $('[data-note-pane="list"]')?.addEventListener('click', ()=> { const nl = $('notes-layout'); if (nl) nl.className='app-body mobile-pane-list'; });
-  $('[data-note-pane="editor"]')?.addEventListener('click', ()=> { const nl = $('notes-layout'); if (nl) nl.className='app-body mobile-pane-editor'; });
-
-  $('note-add-block').onclick = () => {
-    const sp = getSpace();
-    const cur = sp.notes.find(n => n.id === sp.selectedNoteId);
-    if (!cur) return;
-    cur.blocks = cur.blocks || [];
-    const t = $('note-block-type').value;
-    cur.blocks.push({ type: t, text: '', at: Date.now() });
-    renderNoteBlocks();
-    const idx = cur.blocks.length - 1;
-    $('note-blocks')?.querySelector(`[data-editable-block="${idx}"]`)?.focus();
-    saveCurrentNote();
-  };
-  $('note-add-block-fab').onclick = () => $('note-add-block').click();
-  if ($('note-generate-flashcards')) $('note-generate-flashcards').onclick = () => {};
+    queueSave(); };
   if ($('note-exam-template')) $('note-exam-template').onclick = () => {
     const tpl = `# Chapter
 ## Definitions
@@ -2371,13 +2462,27 @@ function setupAdvancedBindings() {
     cur.blocks = cur.blocks || []; cur.blocks.push({ type:'heading', text:'Exam Template', at:Date.now() }); cur.blocks.push({ type:'text', text: tpl, at:Date.now() });
     renderNoteBlocks(); saveCurrentNote();
   };
-  if ($('note-quick-revision')) $('note-quick-revision').onclick = () => {};
+  if ($('note-quick-revision')) $('note-quick-revision').onclick = () => { showToast('Quick revision not implemented yet'); };
 
-  if ($('note-generate-quiz')) $('note-generate-quiz').onclick = () => {};
+  if ($('note-generate-quiz')) $('note-generate-quiz').onclick = () => { showToast('Quiz generator not implemented yet'); };
 
-  $('flash-prev').onclick = () => { flashIndex = Math.max(0, flashIndex - 1);  };
-  $('flash-next').onclick = () => { flashIndex = Math.min((getSpace().flashcards||[]).length - 1, flashIndex + 1);  };
-  $('flash-flip').onclick = () => { flashFlipped = !flashFlipped;  };
+  $('flash-prev').onclick = () => { flashIndex = Math.max(0, flashIndex - 1); renderFlashcardReview(); };
+  $('flash-next').onclick = () => { flashIndex = Math.min((getSpace().flashcards||[]).length - 1, flashIndex + 1); renderFlashcardReview(); };
+  $('flash-flip').onclick = () => { flashFlipped = !flashFlipped; renderFlashcardReview(); const nl = $('notes-layout'); if (nl) nl.className='app-body mobile-pane-editor'; };
+
+  $('note-add-block').onclick = () => {
+    const sp = getSpace();
+    const cur = sp.notes.find(n => n.id === sp.selectedNoteId);
+    if (!cur) return;
+    cur.blocks = cur.blocks || [];
+    const t = $('note-block-type').value;
+    cur.blocks.push({ type: t, text: '', at: Date.now() });
+    renderNoteBlocks();
+    const idx = cur.blocks.length - 1;
+    $('note-blocks')?.querySelector(`[data-editable-block="${idx}"]`)?.focus();
+    saveCurrentNote();
+  };
+  $('note-add-block-fab').onclick = () => $('note-add-block').click();
 
   $('focus-start').onclick = () => {
     clearInterval(pomodoroTimer);
@@ -2486,7 +2591,7 @@ renderAll = function() {
 
 
 function initPDFViewer() {
-  if (pdfDoc) renderPage();
+  if (pdfDoc) {renderPage();}
 }
 
 function openPDFDB() {
