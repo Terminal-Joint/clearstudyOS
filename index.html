@@ -3,2542 +3,561 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='52' font-size='52'%3E%F0%9F%93%98%3C/text%3E%3C/svg%3E" />
-  <title>For Clear PCM - Personal Study Workspace</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-<script src="https://unpkg.com/mammoth/mammoth.browser.min.js"></script>
-<script>
-pdfjsLib.GlobalWorkerOptions.workerSrc =
-"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-</script>
+  <title>For Clear PCM – Study Workspace</title>
+
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     :root {
-      --taskbar-h: 58px;
-      --radius-win: 10px;
-      --glass: rgba(16, 22, 40, 0.56);
-      --line: rgba(255,255,255,.18);
-      --text: #f5f7ff;
-      --accent: #4f8cff;
-      --wallpaper: url('https://images.unsplash.com/photo-1604079628040-94301bb21b91?q=80&w=1974&auto=format&fit=crop');
-      --window-bg: rgba(23, 30, 54, 0.72);
-      --font-size-ui: 13px;
-      --font-family-ui: "Segoe UI", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+      --taskbar-h: 56px;
+      --radius: 12px;
+      --bg: #070917;
+      --panel: rgba(10, 13, 25, .82);
+      --panel-strong: rgba(10, 13, 25, .92);
+      --line: rgba(255, 255, 255, .14);
+      --text: #f4f6ff;
+      --muted: rgba(255, 255, 255, .66);
+      --accent: #5b8cff;
+      --shadow: 0 18px 40px rgba(0,0,0,.42);
+      --font: "Inter", -apple-system, system-ui, "Segoe UI", sans-serif;
     }
+
     * { box-sizing: border-box; }
-    html, body {
-      margin: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      font-family: var(--font-family-ui);
-      font-size: var(--font-size-ui);
-      color: var(--text);
-    }
-    body {
-      background:
-        radial-gradient(120% 100% at 20% 10%, rgba(102,132,255,.30), transparent 48%),
-        radial-gradient(120% 100% at 90% 10%, rgba(177,114,255,.22), transparent 42%),
-        var(--wallpaper) center/cover no-repeat;
-    }
-    .glass {
-      background: var(--glass);
-      backdrop-filter: blur(16px) saturate(145%);
-      -webkit-backdrop-filter: blur(16px) saturate(145%);
-      border: 1px solid var(--line);
-      box-shadow: 0 14px 34px rgba(0,0,0,.34);
-    }
-    .btn, .field, select {
-      font: inherit;
-      color: var(--text);
-      border-radius: 8px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.10);
-      padding: 7px 10px;
-    }
-    .btn { cursor: pointer; }
-    .btn:hover { background: rgba(255,255,255,.17); }
-    .btn.primary { background: var(--accent); border-color: transparent; }
+    html, body { height: 100%; margin: 0; font-family: var(--font); background: radial-gradient(circle at 20% 10%, rgba(95, 147, 255, .16), transparent 55%), radial-gradient(circle at 90% 15%, rgba(220, 115, 255, .16), transparent 50%), var(--bg); color: var(--text); overflow: hidden; }
+    button, input, textarea { font-family: inherit; }
 
-    #desktop {
-      position: absolute;
-      inset: 10px 10px calc(var(--taskbar-h) + 10px) 10px;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
-      grid-auto-rows: 110px;
-      gap: 10px;
-      align-content: start;
-      overflow: auto;
-      user-select: none;
-    }
-    .desktop-icon {
-      width: 92px;
-      justify-self: center;
-      text-align: center;
-      border-radius: 10px;
-      padding: 6px;
-      cursor: pointer;
-      position: relative;
-    }
-    .desktop-icon:hover { background: rgba(255,255,255,.15); }
-    .tile {
-      width: 54px;
-      height: 54px;
-      margin: 0 auto;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.35);
-      background: rgba(255,255,255,.16);
-      display: grid;
-      place-items: center;
-      font-size: 26px;
-    }
-    .label {
-      margin-top: 6px;
-      font-size: 12px;
-      text-shadow: 0 2px 6px rgba(0,0,0,.6);
-      word-break: break-word;
-    }
-    .icon-edit {
-      position: absolute;
-      top: 4px;
-      right: 4px;
-      width: 18px;
-      height: 18px;
-      border-radius: 6px;
-      display: none;
-      border: 1px solid var(--line);
-      background: rgba(0,0,0,.35);
-      font-size: 11px;
-      line-height: 16px;
-      text-align: center;
-    }
-    .desktop-icon:hover .icon-edit { display: inline-block; }
+    #app { height: 100%; display: grid; grid-template-rows: auto 1fr; }
 
-    #taskbar {
-      position: fixed;
-      left: 10px;
-      right: 10px;
-      bottom: 8px;
-      height: var(--taskbar-h);
-      border-radius: 12px;
-      z-index: 9000;
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      align-items: center;
-      gap: 10px;
-      padding: 0 10px;
-    }
-    #tb-left, #tb-center, #tb-right { display: flex; align-items: center; gap: 8px; }
-    #tb-center { justify-content: center; }
-    #tb-right { justify-content: flex-end; }
-    .tb-btn {
-      position: relative;
-      border: 1px solid transparent;
-      background: transparent;
-      color: var(--text);
-      border-radius: 8px;
-      height: 38px;
-      min-width: 38px;
-      padding: 0 9px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-    .tb-btn:hover { background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.2); }
-    .tb-btn.active::after {
-      content: '';
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      bottom: 2px;
-      width: 20px;
-      height: 3px;
-      border-radius: 999px;
-      background: #fff;
-    }
-    .pill {
-      border: 1px solid var(--line);
-      border-radius: 9px;
-      background: rgba(255,255,255,.12);
-      padding: 6px 10px;
-      font-size: 12px;
-      white-space: nowrap;
-    }
+    /* Taskbar */
+    #taskbar { height: var(--taskbar-h); padding: 0 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); background: rgba(10, 14, 26, .68); backdrop-filter: blur(16px); }
+    #brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 14px; }
+    #brand .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
 
-    #start-menu, #quick-note-pop {
-      position: fixed;
-      bottom: 74px;
-      border-radius: 12px;
-      z-index: 9400;
-      display: none;
-      opacity: 0;
-      transition: transform .22s ease, opacity .2s ease;
-    }
-    #start-menu.open, #quick-note-pop.open { opacity: 1; }
+    nav { display: flex; gap: 10px; }
+    .tab { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 10px; border: 1px solid transparent; background: rgba(255,255,255,.06); cursor: pointer; transition: background .15s, border .15s; }
+    .tab.active { background: rgba(255,255,255,.14); border-color: rgba(255,255,255,.18); }
+    .tab svg { width: 16px; height: 16px; fill: currentColor; }
 
-    #start-menu {
-      left: 50%;
-      transform: translateX(-50%) translateY(16px) scale(.98);
-      width: min(900px, 96vw);
-      padding: 12px;
-    }
-    #start-menu.open { transform: translateX(-50%) translateY(0) scale(1); }
-    #start-search { width: 100%; }
-    #space-row { display: flex; gap: 8px; align-items: center; margin: 10px 0; flex-wrap: wrap; }
-    .space-chip {
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.10);
-      color: var(--text);
-      border-radius: 999px;
-      padding: 6px 10px;
-      cursor: pointer;
-      font-size: 12px;
-    }
-    .space-chip.active { background: var(--accent); border-color: transparent; }
-    #start-grid {
-      display: grid;
-      grid-template-columns: repeat(6, minmax(0,1fr));
-      gap: 8px;
-    }
-    .start-item {
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.08);
-      border-radius: 10px;
-      padding: 10px;
-      text-align: center;
-      cursor: pointer;
-      min-height: 70px;
-    }
-    #recommended {
-      margin-top: 10px;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 10px;
-      background: rgba(255,255,255,.06);
-    }
-    #recommended-list { display: grid; gap: 7px; margin-top: 8px; }
-    .rec-item { border: 1px solid var(--line); border-radius: 8px; padding: 7px 8px; cursor: pointer; background: rgba(255,255,255,.06); }
+    #tools { display: flex; gap: 10px; align-items: center; }
+    .icon-btn { width: 38px; height: 38px; padding: 8px; border-radius: 12px; border: 1px solid transparent; background: rgba(255,255,255,.06); cursor: pointer; display: grid; place-items: center; transition: background .15s, border .15s; }
+    .icon-btn:hover { background: rgba(255,255,255,.14); border-color: rgba(255,255,255,.18); }
 
-    #quick-note-pop {
-      right: 12px;
-      width: min(360px, 92vw);
-      transform: translateY(16px);
-      padding: 10px;
-    }
-    #quick-note-pop.open { transform: translateY(0); }
-    #quick-note-text { width: 100%; min-height: 120px; resize: vertical; }
+    /* Main content */
+    #main { height: calc(100% - var(--taskbar-h)); position: relative; overflow: hidden; }
+    .panel { position: absolute; inset: 0; padding: 14px; display: none; flex-direction: column; gap: 12px; background: var(--panel); border-top: 1px solid var(--line); overflow: hidden; }
+    .panel.active { display: flex; }
+    .panel-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .panel-title { font-size: 16px; font-weight: 700; letter-spacing: .02em; }
+    .panel-subtitle { color: var(--muted); font-size: 13px; }
 
-    .window {
-      position: absolute;
-      display: none;
-      flex-direction: column;
-      min-width: 330px;
-      min-height: 240px;
-      width: min(980px, 94vw);
-      height: min(720px, 86vh);
-      left: 80px;
-      top: 64px;
-      border-radius: var(--radius-win);
-      overflow: hidden;
-      z-index: 500;
-      background: var(--window-bg);
-      border: 1px solid var(--line);
-      backdrop-filter: blur(12px);
-    }
-    .window.active { z-index: 1300; }
-    .titlebar {
-      height: 36px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 0 8px;
-      border-bottom: 1px solid var(--line);
-      background: rgba(255,255,255,.06);
-      cursor: move;
-      user-select: none;
-    }
-    .title {
-      font-size: 12px;
-      font-weight: 600;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      margin-right: auto;
-    }
-    .w-controls { display: flex; gap: 4px; margin-left: auto; }
-    .ctrl {
-      width: 28px;
-      height: 24px;
-      border-radius: 6px;
-      border: 1px solid transparent;
-      background: transparent;
-      color: #fff;
-      cursor: pointer;
-      font-size: 13px;
-      display: grid;
-      place-items: center;
-    }
-    .ctrl:hover { background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.2); }
-    .ctrl.close:hover { background: #c42b1c; border-color: #c42b1c; }
+    .row { display: flex; gap: 10px; align-items: center; }
+    .grow { flex: 1; }
 
-    .toolbar {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-wrap: wrap;
-      padding: 6px 8px;
-      border-bottom: 1px solid var(--line);
-      background: rgba(255,255,255,.05);
-    }
-    .app-body { flex: 1; min-height: 0; overflow: auto; padding: 8px; }
-    .panel { border: 1px solid var(--line); border-radius: 9px; background: rgba(255,255,255,.06); }
-    .split { display: grid; grid-template-columns: 270px 1fr; gap: 8px; height: 100%; }
+    .pill-btn { padding: 10px 14px; border-radius: 999px; border: 1px solid var(--line); background: rgba(255,255,255,.06); cursor: pointer; transition: background .15s, border .15s; }
+    .pill-btn:hover { background: rgba(255,255,255,.14); border-color: rgba(255,255,255,.22); }
+    .pill-btn.active { background: rgba(91,140,255,.26); border-color: rgba(91,140,255,.46); }
 
-    .resize-handle { position: absolute; z-index: 1400; }
-    .resize-handle.e { top:8px; bottom:8px; right:-4px; width:8px; cursor:ew-resize; }
-    .resize-handle.w { top:8px; bottom:8px; left:-4px; width:8px; cursor:ew-resize; }
-    .resize-handle.n { left:8px; right:8px; top:-4px; height:8px; cursor:ns-resize; }
-    .resize-handle.s { left:8px; right:8px; bottom:-4px; height:8px; cursor:ns-resize; }
-    .resize-handle.ne { top:-4px; right:-4px; width:10px; height:10px; cursor:nesw-resize; }
-    .resize-handle.nw { top:-4px; left:-4px; width:10px; height:10px; cursor:nwse-resize; }
-    .resize-handle.se { bottom:-4px; right:-4px; width:10px; height:10px; cursor:nwse-resize; }
-    .resize-handle.sw { bottom:-4px; left:-4px; width:10px; height:10px; cursor:nesw-resize; }
+    .card { border-radius: var(--radius); border: 1px solid var(--line); padding: 14px; background: rgba(255,255,255,.05); display: flex; flex-direction: column; gap: 12px; overflow: hidden; }
 
-    .note-item, .task-row, .book-item, .vault-item, .sticky-item {
-      padding: 8px;
-      border-bottom: 1px solid rgba(255,255,255,.12);
-      cursor: pointer;
-    }
-    .note-item.active { background: rgba(79,140,255,.32); }
-    .note-block {
-      border: 1px solid rgba(255,255,255,.14);
-      border-radius: 10px;
-      padding: 10px;
-      background: rgba(255,255,255,.04);
-      display: grid;
-      gap: 6px;
-    }
-    .note-block .block-top { display:flex; align-items:center; justify-content:space-between; gap:8px; }
-    .note-block .block-tag { font-size: 11px; text-transform: uppercase; letter-spacing:.04em; opacity:.85; padding:2px 8px; border-radius:999px; border:1px solid var(--line); }
-    .note-block[data-type="concept"] .block-tag { background: rgba(255,214,10,.18); }
-    .note-block[data-type="formula"] .block-tag { background: rgba(50,150,255,.2); }
-    .note-block[data-type="example"] .block-tag { background: rgba(62,190,100,.2); }
-    .note-block[data-type="question"] .block-tag { background: rgba(255,110,110,.2); }
-    .note-block .block-controls { display:none; gap:5px; }
-    .note-block:hover .block-controls, .note-block:focus-within .block-controls { display:flex; }
-    .note-block .block-content { min-height: 28px; outline:none; white-space: pre-wrap; }
-    #note-slash-menu { display:none; position:absolute; z-index:20; max-width:210px; padding:6px; border-radius:10px; border:1px solid var(--line); background:rgba(10,18,33,.96); }
-    #note-slash-menu .slash-item { padding:6px 8px; border-radius:6px; cursor:pointer; }
-    #note-slash-menu .slash-item:hover { background: rgba(255,255,255,.12); }
-    #note-add-block-fab { position: absolute; right: 14px; bottom: 14px; border-radius: 999px; width: 42px; height: 42px; display:none; place-items:center; font-size:20px; }
-    .bookshelf-section-title { padding:6px 4px; font-weight:700; opacity:.95; }
+    /* Bookshelf */
+    #bookshelf-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; overflow: auto; padding-bottom: 10px; }
+    .book { border-radius: var(--radius); border: 1px solid var(--line); padding: 12px; background: rgba(255,255,255,.04); cursor: pointer; transition: transform .15s, border .15s; text-align: left; }
+    .book:hover { transform: translateY(-2px); border-color: rgba(255,255,255,.3); }
+    .book-title { font-weight: 600; font-size: 14px; margin-bottom: 6px; }
+    .book-meta { font-size: 12px; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; }
+    .book-progress { height: 6px; border-radius: 999px; background: rgba(255,255,255,.12); margin-top: 10px; overflow: hidden; }
+    .book-progress span { display: block; height: 100%; background: linear-gradient(90deg, #5b8cff, #66ffb2); }
 
+    #reader { display: none; flex-direction: column; border-radius: var(--radius); border: 1px solid var(--line); background: rgba(6,10,22,.78); overflow: hidden; }
+    #reader.active { display: flex; }
+    #reader-header { padding: 10px; border-bottom: 1px solid var(--line); display: flex; gap: 10px; align-items: center; }
+    #reader-title { font-weight: 600; font-size: 14px; }
+    #reader-controls { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+    #reader-frame { flex: 1; background: #0a0f1d; display: grid; overflow: hidden; }
+    #reader-frame iframe, #reader-text { width: 100%; height: 100%; border: none; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--text); background: transparent; padding: 14px; overflow: auto; }
+    #reader-text { white-space: pre-wrap; line-height: 1.5; }
 
+    /* Notes */
+    #notes { display: grid; grid-template-columns: 320px 1fr; gap: 12px; overflow: hidden; }
+    #notes-list { overflow: auto; border-radius: var(--radius); border: 1px solid var(--line); background: rgba(255,255,255,.03); padding: 10px; }
+    .note-item { padding: 10px; border-radius: 10px; border: 1px solid transparent; cursor: pointer; text-align: left; }
+    .note-item:hover { background: rgba(255,255,255,.08); }
+    .note-item.active { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.22); }
+    .note-title { font-weight: 600; font-size: 14px; }
+    .note-meta { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    #note-editor { display: flex; flex-direction: column; height: 100%; border-radius: var(--radius); border: 1px solid var(--line); overflow: hidden; background: rgba(255,255,255,.04); }
+    #note-editor header { padding: 12px; border-bottom: 1px solid var(--line); display: flex; gap: 10px; align-items: center; }
+    #note-editor textarea { flex: 1; padding: 12px; border: none; outline: none; resize: none; background: transparent; color: var(--text); font-size: 14px; line-height: 1.6; }
+    #note-editor textarea::placeholder { color: var(--muted); }
 
-    .book-meta { display:flex; justify-content:space-between; gap:8px; font-size:11px; opacity:.86; margin-top:6px; }
-    .book-progress { height:6px; border-radius:999px; background:rgba(255,255,255,.12); margin-top:6px; overflow:hidden; }
-    .book-progress > i { display:block; height:100%; background:linear-gradient(90deg, #69a1ff, #8d63ff); }
+    /* Timer */
+    #timer { display: grid; grid-template-columns: 1fr minmax(320px, 360px); gap: 14px; overflow: hidden; }
+    #timer-main { border-radius: var(--radius); border: 1px solid var(--line); background: rgba(255,255,255,.04); padding: 18px; display: flex; flex-direction: column; gap: 12px; align-items: center; justify-content: center; }
+    #timer-label { font-size: 14px; color: var(--muted); }
+    #timer-clock { font-size: 64px; font-weight: 700; letter-spacing: .02em; }
+    #timer-controls { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+    #timer-presets { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+    #timer-notes { border-radius: var(--radius); border: 1px solid var(--line); background: rgba(255,255,255,.04); padding: 14px; overflow: auto; }
+    #timer-notes h3 { margin-top: 0; }
+    #timer-notes textarea { width: 100%; min-height: 160px; resize: vertical; padding: 10px; border: 1px solid var(--line); border-radius: 10px; background: rgba(0,0,0,.16); color: var(--text); }
 
-    .cards { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; }
-    .card { padding: 10px; border-radius: 10px; border: 1px solid var(--line); background: rgba(255,255,255,.08); }
-    .card b { font-size: 22px; }
+    .field { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: rgba(255,255,255,.05); color: var(--text); outline: none; }
+    .field::placeholder { color: var(--muted); }
 
-    /* Chrome-like browser */
-    #browser-top { padding: 4px 6px 0; border-bottom: 1px solid var(--line); background: rgba(255,255,255,.04); }
-    #browser-tabs {
-      display: flex;
-      align-items: end;
-      gap: 4px;
-      overflow: auto;
-      padding-bottom: 4px;
+    @media (max-width: 920px) { #notes { grid-template-columns: 1fr; } #timer { grid-template-columns: 1fr; } }
+    @media (max-width: 520px) {
+      #taskbar { padding: 0 10px; }
+      nav { gap: 6px; }
+      .tab { padding: 8px 10px; }
+      #bookshelf-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+      #notes { grid-template-columns: 1fr; }
+      #timer { grid-template-columns: 1fr; }
     }
-    .btab {
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.08);
-      color: var(--text);
-      border-radius: 8px 8px 0 0;
-      min-width: 150px;
-      max-width: 240px;
-      height: 30px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 0 8px;
-      cursor: pointer;
-    }
-    .btab.active { background: rgba(79,140,255,.34); }
-    .btab .name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12px; flex: 1; }
-    .btab .close-tab {
-      width: 18px;
-      height: 18px;
-      border-radius: 5px;
-      border: 1px solid transparent;
-      background: transparent;
-      color: #fff;
-      font-size: 11px;
-      cursor: pointer;
-    }
-    .btab .close-tab:hover { background: rgba(255,255,255,.22); }
-    #browser-frame { width:100%; height:100%; border:0; background:#fff; border-radius:8px; }
-
-    /* Global annotation overlay */
-    #annot-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 12000;
-      display: none;
-      pointer-events: none;
-    }
-    #annot-canvas {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: auto;
-      cursor: crosshair;
-    }
-    #annot-tools {
-      position: fixed;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 12500;
-      display: none;
-      align-items: center;
-      gap: 8px;
-      padding: 8px;
-      border-radius: 10px;
-      pointer-events: auto;
-    }
-
-    @media (max-width: 1100px) {
-      .cards { grid-template-columns: repeat(2, minmax(0,1fr)); }
-      #start-grid { grid-template-columns: repeat(4, minmax(0,1fr)); }
-      .split { grid-template-columns: 1fr; }
-      .pill { display: none; }
-    }
-    @media (max-width: 700px) {
-      #start-grid { grid-template-columns: repeat(3, minmax(0,1fr)); }
-      .tb-btn { min-width: 34px; height: 34px; }
-      #taskbar { height: 52px; }
-      .window { width: calc(100vw - 16px); height: calc(100vh - 72px); left: 8px; top: 8px; }
-    }
-    .global-letterpad {
-      position: fixed;
-      right: 10px;
-      top: 70px;
-      width: min(360px, 92vw);
-      max-height: calc(100vh - 90px);
-      z-index: 15000;
-      display: none;
-      grid-template-rows: auto 1fr auto auto;
-      gap: 8px;
-      padding: 10px;
-      border-radius: 12px;
-      border: 1px solid var(--line);
-      background: rgba(8,14,28,.92);
-      backdrop-filter: blur(18px);
-      box-shadow: 0 22px 60px rgba(0,0,0,.45);
-    }
-    .global-letterpad textarea { width:100%; min-height:120px; resize:vertical; }
-    #mobile-letterpad-fab { display:none; position:fixed; right:14px; bottom:74px; z-index:15500; background:var(--accent); border-color:transparent; }
-    .window .app-body { position: relative; }
-
-    #bookshelf { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:12px; padding:10px; align-content:start; }
-    .book-card { border:1px solid var(--line); border-radius:12px; padding:8px; background:rgba(255,255,255,.05); cursor:pointer; transition:.2s transform,.2s background; }
-    .book-card:hover { transform: translateY(-2px); background:rgba(255,255,255,.12); }
-    .book-cover { height:120px; border-radius:10px; display:grid; place-items:center; font-size:34px; background:linear-gradient(135deg, rgba(79,140,255,.35), rgba(141,99,255,.25)); margin-bottom:8px; }
-    .floating-highlight {
-      position: fixed; z-index: 16000; display:none; gap:6px; padding:6px; border-radius:10px;
-      border:1px solid var(--line); background:rgba(9,16,30,.94); backdrop-filter: blur(8px);
-    }
-    .highlight-legend { display:grid; gap:6px; font-size:12px; }
-    ::-webkit-scrollbar { width: 9px; height: 9px; }
-    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.24); border-radius: 999px; }
-    ::-webkit-scrollbar-track { background: rgba(255,255,255,.05); }
-
-
-    @media (max-width: 900px) {
-      #bookshelf-window .app-body { grid-template-columns: 1fr !important; grid-template-rows: 180px minmax(0,1fr) 220px; }
-      .global-letterpad { right: 4px; left: 4px; top: auto; bottom: 64px; width: auto; max-height: 52vh; }
-      #notes-window .app-body { grid-template-columns: 1fr !important; }
-      #tb-right { gap: 4px; }
-      #tb-right .pill { padding: 4px 7px; font-size: 11px; }
-    }
-    @media (max-width: 560px) {
-      #taskbar { left: 4px; right: 4px; bottom: 4px; padding: 0 6px; }
-      #tb-center { gap: 4px; }
-      #tb-center .tb-btn { min-width: 30px; padding: 0 6px; }
-      #bookshelf-window .toolbar { gap: 4px; }
-      .toolbar .btn, .toolbar .field { padding: 5px 7px; }
-      #mobile-letterpad-fab { display:grid; place-items:center; }
-      #tb-letterpad { display:none; }
-      #notes-window .toolbar { grid-template-columns: 1fr !important; }
-      #notes-window .app-body > aside:last-child { display:none; }
-      #notes-mobile-tabs { display:flex !important; }
-      #note-add-block-fab { display:grid; }
-      #note-blocks .note-block { padding: 12px; }
-      #note-blocks .btn { min-height: 34px; }
-      #notes-layout.mobile-pane-list > section { display:none; }
-      #notes-layout.mobile-pane-editor > aside:first-child { display:none; }
-    }
-
   </style>
 </head>
 <body>
-  <main id="desktop"></main>
+  <div id="app">
+    <header id="taskbar">
+      <div id="brand"><span class="dot"></span><span>For‑Clear PCM</span></div>
 
-  <aside id="start-menu" class="glass">
-    <input id="start-search" class="field" placeholder="Search apps and note content..." />
-    <div id="space-row">
-      <div id="spaces" style="display:flex;gap:8px;flex-wrap:wrap;flex:1"></div>
-      <button class="btn" id="add-space">+ Space</button>
-      <button class="btn" id="rename-space">Rename</button>
-      <button class="btn" id="delete-space">Delete</button>
-    </div>
-    <div id="start-grid"></div>
-    <div id="recommended">
-      <b>Pinned Apps</b>
-      <div id="start-pinned" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:8px;"></div>
-      <b style="display:block;margin-top:10px;">Recent Items</b>
-      <div id="recommended-list"></div>
-    </div>
-  </aside>
+      <nav aria-label="Primary tools">
+        <button class="tab active" data-tool="bookshelf" title="Bookshelf">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zm13 2H6v12h12V6z"></path></svg>
+          <span>Bookshelf</span>
+        </button>
+        <button class="tab" data-tool="notes" title="Notes">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm2 3v2h8V6H8zm0 4v2h8v-2H8zm0 4v2h5v-2H8z"></path></svg>
+          <span>Notes</span>
+        </button>
+        <button class="tab" data-tool="timer" title="Focus Timer">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4a1 1 0 0 1 1 1v1.07a7 7 0 1 1-2 0V5a1 1 0 0 1 1-1zm-5.57 3.64l.7.7A7.01 7.01 0 0 1 5 12a7 7 0 1 0 7-7c-1.54 0-2.96.5-4.11 1.35l-.7-.7A8.96 8.96 0 0 1 12 3c4.97 0 9 4.03 9 9s-4.03 9-9 9-9-4.03-9-9c0-2.36.88-4.52 2.43-6.16z"></path><path d="M13 7h-2v6l5.25 3.15.9-1.48-4.15-2.47V7z"></path></svg>
+          <span>Timer</span>
+        </button>
+      </nav>
 
-  <aside id="quick-note-pop" class="glass">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><b style="margin-right:auto;">Quick Note</b><button class="btn" id="quick-note-save">Save</button></div>
-    <textarea id="quick-note-text" class="field" placeholder="Write and save instantly..."></textarea>
-  </aside>
-
-  <section id="dashboard-window" class="window">
-    <div class="titlebar" data-window="dashboard-window"><div class="title">Dashboard</div><div class="w-controls"><button class="ctrl min" data-close="dashboard-window">—</button><button class="ctrl max" data-max="dashboard-window">▢</button><button class="ctrl close" data-close="dashboard-window">✕</button></div></div>
-    <div class="app-body">
-      <div class="cards">
-        <div class="card"><div>Today Minutes</div><b id="m-today">0m</b></div>
-        <div class="card"><div>Streak</div><b id="m-streak">0d</b></div>
-      </div>
-      <div class="panel" style="margin-top:10px;padding:10px;">
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-          <label>Daily goal <input class="field" id="daily-goal" type="number" min="30" max="600" style="width:110px"></label>
-          <button class="btn primary" id="save-goal">Save Goal</button>
-          <button class="btn" id="sync-now">Sync Now</button>
-          <button class="btn" id="open-desktop-from-dashboard">Show Desktop</button>
-        </div>
-        <div id="coach-text" style="margin-top:8px;opacity:.9;"></div>
-        <div id="study-activity" style="margin-top:8px;display:grid;gap:5px;font-size:12px;"></div>
-      </div>
-    </div>
-
-  </section>
-
-  <section id="notes-window" class="window" style="left:100px;top:70px;">
-    <div class="titlebar" data-window="notes-window"><div class="title">Notes</div><div class="w-controls"><button class="ctrl min" data-close="notes-window">—</button><button class="ctrl max" data-max="notes-window">▢</button><button class="ctrl close" data-close="notes-window">✕</button></div></div>
-    <div class="toolbar" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;">
-      <div class="panel" style="padding:6px;display:flex;gap:6px;flex-wrap:wrap;"><b>File</b><button class="btn" id="note-new">New</button><button class="btn primary" id="note-save">Save</button><button class="btn" id="note-delete">Delete</button></div>
-      <div class="panel" style="padding:6px;display:flex;gap:6px;flex-wrap:wrap;"><b>Blocks</b><select id="note-block-type" class="field" style="max-width:120px;"><option value="text">Text</option><option value="heading">Heading</option><option value="list">List</option></select><button class="btn" id="note-add-block">Add</button></div>
-      <div class="panel" style="padding:6px;display:flex;gap:6px;flex-wrap:wrap;"><b>Format</b><button class="btn" id="note-bold">B</button><button class="btn" id="note-italic">I</button><button class="btn" id="note-h1">H1</button><button class="btn" id="note-h2">H2</button></div>
-    </div>
-    <div id="notes-mobile-tabs" class="toolbar" style="display:none;gap:6px;padding-top:0;">
-      <button class="btn" data-note-pane="list">Notes</button>
-      <button class="btn" data-note-pane="editor">Editor</button>
-
-    </div>
-    <div class="app-body" id="notes-layout" style="display:grid;grid-template-columns:260px 1fr;gap:8px;min-height:0;">
-      <aside class="panel" style="overflow:auto;"><div id="notes-list" style="overflow:auto;"></div></aside>
-      <section class="panel" style="display:flex;flex-direction:column;gap:8px;padding:8px;">
-        <input id="note-title" class="field" placeholder="Title">
-        <textarea id="note-editor" class="field" style="min-height:320px;resize:vertical;" placeholder="Write your notes here..."></textarea>
-        <input id="note-block-input" class="field" placeholder="Type /concept, /formula, /example, /question then Enter" style="display:none;">
-        <div id="note-slash-menu"></div>
-        <div id="note-blocks" style="display:none;gap:8px;overflow:auto;min-height:220px;"></div>
-        <button class="btn primary" id="note-add-block-fab" title="Add block">+</button>
-        <input type="hidden" id="note-content" value="">
-      </section>
-      <aside class="panel" style="display:none;grid-template-rows:1fr 1fr 1fr;gap:8px;overflow:hidden;">
-        <div id="notes-highlights" style="overflow:auto;"></div>
-        <div id="note-links" style="overflow:auto;display:none;"></div>
-        <div id="note-live-preview" class="panel" style="padding:8px;overflow:auto;"></div>
-      </aside>
-    </div>
-  </section>
-
-
-
-
-
-  <section id="bookshelf-window" class="window" style="left:150px;top:80px;width:min(1200px,96vw);height:min(760px,88vh);">
-    <div class="titlebar" data-window="bookshelf-window"><div class="title">Bookshelf + PDF Workspace</div><div class="w-controls"><button class="ctrl min" data-close="bookshelf-window">—</button><button class="ctrl max" data-max="bookshelf-window">▢</button><button class="ctrl close" data-close="bookshelf-window">✕</button></div></div>
-    <div class="toolbar">
-<input id="pdf-upload" type="file" accept=".pdf,.txt,.md,.html,.htm,.mhtml,.png,.jpg,.jpeg,.webp,.gif,.docx">
-<input id="book-title" class="field" placeholder="Book title">
-<button class="btn primary" id="add-book">Add Book</button>
-<button class="btn" id="pdf-prev">◀ Page</button>
-<button class="btn" id="pdf-next">Page ▶</button>
-<span class="pill" id="pdf-page-info">Page 0 / 0</span>
-<button class="btn" id="pdf-zoom-in">Zoom +</button>
-<button class="btn" id="pdf-zoom-out">Zoom −</button>
-<input id="pdf-search" class="field" placeholder="Search" style="max-width:170px;">
-<button class="btn" id="pdf-run-search">Search</button>
-<button class="btn" id="pdf-highlight">Highlight</button>
-<button class="btn" id="pdf-bookmark-page">Bookmark</button>
-</div>
-    <div class="app-body" style="display:grid;grid-template-columns:240px 1fr;gap:8px;padding:8px;min-height:0;">
-      <aside class="panel" style="display:grid;grid-template-rows:130px minmax(0,1fr) 110px 110px;overflow:hidden;">
-        <div id="bookshelf" style="overflow:auto;border-bottom:1px solid rgba(255,255,255,.14);"></div>
-        <div id="pdf-thumbnails" style="overflow:auto;padding:6px;display:grid;gap:6px;"></div><div id="pdf-bookmarks" style="overflow:auto;padding:6px;border-top:1px solid rgba(255,255,255,.14);"></div><div id="pdf-highlight-list" style="overflow:auto;padding:6px;border-top:1px solid rgba(255,255,255,.14);"></div>
-      </aside>
-      <section class="panel" style="padding:8px;min-width:0;">
-        <div id="pdf-viewer-container" style="width:100%;height:100%;overflow:auto;background:#111;display:grid;grid-template-columns:1fr;gap:8px;">
-          <canvas id="pdf-canvas"></canvas>
-          <canvas id="pdf-canvas-2" style="display:none;"></canvas>
-          <pre id="doc-text-viewer" class="field" style="display:none;white-space:pre-wrap;min-height:320px;"></pre>
-          <img id="doc-image-viewer" style="display:none;max-width:100%;height:auto;border-radius:8px;">
-          <textarea id="doc-html-editor" class="field" style="display:none;min-height:220px;"></textarea>
-          <iframe id="doc-html-preview" style="display:none;width:100%;min-height:280px;border:1px solid rgba(255,255,255,.2);border-radius:8px;"></iframe>
-        </div>
-      </section>
-    </div>
-  </section>
-
-
-
-
-
-
-
-
-
-
-
-  <section id="focus-window" class="window" style="left:170px;top:120px;width:min(600px,88vw);height:min(460px,70vh);">
-    <div class="titlebar" data-window="focus-window"><div class="title">Focus Mode</div><div class="w-controls"><button class="ctrl min" data-close="focus-window">—</button><button class="ctrl max" data-max="focus-window">▢</button><button class="ctrl close" data-close="focus-window">✕</button></div></div>
-    <div class="toolbar"><button class="btn primary" id="focus-start">Start Pomodoro</button><button class="btn" id="focus-stop">Stop</button><button class="btn" id="focus-fullscreen">Fullscreen</button></div>
-    <div class="app-body panel"><h2 id="focus-timer">25:00</h2></div>
-  </section>
-
-
-  <section id="settings-window" class="window" style="left:150px;top:82px;width:min(920px,94vw);height:min(700px,84vh);">
-    <div class="titlebar" data-window="settings-window"><div class="title">Settings</div><div class="w-controls"><button class="ctrl min" data-close="settings-window">—</button><button class="ctrl max" data-max="settings-window">▢</button><button class="ctrl close" data-close="settings-window">✕</button></div></div>
-    <div class="app-body" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-      <div class="panel" style="padding:9px;display:flex;flex-direction:column;gap:8px;">
-        <h4 style="margin:0;">Theme & Visuals</h4>
-        <label>Wallpaper URL <input id="set-wallpaper" class="field" placeholder="https://..."></label>
-        <label>Accent color <input id="set-accent" class="field" type="color"></label>
-        <label>Glass opacity <input id="set-glass" class="field" type="range" min="25" max="85"></label>
-        <label>UI font size <input id="set-font-size" class="field" type="range" min="11" max="18"></label>
-        <label>Window radius <input id="set-radius" class="field" type="range" min="6" max="16"></label>
-        <label>UI font family
-          <select id="set-font-family" class="field">
-            <option value='"Segoe UI", "Inter", sans-serif'>Segoe UI</option>
-            <option value='"Inter", "Segoe UI", sans-serif'>Inter</option>
-            <option value='"Arial", sans-serif'>Arial</option>
-            <option value='"Verdana", sans-serif'>Verdana</option>
-          </select>
+      <div id="tools">
+        <label class="icon-btn" for="file-upload" title="Upload study files">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20h14v-2H5v2zm7-18L5.33 9h3.92v4h6.5V9h3.92L12 2z"></path></svg>
+          <input id="file-upload" type="file" accept=".pdf,.txt,.md,.html" multiple class="hidden" />
         </label>
-        <button class="btn primary" id="apply-theme">Apply Theme</button>
+        <button class="icon-btn" id="settings-btn" title="Settings">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.14 12.94c.04-.32.06-.66.06-1s-.02-.68-.06-1l2.03-1.58a.5.5 0 0 0 .12-.63l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.04 7.04 0 0 0-1.72-.99l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.63.24-1.23.56-1.77.96l-2.4-.96a.5.5 0 0 0-.6.22l-1.92 3.32a.5.5 0 0 0 .12.63l2.03 1.58c-.04.32-.06.66-.06 1s.02.68.06 1L2.44 14.52a.5.5 0 0 0-.12.63l1.92 3.32c.14.24.44.33.69.22l2.4-.96c.54.4 1.14.72 1.77.96l.36 2.54c.05.26.27.42.5.42h3.84c.23 0 .45-.16.5-.42l.36-2.54c.62-.24 1.22-.56 1.77-.96l2.4.96c.25.1.55.01.69-.22l1.92-3.32a.5.5 0 0 0-.12-.63l-2.03-1.58zM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"></path></svg>
+        </button>
       </div>
-      <div class="panel" style="padding:9px;display:flex;flex-direction:column;gap:8px;">
-        <h4 style="margin:0;">Behavior & Layout</h4>
-        <label><input type="checkbox" id="set-autosave"> Enable instant autosave while typing</label>
-        <label><input type="checkbox" id="set-click-close"> Click outside closes menus/popups</label>
-        <label><input type="checkbox" id="set-open-start"> Open start menu on load</label>
-        <label><input type="checkbox" id="set-snap"> Enable snap helpers</label>
-        <label>Preferred homepage <input id="set-homepage" class="field" placeholder="https://www.google.com"></label>
-        <button class="btn" id="settings-reset-layout">Reset window layout</button>
-      </div>
-    </div>
-  </section>
+    </header>
 
-  <div id="annot-overlay">
-    <canvas id="annot-canvas"></canvas>
-  </div>
-  <div id="annot-tools" class="glass">
-    <button class="btn" id="annot-pen">Pen</button>
-    <button class="btn" id="annot-eraser">Eraser</button>
-    <input id="annot-size" type="range" min="2" max="28" value="3">
-    <input id="annot-color" type="color" value="#ff0000">
-    <button class="btn" id="annot-clear">Clear</button>
-    <button class="btn primary" id="annot-exit">Exit Draw</button>
-  </div>
-
-  <div id="toast" style="position:fixed;right:14px;top:14px;z-index:13000;display:none;max-width:380px;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:rgba(13,20,37,.9);color:#fff;"></div>
-
-  <div id="taskbar" class="glass">
-    <div id="tb-left"><button class="tb-btn" id="tb-start" title="Start">⊞</button><button class="tb-btn" id="tb-show-desktop" title="Show desktop">🖥️</button><button class="tb-btn" id="tb-letterpad" title="Letterpad">✏️</button></div>
-    <div id="tb-center">
-      <button class="tb-btn" data-open="dashboard-window" title="Dashboard">📊</button>
-      <button class="tb-btn" data-open="notes-window" title="Notes">📝</button>
-      <button class="tb-btn" data-open="bookshelf-window" title="Bookshelf">📚</button>
-      <button class="tb-btn" data-open="focus-window" title="Focus">⏱️</button>
-      <button class="tb-btn" data-open="settings-window" title="Settings">⚙️</button>
-    </div>
-    <div id="tb-right"><button class="tb-btn" id="tb-quick-note" title="Quick note">🗒️</button><div class="pill" id="space-pill">Space</div><div class="pill" id="status-pill">Saved</div><div class="pill" id="custom-timer-pill" title="Click start/pause • Right click customize">Timer 25:00</div><div class="pill" id="clock-pill"></div><button class="tb-btn" id="btn-login" title="Login">👤</button><button class="tb-btn" id="btn-logout" title="Logout" style="display:none;">⇦</button></div>
-  </div>
-
-  <button id="mobile-letterpad-fab" class="tb-btn" title="Quick capture">✏️</button>
-  <aside id="global-letterpad" class="global-letterpad">
-    <div style="display:flex;align-items:center;gap:8px;"><b style="margin-right:auto;">Letterpad</b><button class="btn" id="lp-close">Close</button></div>
-    <textarea id="lp-input" class="field" placeholder="Write idea / formula / concept..."></textarea>
-    <select id="lp-tag" class="field" style="display:none;"><option value="idea">Idea</option></select>
-    <div style="display:flex;gap:6px;"><button class="btn primary" id="lp-save-notes">Save → Notes</button><button class="btn" id="lp-save-vault">Save → Vault</button><button class="btn" id="lp-clear">Clear</button></div>
-  </aside>
-
-  <div id="desktop-context"><div class="ctx-item" data-ctx="refresh">Refresh Desktop</div><div class="ctx-item" data-ctx="new-note">New Note</div><div class="ctx-item" data-ctx="focus">Open Focus Mode</div></div>
-  <div id="window-context"><div class="ctx-item" data-wctx="left">Snap Left</div><div class="ctx-item" data-wctx="right">Snap Right</div><div class="ctx-item" data-wctx="top">Snap Top</div></div>
-
-
-  <div id="floating-highlight-toolbar" class="floating-highlight"><button class="btn" data-hl-kind="concept">🟡 Concept</button><button class="btn" data-hl-kind="formula">🔵 Formula</button><button class="btn" data-hl-kind="example">🟢 Example</button><button class="btn" data-hl-kind="doubt">🔴 Doubt</button></div>
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyAPzgwYDQQqR4y8aRcu8BmXfhYoLPXDuVM",
-      authDomain: "forclearpcm.firebaseapp.com",
-      projectId: "forclearpcm",
-      storageBucket: "forclearpcm.firebasestorage.app",
-      messagingSenderId: "594895089425",
-      appId: "1:594895089425:web:65e09f36f7f519f8578fdb",
-      measurementId: "G-FM5Y4M0HB0"
-    };
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
-    const db = getFirestore(app);
-
-    const LOCAL_KEY = 'studyos11-pro-guest';
-
-    const CORE_APPS = [
-      { id:'dashboard-window', name:'Dashboard', icon:'📊' },
-      { id:'notes-window', name:'Notes', icon:'📝' },
-      { id:'bookshelf-window', name:'Bookshelf', icon:'📚' },
-      { id:'focus-window', name:'Focus', icon:'⏱️' },
-      { id:'settings-window', name:'Settings', icon:'⚙️' }
-    ];
-    const $ = id => document.getElementById(id);
-    const el = {
-      bookshelf: $('bookshelf'),
-      desktop: $('desktop'), startMenu: $('start-menu'), startSearch: $('start-search'), startGrid: $('start-grid'),
-      spaces: $('spaces'), recommendedList: $('recommended-list'), quickNotePop: $('quick-note-pop'), quickNoteText: $('quick-note-text'),
-      notesList: $('notes-list'), noteTitle: $('note-title'), noteEditor: $('note-editor'), noteContent: $('note-content'), taskList: $('task-list'),
-      notesHighlights: $('notes-highlights'), noteLinks: $('note-links'), startPinned: $('start-pinned'), knowledgeCardsList: $('knowledge-cards-list'), noteLivePreview: $('note-live-preview'), noteBlockInput: $('note-block-input'), floatingHl: $('floating-highlight-toolbar'), pdfSlider: $('pdf-page-slider'), detectedConcepts: $('detected-concepts'), lpPanel: $('global-letterpad'), lpInput: $('lp-input'), lpTag: $('lp-tag'),
-      browserTabs: $('browser-tabs'), browserUrl: $('browser-url'), browserFrame: $('browser-frame'),
-      vaultList: $('vault-list'),
-      status: $('status-pill'), clock: $('clock-pill'), customTimer: $('custom-timer-pill'), spacePill: $('space-pill'),
-      annotOverlay: $('annot-overlay'), annotCanvas: $('annot-canvas'), annotTools: $('annot-tools')
-      ,toast: $('toast')
-    };
-
-    let pdfDoc = null;
-    let pdfDoc2 = null;
-    let pdfPage = 1;
-    let pdfPage2 = 1;
-    let pdfScale = 1.35;
-    let splitPDF = false;
-    let currentBookTitle = '';
-    let flashIndex = 0;
-    let flashFlipped = false;
-    let pomodoroTimer = null;
-    let pomodoroRemaining = 25 * 60;
-
-    function showToast(msg, ms=2400) {
-      el.toast.textContent = msg;
-      el.toast.style.display = 'block';
-      clearTimeout(showToast._t);
-      showToast._t = setTimeout(() => el.toast.style.display = 'none', ms);
-    }
-
-
-    function formatSeconds(sec=0) {
-      const m = Math.floor(Math.max(0, sec) / 60);
-      const s = Math.max(0, sec) % 60;
-      return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-    }
-
-    function renderCustomTimer() {
-      const t = state.prefs.customTimer || { label:'Study', seconds:1500, running:false };
-      if (!el.customTimer) return;
-      el.customTimer.textContent = `${t.label} ${formatSeconds(t.seconds)}`;
-      el.customTimer.style.borderColor = t.running ? 'var(--accent)' : 'var(--line)';
-    }
-
-    function tickCustomTimer() {
-      const t = state.prefs.customTimer;
-      if (!t?.running) return;
-      const now = Date.now();
-      const prev = t.lastTick || now;
-      const delta = Math.floor((now - prev) / 1000);
-      if (delta <= 0) return;
-      t.seconds = Math.max(0, t.seconds - delta);
-      t.lastTick = now;
-      if (t.seconds === 0) {
-        t.running = false;
-        showToast(`⏰ ${t.label} timer done`);
-      }
-      renderCustomTimer();
-    }
-
-    let currentUser = null;
-    let saveTimer = null;
-    let activeWindowId = '';
-
-    function baseSpace(name='Physics') {
-      return {
-        name,
-        notes: [{ id: crypto.randomUUID(), title: 'Welcome', content: 'Start writing your notes here.', updatedAt: Date.now() }],
-        selectedNoteId: null,
-        tasks: [],
-        books: [],
-        studio: { drawing:'', stickies:[] },
-        vault: [],
-        highlights: [],
-        analytics: { appMinutes: {}, events: [] },
-        browser: { tabs:[{ id: crypto.randomUUID(), title:'Home', url:'https://www.wikipedia.org' }], activeTabId:null },
-        quickNotes: [],
-        apps: CORE_APPS.map(a => ({ id: a.id, name: a.name, icon: a.icon, type:'core' })),
-        windows: {},
-        formulaVault: [],
-        flashcards: [],
-        ocrCache: {},
-        revisionSummaries: [],
-        knowledgeCards: [],
-        conceptLinks: {},
-        bookmarks: []
-      };
-    }
-
-    function baseState() {
-      const sp = baseSpace('Physics');
-      sp.selectedNoteId = sp.notes[0].id;
-      sp.browser.activeTabId = sp.browser.tabs[0].id;
-      return {
-        currentSpace: 'Physics',
-        spaceOrder: ['Physics','Chemistry','Mathematics'],
-        spaces: {
-          Physics: sp,
-          Chemistry: { ...baseSpace('Chemistry'), selectedNoteId: null },
-          Mathematics: { ...baseSpace('Mathematics'), selectedNoteId: null }
-        },
-        theme: {
-          wallpaper: '', accent:'#4f8cff', glass:56, uiFontSize:13, radius:10,
-          fontFamily:'"Segoe UI", "Inter", sans-serif'
-        },
-        prefs: {
-          autosave: true,
-          clickClose: true,
-          openStartOnLoad: false,
-          snap: true,
-          homepage: 'https://www.wikipedia.org',
-          customTimer: { label:'Study', seconds:1500, running:false, lastTick:0 }
-        },
-        installedAppsGlobal: [],
-        session: { lastOpenWindows: [] }
-      };
-    }
-
-    function normalize(raw) {
-      const b = baseState();
-      const s = { ...b, ...(raw || {}) };
-      s.spaceOrder = (s.spaceOrder?.length ? s.spaceOrder : b.spaceOrder).filter(Boolean);
-      s.spaces = s.spaces || {};
-      s.spaceOrder.forEach(name => {
-        const base = baseSpace(name);
-        const sp = { ...base, ...(s.spaces[name] || {}) };
-        sp.notes = (sp.notes?.length ? sp.notes : base.notes).map(n => ({ ...n, updatedAt: n.updatedAt || Date.now() }));
-        sp.selectedNoteId = sp.selectedNoteId && sp.notes.some(n => n.id === sp.selectedNoteId) ? sp.selectedNoteId : sp.notes[0]?.id || null;
-        sp.tasks = sp.tasks || [];
-        sp.formulaVault = sp.formulaVault || [];
-        sp.flashcards = sp.flashcards || [];
-        sp.ocrCache = sp.ocrCache || {};
-        sp.revisionSummaries = sp.revisionSummaries || [];
-        sp.knowledgeCards = sp.knowledgeCards || [];
-        sp.conceptLinks = sp.conceptLinks || {};
-        sp.bookmarks = sp.bookmarks || [];
-        sp.books = sp.books || [];
-        sp.studio = { drawing: sp.studio?.drawing || '', stickies: sp.studio?.stickies || [] };
-        sp.vault = sp.vault || [];
-        sp.highlights = sp.highlights || [];
-        sp.analytics = { appMinutes: sp.analytics?.appMinutes || {}, events: sp.analytics?.events || [] };
-        sp.quickNotes = sp.quickNotes || [];
-        sp.apps = sp.apps?.length ? sp.apps : base.apps;
-        const tabs = sp.browser?.tabs?.length ? sp.browser.tabs : [{ id: crypto.randomUUID(), title:'Google', url:(s.prefs?.homepage || 'https://www.google.com') }];
-        sp.browser = { tabs, activeTabId: sp.browser?.activeTabId || tabs[0].id };
-        if (!sp.browser.tabs.some(t => t.id === sp.browser.activeTabId)) sp.browser.activeTabId = sp.browser.tabs[0].id;
-        sp.windows = sp.windows || {};
-        s.spaces[name] = sp;
-      });
-      if (!s.spaceOrder.includes(s.currentSpace)) s.currentSpace = s.spaceOrder[0];
-      s.theme = { ...b.theme, ...(s.theme || {}) };
-      s.prefs = { ...b.prefs, ...(s.prefs || {}) };
-      s.prefs.customTimer = { ...b.prefs.customTimer, ...(s.prefs.customTimer || {}) };
-      s.installedAppsGlobal = s.installedAppsGlobal || [];
-      return s;
-    }
-
-    let state = normalize(null);
-    const getSpace = () => state.spaces[state.currentSpace];
-
-    function dayKey(ts=Date.now()) { return new Date(ts).toISOString().slice(0,10); }
-    function logStudyEvent(type, payload={}) {
-      const sp = getSpace();
-      sp.analytics.events.unshift({ type, payload, at: Date.now() });
-      sp.analytics.events = sp.analytics.events.slice(0, 300);
-    }
-    function addAppMinutes(appId, minutes=1) {
-      if (!appId) return;
-      const sp = getSpace();
-      sp.analytics.appMinutes[appId] = Number(sp.analytics.appMinutes[appId] || 0) + minutes;
-    }
-    function addHighlight(source, text, meta='') {
-      const t = (text || '').trim();
-      if (!t) return;
-      const sp = getSpace();
-      sp.highlights.unshift({ id: crypto.randomUUID(), source, text: t, meta, at: Date.now() });
-      sp.highlights = sp.highlights.slice(0, 400);
-      logStudyEvent('highlight', { source });
-      queueSave();
-    }
-
-    function totalTodayMinutes() {
-      const sp = getSpace();
-      const today = dayKey();
-      const mins = sp.tasks.filter(t => t.done && dayKey(t.doneAt || t.at) === today).length * 5
-        + sp.quickNotes.filter(n => dayKey(n.at) === today).length
-        + Math.round(Object.values(sp.analytics.appMinutes || {}).reduce((a,b)=>a+b,0));
-      return mins;
-    }
-
-    function buildCloudPayload(srcState) {
-      const payload = {
-        theme: { ...srcState.theme },
-        prefs: {
-          autosave: !!srcState.prefs.autosave,
-          openStartOnLoad: !!srcState.prefs.openStartOnLoad,
-          homepage: srcState.prefs.homepage || 'https://www.wikipedia.org',
-          customTimer: { ...(srcState.prefs.customTimer || { label:'Study', seconds:1500, running:false, lastTick:0 }) }
-        },
-        currentSpace: srcState.currentSpace,
-        spaceOrder: [...srcState.spaceOrder],
-        spaces: {}
-      };
-      srcState.spaceOrder.forEach(name => {
-        const sp = srcState.spaces[name];
-        payload.spaces[name] = {
-          notes: (sp.notes || []).map(n => ({
-            id: n.id,
-            title: n.title || '',
-            content: n.content || '',
-            blocks: n.blocks || [],
-            updatedAt: n.updatedAt || Date.now()
-          })),
-          selectedNoteId: sp.selectedNoteId || null
-        };
-      });
-      return payload;
-    }
-
-    function mergeCloudIntoLocal(localState, cloudPayload) {
-      if (!cloudPayload) return localState;
-      const merged = normalize(localState);
-      if (cloudPayload.theme) merged.theme = { ...merged.theme, ...cloudPayload.theme };
-      if (cloudPayload.prefs) merged.prefs = { ...merged.prefs, ...cloudPayload.prefs };
-      if (cloudPayload.spaceOrder?.length) merged.spaceOrder = cloudPayload.spaceOrder;
-      if (cloudPayload.currentSpace) merged.currentSpace = cloudPayload.currentSpace;
-      (merged.spaceOrder || []).forEach(name => {
-        const cloudSpace = cloudPayload.spaces?.[name];
-        if (!cloudSpace) return;
-        merged.spaces[name] = merged.spaces[name] || baseSpace(name);
-        merged.spaces[name].notes = (cloudSpace.notes || []).map(n => ({ ...n, updatedAt: n.updatedAt || Date.now() }));
-        if (cloudSpace.selectedNoteId) merged.spaces[name].selectedNoteId = cloudSpace.selectedNoteId;
-      });
-      return normalize(merged);
-    }
-
-    async function loadState(user) {
-      let local = null;
-      try { local = JSON.parse(localStorage.getItem(LOCAL_KEY) || 'null'); }
-      catch { local = null; }
-      if (!user) return normalize(local);
-
-      const ref = doc(db, 'users', user.uid, 'studyos', 'state');
-      const snap = await getDoc(ref);
-      const cloud = snap.exists() ? snap.data()?.payload : null;
-      return mergeCloudIntoLocal(local, cloud);
-    }
-
-    async function saveNow() {
-      if (!state) return;
-      el.status.textContent = 'Saving...';
-      try {
-        localStorage.setItem(LOCAL_KEY, JSON.stringify(state));
-        if (!currentUser) {
-          el.status.textContent = 'Saved local';
-          return;
-        }
-        const payload = buildCloudPayload(state);
-        const digest = JSON.stringify(payload);
-        if (saveNow._lastCloudDigest === digest) {
-          el.status.textContent = 'Saved local';
-          return;
-        }
-        const ref = doc(db, 'users', currentUser.uid, 'studyos', 'state');
-        await setDoc(ref, { payload, uid: currentUser.uid, updatedAt: serverTimestamp() }, { merge: true });
-        saveNow._lastCloudDigest = digest;
-        el.status.textContent = 'Saved Firebase (limited)';
-      } catch (err) {
-        el.status.textContent = 'Save failed';
-        showToast(`Save failed: ${err?.message || 'unknown error'}`, 4200);
-      }
-    }
-
-    function queueSave() {
-      clearTimeout(saveTimer);
-      saveTimer = setTimeout(saveNow, 900);
-    }
-
-    function esc(v='') {
-      return v.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
-    }
-
-    function applyTheme() {
-      document.documentElement.style.setProperty('--accent', state.theme.accent || '#4f8cff');
-      document.documentElement.style.setProperty('--glass-opacity', String((Number(state.theme.glass || 56))/100));
-      document.documentElement.style.setProperty('--font-size-ui', `${Number(state.theme.uiFontSize || 13)}px`);
-      document.documentElement.style.setProperty('--radius-win', `${Number(state.theme.radius || 10)}px`);
-      document.documentElement.style.setProperty('--font-family-ui', state.theme.fontFamily || '"Segoe UI", "Inter", sans-serif');
-      if (state.theme.wallpaper) document.documentElement.style.setProperty('--wallpaper', `url('${state.theme.wallpaper}')`);
-    }
-
-    function allAppEntries() {
-      return getSpace().apps;
-    }
-
-    function renderSpaces() {
-      el.spaces.innerHTML = state.spaceOrder.map(s => `<button class="space-chip ${s===state.currentSpace?'active':''}" data-space="${s}">${esc(s)}</button>`).join('');
-      [...el.spaces.querySelectorAll('[data-space]')].forEach(n => n.onclick = () => switchSpace(n.dataset.space));
-      el.spacePill.textContent = `Space: ${state.currentSpace}`;
-    }
-
-    function switchSpace(name) {
-      persistWindowRects();
-      state.currentSpace = name;
-      renderAll();
-      queueSave();
-    }
-
-    function renderDesktop() {
-      el.desktop.innerHTML = allAppEntries().map(a => `
-        <div class="desktop-icon" data-open="${a.id}">
-          <div class="icon-edit" data-edit-icon="${a.id}" title="Edit icon">✎</div>
-          <div class="tile">${a.icon || '📦'}</div>
-          <div class="label">${esc(a.name)}</div>
+    <main id="main">
+      <section id="bookshelf" class="panel active" aria-label="Bookshelf">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Bookshelf</div>
+            <div class="panel-subtitle">Upload PDFs and text files for reading.</div>
+          </div>
+          <div class="row">
+            <button class="pill-btn" id="clear-books-btn">Clear library</button>
+          </div>
         </div>
-      `).join('');
-      [...el.desktop.querySelectorAll('[data-open]')].forEach(n => n.ondblclick = e => {
-        if (e.target.closest('[data-edit-icon]')) return;
-        launchApp(n.dataset.open);
-      });
-      [...el.desktop.querySelectorAll('[data-edit-icon]')].forEach(n => n.onclick = e => {
-        e.stopPropagation();
-        const id = n.dataset.editIcon;
-        const app = getSpace().apps.find(x => x.id === id);
-        if (!app) return;
-        const icon = prompt('New icon (emoji/text)', app.icon || '📦');
-        if (icon == null) return;
-        app.icon = icon.trim() || app.icon;
-        const name = prompt('App name', app.name);
-        if (name != null && name.trim()) app.name = name.trim();
-        renderDesktop();
-        renderStart(el.startSearch.value || '');
-        queueSave();
-      });
+
+        <div id="bookshelf-grid" class="card"></div>
+
+        <div id="reader" class="card hidden" aria-label="Reader">
+          <div id="reader-header">
+            <div id="reader-title">Untitled</div>
+            <div id="reader-controls" class="row">
+              <button class="pill-btn" id="reader-close">Close</button>
+              <button class="pill-btn" id="reader-search">Search</button>
+              <input id="reader-search-input" class="field" placeholder="Search (text)" style="max-width:240px; display:none;" />
+            </div>
+          </div>
+          <div id="reader-frame"></div>
+        </div>
+      </section>
+
+      <section id="notes" class="panel" aria-label="Notes">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Notes</div>
+            <div class="panel-subtitle">Write and organize what you're learning.</div>
+          </div>
+          <div class="row">
+            <button class="pill-btn" id="new-note">New note</button>
+            <button class="pill-btn" id="delete-note">Delete</button>
+          </div>
+        </div>
+
+        <div id="notes-card" class="card">
+          <aside id="notes-list" aria-label="Notes list"></aside>
+          <div id="note-editor" aria-label="Note editor">
+            <header>
+              <input id="note-title" class="field" placeholder="Untitled note" />
+            </header>
+            <textarea id="note-body" placeholder="Write your thoughts..."></textarea>
+          </div>
+        </div>
+      </section>
+
+      <section id="timer" class="panel" aria-label="Focus timer">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Focus Timer</div>
+            <div class="panel-subtitle">Simple timer to support focused sessions.</div>
+          </div>
+          <div class="row">
+            <button class="pill-btn" id="timer-reset">Reset</button>
+          </div>
+        </div>
+
+        <div id="timer-card" class="card">
+          <div id="timer-main">
+            <div id="timer-label">Session length</div>
+            <div id="timer-clock">25:00</div>
+            <div id="timer-controls">
+              <button class="pill-btn" id="timer-start">Start</button>
+              <button class="pill-btn" id="timer-pause">Pause</button>
+            </div>
+            <div id="timer-presets">
+              <button class="pill-btn" data-minutes="25">25m</button>
+              <button class="pill-btn" data-minutes="50">50m</button>
+              <button class="pill-btn" data-minutes="90">90m</button>
+            </div>
+          </div>
+          <div id="timer-notes">
+            <h3>Session notes</h3>
+            <textarea id="timer-note" placeholder="Capture what you learned in this session..."></textarea>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const qs = (sel, root = document) => root.querySelector(sel);
+    const qsa = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+    const STORAGE_KEYS = {
+      files: 'fc_files',
+      notes: 'fc_notes',
+      timer: 'fc_timer',
+    };
+
+    const state = {
+      tool: 'bookshelf',
+      files: [],
+      currentFileId: null,
+      notes: [],
+      currentNoteId: null,
+      timer: {
+        duration: 25 * 60,
+        remaining: 25 * 60,
+        running: false,
+        intervalId: null,
+      },
+    };
+
+    const safeParse = (value, fallback) => {
+      try { return JSON.parse(value); } catch { return fallback; }
+    };
+
+    const formatTime = seconds => {
+      const m = String(Math.floor(seconds / 60)).padStart(2, '0');
+      const s = String(seconds % 60).padStart(2, '0');
+      return `${m}:${s}`;
+    };
+
+    function loadStorage() {
+      state.files = safeParse(localStorage.getItem(STORAGE_KEYS.files), []);
+      state.notes = safeParse(localStorage.getItem(STORAGE_KEYS.notes), []);
+      const timerState = safeParse(localStorage.getItem(STORAGE_KEYS.timer), null);
+      if (timerState) {
+        state.timer.duration = timerState.duration || state.timer.duration;
+        state.timer.remaining = typeof timerState.remaining === 'number' ? timerState.remaining : state.timer.remaining;
+      }
     }
 
-    function renderStart(filter='') {
-      const q = (filter || '').trim().toLowerCase();
-      const noteHits = Object.values(state.spaces).flatMap(sp => sp.notes || []).filter(n => q && `${n.title} ${n.content}`.toLowerCase().includes(q)).slice(0, 6).map(n => ({ id:`note:${n.id}`, icon:'📄', name:`Note: ${n.title || 'Untitled'}` }));
-      const apps = allAppEntries().filter(a => !q || a.name.toLowerCase().includes(q));
-      const entries = [...apps, ...noteHits].slice(0, 18);
-      el.startGrid.innerHTML = entries.map(a => `<div class="start-item" data-launch="${a.id}">${a.icon || '📦'}<div>${esc(a.name)}</div></div>`).join('');
-      [...el.startGrid.querySelectorAll('[data-launch]')].forEach(n => n.onclick = () => {
-        const id = n.dataset.launch;
-        if (id.startsWith('note:')) {
-          const noteId = id.slice(5);
-          const targetSpace = state.spaceOrder.find(sp => (state.spaces[sp].notes || []).some(x => x.id === noteId));
-          if (targetSpace) {
-            state.currentSpace = targetSpace;
-            state.spaces[targetSpace].selectedNoteId = noteId;
-            renderAll();
-            openWindow('notes-window');
-            initPDFViewer();
-          }
-        } else {
-          launchApp(id);
-        }
-        closePopups();
-      });
-
-      const pinned = allAppEntries().slice(0, 8);
-      el.startPinned.innerHTML = pinned.map(a => `<div class="start-item" data-pinned="${a.id}">${a.icon || '📦'}<div>${esc(a.name)}</div></div>`).join('');
-      [...el.startPinned.querySelectorAll('[data-pinned]')].forEach(n => n.onclick = () => { launchApp(n.dataset.pinned); closePopups(); });
-
-      const rec = [...getSpace().notes].sort((a,b)=>b.updatedAt-a.updatedAt).slice(0, 5);
-      el.recommendedList.innerHTML = rec.map(n => `<div class="rec-item" data-rec="${n.id}">${esc(n.title || 'Untitled')}<small style="display:block;opacity:.8;">Recent note</small></div>`).join('') || '<div class="rec-item">No recent notes</div>';
-      [...el.recommendedList.querySelectorAll('[data-rec]')].forEach(n => n.onclick = () => {
-        getSpace().selectedNoteId = n.dataset.rec;
-        renderNotes();
-        openWindow('notes-window');
-        closePopups();
-      });
+    function saveStorage() {
+      localStorage.setItem(STORAGE_KEYS.files, JSON.stringify(state.files));
+      localStorage.setItem(STORAGE_KEYS.notes, JSON.stringify(state.notes));
+      localStorage.setItem(STORAGE_KEYS.timer, JSON.stringify({ duration: state.timer.duration, remaining: state.timer.remaining }));
     }
 
-    function launchApp(id) {
-      if (id.startsWith('webapp:')) {
-        const app = getSpace().apps.find(a => a.id === id);
-        if (!app) return;
-        openWindow('browser-window');
-        const tab = getActiveTab();
-        tab.url = app.url;
-        tab.title = app.name;
-        renderBrowserTabs();
-        loadActiveTab();
-        queueSave();
+    function setTool(tool) {
+      state.tool = tool;
+      qsa('.tab').forEach(btn => btn.classList.toggle('active', btn.dataset.tool === tool));
+      qsa('.panel').forEach(panel => panel.classList.toggle('active', panel.id === tool));
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function normalizeFileEntry(file) {
+      return {
+        id: crypto.randomUUID(),
+        name: file.name,
+        type: file.type || (file.name.endsWith('.pdf') ? 'application/pdf' : 'text/plain'),
+        size: file.size,
+        createdAt: Date.now(),
+        lastOpened: Date.now(),
+        progress: 0,
+      };
+    }
+
+    function addFiles(files) {
+      const entries = Array.from(files).map(f => normalizeFileEntry(f));
+      state.files = [...entries, ...state.files];
+      saveStorage();
+      renderBookshelf();
+    }
+
+    function clearBookshelf() {
+      if (!confirm('Clear all uploaded files?')) return;
+      state.files = [];
+      state.currentFileId = null;
+      saveStorage();
+      renderBookshelf();
+      hideReader();
+    }
+
+    function renderBookshelf() {
+      const container = qs('#bookshelf-grid');
+      container.innerHTML = '';
+
+      if (!state.files.length) {
+        container.innerHTML = `<div style="padding:30px;text-align:center;opacity:.75;">No files yet. Use the upload button to add PDFs and text files.</div>`;
         return;
       }
-      openWindow(id);
+
+      state.files.forEach(file => {
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'book';
+        card.dataset.id = file.id;
+        card.innerHTML = `
+          <div class="book-title">${escapeHtml(file.name)}</div>
+          <div class="book-meta"><span>${file.type.split('/')[1] || 'file'}</span><span>${new Date(file.createdAt).toLocaleDateString()}</span></div>
+          <div class="book-progress"><span style="width:${Math.min(100, Math.round(file.progress * 100))}%"></span></div>
+        `;
+        card.addEventListener('click', () => openFile(file.id));
+        container.appendChild(card);
+      });
     }
 
-    function setActiveTaskbar(id='') {
-      [...document.querySelectorAll('.tb-btn[data-open]')].forEach(b => b.classList.toggle('active', b.dataset.open === id));
+    function openFile(fileId) {
+      const fileEntry = state.files.find(f => f.id === fileId);
+      if (!fileEntry) return;
+
+      state.currentFileId = fileId;
+      fileEntry.lastOpened = Date.now();
+      saveStorage();
+      renderBookshelf();
+      showReader(fileEntry);
     }
 
-    function openWindow(id) {
-      const w = $(id);
-      if (!w) return;
-      document.querySelectorAll('.window').forEach(x => x.classList.remove('active'));
-      w.style.display = 'flex';
-      w.classList.add('active');
-      activeWindowId = id;
-      const rect = getSpace().windows[id];
-      if (rect) {
-        w.style.left = rect.left;
-        w.style.top = rect.top;
-        w.style.width = rect.width;
-        w.style.height = rect.height;
+    function showReader(fileEntry) {
+      const reader = qs('#reader');
+      reader.classList.add('active');
+      qs('#reader-title').textContent = fileEntry.name;
+      qs('#reader-search-input').value = '';
+      qs('#reader-search-input').style.display = 'none';
+
+      const frame = qs('#reader-frame');
+      frame.innerHTML = '';
+
+      const input = qs('#file-upload');
+      const file = input.files && Array.from(input.files).find(f => f.name === fileEntry.name && f.size === fileEntry.size);
+
+      if (!file) {
+        frame.innerHTML = `<div style="padding:20px;color:var(--muted);">Please re-upload the file to view it. (Files are stored in session only.)</div>`;
+        return;
       }
-      logStudyEvent('open-window', { id });
-      setActiveTaskbar(id);
-    }
 
-    function closeWindow(id) {
-      const w = $(id);
-      if (!w) return;
-      w.style.display = 'none';
-      w.classList.remove('active');
-      if (activeWindowId === id) activeWindowId = document.querySelector('.window.active')?.id || '';
-      saveWindowRect(id);
-      setActiveTaskbar(document.querySelector('.window.active')?.id || '');
-    }
+      const url = URL.createObjectURL(file);
 
-    function saveWindowRect(id) {
-      const w = $(id);
-      if (!w) return;
-      getSpace().windows[id] = {
-        left: w.style.left || `${w.offsetLeft}px`,
-        top: w.style.top || `${w.offsetTop}px`,
-        width: w.style.width || `${w.offsetWidth}px`,
-        height: w.style.height || `${w.offsetHeight}px`
-      };
-    }
-
-    function persistWindowRects() {
-      document.querySelectorAll('.window').forEach(w => saveWindowRect(w.id));
-    }
-
-    function bindWindowUX() {
-      document.querySelectorAll('.window').forEach(w => {
-        ['n','s','e','w','ne','nw','se','sw'].forEach(dir => {
-          const h = document.createElement('div');
-          h.className = `resize-handle ${dir}`;
-          h.dataset.resize = dir;
-          w.appendChild(h);
+      if (fileEntry.type === 'application/pdf') {
+        const iframe = document.createElement('iframe');
+        iframe.src = url;
+        frame.appendChild(iframe);
+      } else {
+        const pre = document.createElement('pre');
+        pre.id = 'reader-text';
+        pre.textContent = 'Loading...';
+        frame.appendChild(pre);
+        file.text().then(text => {
+          pre.textContent = text;
+        }).catch(() => {
+          pre.textContent = 'Unable to load file content.';
         });
-      });
+      }
+    }
 
-      document.querySelectorAll('.titlebar').forEach(bar => {
-        bar.addEventListener('mousedown', e => {
-          if (e.target.closest('button,input,textarea,select,label')) return;
-          const id = bar.dataset.window;
-          const w = $(id);
-          const sx = e.clientX, sy = e.clientY, sl = w.offsetLeft, st = w.offsetTop;
-          const move = ev => {
-            w.style.left = `${Math.max(0, sl + ev.clientX - sx)}px`;
-            w.style.top = `${Math.max(0, st + ev.clientY - sy)}px`;
-          };
-          const up = () => {
-            window.removeEventListener('mousemove', move);
-            window.removeEventListener('mouseup', up);
-            saveWindowRect(id);
-            queueSave();
-          };
-          window.addEventListener('mousemove', move);
-          window.addEventListener('mouseup', up);
-        });
-      });
+    function hideReader() {
+      const reader = qs('#reader');
+      reader.classList.remove('active');
+    }
 
-      document.querySelectorAll('.resize-handle').forEach(h => {
-        h.addEventListener('mousedown', e => {
-          e.stopPropagation();
-          const w = h.closest('.window');
-          const dir = h.dataset.resize;
-          const sx=e.clientX, sy=e.clientY, sl=w.offsetLeft, st=w.offsetTop, sw=w.offsetWidth, sh=w.offsetHeight;
-          const move = ev => {
-            let l=sl,t=st,ww=sw,hh=sh;
-            if (dir.includes('e')) ww = Math.max(330, sw + ev.clientX - sx);
-            if (dir.includes('s')) hh = Math.max(240, sh + ev.clientY - sy);
-            if (dir.includes('w')) { ww = Math.max(330, sw - (ev.clientX - sx)); l = sl + (ev.clientX - sx); }
-            if (dir.includes('n')) { hh = Math.max(240, sh - (ev.clientY - sy)); t = st + (ev.clientY - sy); }
-            w.style.left = `${l}px`; w.style.top = `${t}px`; w.style.width = `${ww}px`; w.style.height = `${hh}px`;
-          };
-          const up = () => {
-            window.removeEventListener('mousemove', move);
-            window.removeEventListener('mouseup', up);
-            saveWindowRect(w.id);
-            queueSave();
-          };
-          window.addEventListener('mousemove', move);
-          window.addEventListener('mouseup', up);
-        });
-      });
+    function filterReaderText(query) {
+      const pre = qs('#reader-text');
+      if (!pre) return;
+      const text = pre.textContent;
+      const escaped = query.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&');
+      const re = new RegExp(escaped, 'gi');
+      pre.innerHTML = text.replace(re, match => `<mark>${match}</mark>`);
+    }
 
-      document.querySelectorAll('[data-close]').forEach(b => b.onclick = () => closeWindow(b.dataset.close));
-      document.querySelectorAll('[data-max]').forEach(b => b.onclick = () => {
-        const id = b.dataset.max;
-        const w = $(id);
-        if (w.dataset.full === '1') {
-          const r = JSON.parse(w.dataset.restore || '{}');
-          if (r.left) {
-            w.style.left=r.left; w.style.top=r.top; w.style.width=r.width; w.style.height=r.height;
-          }
-          w.dataset.full = '0';
-        } else {
-          w.dataset.restore = JSON.stringify({ left:w.style.left||`${w.offsetLeft}px`, top:w.style.top||`${w.offsetTop}px`, width:w.style.width||`${w.offsetWidth}px`, height:w.style.height||`${w.offsetHeight}px` });
-          w.style.left='8px'; w.style.top='8px'; w.style.width='calc(100vw - 16px)'; w.style.height='calc(100vh - var(--taskbar-h) - 20px)';
-          w.dataset.full='1';
-        }
-        saveWindowRect(id);
-        queueSave();
-      });
+    function renderNotesList() {
+      const list = qs('#notes-list');
+      list.innerHTML = '';
+      if (!state.notes.length) {
+        list.innerHTML = `<div style="padding:20px;opacity:.75;">No notes yet. Click "New note" to start writing.</div>`;
+        return;
+      }
 
-      document.querySelectorAll('.window').forEach(w => {
-        w.addEventListener('mousedown', () => {
-          document.querySelectorAll('.window').forEach(x => x.classList.remove('active'));
-          w.classList.add('active');
-          activeWindowId = w.id;
-          setActiveTaskbar(w.id);
-        });
+      state.notes.forEach(note => {
+        const item = document.createElement('button');
+        item.type = 'button';
+        item.className = 'note-item' + (note.id === state.currentNoteId ? ' active' : '');
+        item.dataset.id = note.id;
+        item.innerHTML = `<div class="note-title">${escapeHtml(note.title || 'Untitled')}</div><div class="note-meta">${new Date(note.updatedAt).toLocaleString()}</div>`;
+        item.addEventListener('click', () => selectNote(note.id));
+        list.appendChild(item);
       });
     }
 
-    function renderNotes() {
-      const sp = getSpace();
-      const notes = [...sp.notes].sort((a,b)=>b.updatedAt-a.updatedAt);
-      el.notesList.innerHTML = notes.map(n => `<div class="note-item ${n.id===sp.selectedNoteId?'active':''}" data-note="${n.id}"><div>${esc(n.title||'Untitled')}</div><small>${new Date(n.updatedAt).toLocaleString()}</small></div>`).join('');
-      [...el.notesList.querySelectorAll('[data-note]')].forEach(n => n.onclick = () => {
-        sp.selectedNoteId = n.dataset.note;
-        renderNotes();
-      });
-      const cur = sp.notes.find(n => n.id === sp.selectedNoteId) || sp.notes[0];
-      if (!cur) return;
-      sp.selectedNoteId = cur.id;
-      el.noteTitle.value = cur.title || '';
-      el.noteContent.value = cur.content || '';
-      if (el.noteEditor) el.noteEditor.value = cur.content || '';
-      if (el.noteBlockInput) el.noteBlockInput.value = '';
-      renderHighlightsPanel();
-      renderNoteLinksPanel(cur);
-      renderKnowledgeCardsList();
-      renderNoteLivePreview();
+    function selectNote(noteId) {
+      state.currentNoteId = noteId;
+      const note = state.notes.find(n => n.id === noteId);
+      if (!note) return;
+      qs('#note-title').value = note.title;
+      qs('#note-body').value = note.body;
+      renderNotesList();
     }
 
-    function renderHighlightsPanel() {
-      const sp = getSpace();
-      el.notesHighlights.innerHTML = `<div style="padding:8px;font-weight:700;">Highlights</div>` + ((sp.highlights || []).slice(0, 12).map(h => `<div class="note-item" data-highlight="${h.id}"><div>${esc(h.text.slice(0,90))}</div><small>${esc(h.source)} • ${new Date(h.at).toLocaleString()}</small></div>`).join('') || '<div class="note-item">No highlights yet.</div>');
-      [...el.notesHighlights.querySelectorAll('[data-highlight]')].forEach(n => n.onclick = () => {
-        const h = sp.highlights.find(x => x.id === n.dataset.highlight);
-        if (!h) return;
-        const insert = `\n\n[HIGHLIGHT • ${h.source}]\n${h.text}\n`;
-        el.noteContent.value = `${el.noteContent.value}${insert}`;
-        saveCurrentNote();
-      });
+    function createNote() {
+      const newNote = { id: crypto.randomUUID(), title: '', body: '', createdAt: Date.now(), updatedAt: Date.now() };
+      state.notes.unshift(newNote);
+      saveStorage();
+      selectNote(newNote.id);
+      renderNotesList();
     }
 
-
-    function parseConceptLinks(text='') {
-      const out = [];
-      const re = /\[\[([^\]]+)\]\]/g;
-      let m;
-      while ((m = re.exec(text))) out.push(m[1].trim());
-      return [...new Set(out)].filter(Boolean);
-    }
-
-    function createKnowledgeCardsFromText(text='', source='Notes', pageNumber='') {
-      const cards = [];
-      const lines = text.split(/\n+/).map(x => x.trim()).filter(Boolean).slice(0, 16);
-      lines.forEach(line => {
-        const isFormula = /[=∫ΣΔ→]|\\frac|\\sum|\\vec|sigma/i.test(line);
-        const defMatch = line.match(/^([A-Za-z][A-Za-z0-9\s]{2,40})\s+(is|means|refers to)\s+(.+)/i);
-        const exMatch = /example|for example/i.test(line);
-        const concept = (defMatch?.[1] || line.split(/[=:.-]/)[0] || 'Concept').trim().slice(0, 60);
-        cards.push({
-          id: crypto.randomUUID(),
-          concept,
-          definition: defMatch?.[3]?.trim() || (isFormula ? '' : line.slice(0, 200)),
-          formula: isFormula ? line.slice(0, 140) : '',
-          kind: isFormula ? 'formula' : (defMatch ? 'definition' : (exMatch ? 'example' : 'concept')),
-          source,
-          page: pageNumber || '',
-          createdAt: Date.now()
-        });
-      });
-      return cards;
-    }
-
-    function addKnowledgeFromText() { /* knowledge automation removed for reliability */ }
-
-    function renderNoteLinksPanel(curNote) {
-      const sp = getSpace();
-      const links = parseConceptLinks(curNote?.content || '');
-      const backlinks = (sp.notes || []).filter(n => n.id !== curNote?.id && links.some(l => (n.content || '').includes(`[[${l}]]`)));
-      sp.conceptLinks[curNote?.id || ''] = links;
-      el.noteLinks.innerHTML = `<div style="padding:8px;font-weight:700;">Related Concepts</div>` +
-        (links.map(l => `<div class="note-item" data-link="${esc(l)}">[[${esc(l)}]]</div>`).join('') || '<div class="note-item">No concept links.</div>') +
-        `<div style="padding:8px;font-weight:700;">Backlinks</div>` +
-        (backlinks.map(n => `<div class="note-item" data-back-note="${n.id}">${esc(n.title || 'Untitled')}</div>`).join('') || '<div class="note-item">No backlinks.</div>');
-      [...el.noteLinks.querySelectorAll('[data-back-note]')].forEach(n => n.onclick = () => { sp.selectedNoteId = n.dataset.backNote; renderNotes(); });
-    }
-
-    function renderKnowledgeCardsList() { if (el.knowledgeCardsList) el.knowledgeCardsList.innerHTML = ''; if (el.detectedConcepts) el.detectedConcepts.innerHTML=''; }
-
-
-
-    function currentNoteText() {
-      const sp = getSpace();
-      const cur = sp.notes.find(n => n.id === sp.selectedNoteId) || sp.notes[0];
-      if (!cur) return '';
-      return (el.noteEditor?.value || cur.content || '').trim();
-    }
-
-    function renderNoteLivePreview() {
-      const panel = $('note-live-preview');
-      if (!panel) return;
-      const txt = currentNoteText();
-      panel.innerHTML = `<div style="font-weight:700;margin-bottom:6px;">Live Preview</div>` + esc(txt).replace(/\n/g,'<br>');
-      if (window.MathJax?.typesetPromise) MathJax.typesetPromise([panel]).catch(()=>{});
+    function deleteNote() {
+      if (!state.currentNoteId) return;
+      if (!confirm('Delete this note?')) return;
+      state.notes = state.notes.filter(n => n.id !== state.currentNoteId);
+      state.currentNoteId = state.notes[0]?.id || null;
+      saveStorage();
+      renderNotesList();
+      if (state.currentNoteId) selectNote(state.currentNoteId);
+      else {
+        qs('#note-title').value = '';
+        qs('#note-body').value = '';
+      }
     }
 
     function saveCurrentNote() {
-      const sp = getSpace();
-      const cur = sp.notes.find(n => n.id === sp.selectedNoteId);
-      if (!cur) return;
-      cur.title = el.noteTitle.value;
-      cur.content = (el.noteEditor?.value || currentNoteText());
-      el.noteContent.value = cur.content;
-      cur.updatedAt = Date.now();
-      logStudyEvent('save-note', { title: cur.title || 'Untitled' });
-      addKnowledgeFromText(cur.content || '', 'Notes', '');
-      renderNotes();
-      queueSave();
-      el.status.textContent = 'Note saved';
+      const note = state.notes.find(n => n.id === state.currentNoteId);
+      if (!note) return;
+      note.title = qs('#note-title').value;
+      note.body = qs('#note-body').value;
+      note.updatedAt = Date.now();
+      saveStorage();
+      renderNotesList();
     }
 
-    function renderTasks() {
-      const sp = getSpace();
-      el.taskList.innerHTML = sp.tasks.map(t => `
-        <div class="task-row">
-          <input type="checkbox" data-toggle="${t.id}" ${t.done ? 'checked' : ''}>
-          <div><div>${esc(t.title)}</div><small>${esc(t.subject || 'General')} ${t.due ? `• ${t.due}` : ''}</small></div>
-          <span>${t.done ? '✅' : '⏳'}</span>
-          <button class="btn" data-del="${t.id}">Delete</button>
-        </div>
-      `).join('');
-      [...el.taskList.querySelectorAll('[data-toggle]')].forEach(n => n.onchange = () => {
-        const t = sp.tasks.find(x => x.id === n.dataset.toggle);
-        if (!t) return;
-        t.done = n.checked;
-        t.doneAt = Date.now();
-        logStudyEvent('task-toggle', { title: t.title, done: t.done });
-        renderTasks();
-        queueSave();
-      });
-      [...el.taskList.querySelectorAll('[data-del]')].forEach(n => n.onclick = () => {
-        sp.tasks = sp.tasks.filter(x => x.id !== n.dataset.del);
-        renderTasks();
-        queueSave();
-      });
+    function renderTimer() {
+      qs('#timer-clock').textContent = formatTime(state.timer.remaining);
+      qsa('#timer-presets button').forEach(btn => btn.classList.toggle('active', Number(btn.dataset.minutes) * 60 === state.timer.duration));
     }
 
-    function getActiveTab() {
-      const b = getSpace().browser;
-      return b.tabs.find(t => t.id === b.activeTabId) || b.tabs[0];
-    }
-
-    function isKnownFrameBlocked(url='') {
-      try {
-        const h = new URL(url).hostname.toLowerCase();
-        return ['google.com','chatgpt.com','openai.com','accounts.google.com','gemini.google.com','copilot.microsoft.com','perplexity.ai'].some(d => h === d || h.endsWith(`.${d}`));
-      } catch { return false; }
-    }
-
-    function setBrowserBlockedMessage(url) {
-      const html = `<!doctype html><html><body style="margin:0;font-family:Segoe UI,Arial,sans-serif;background:#0b1220;color:#e5e7eb;display:grid;place-items:center;height:100vh;"><div style="max-width:620px;padding:24px;text-align:center;"><h2 style="margin:0 0 10px;">This site blocks embedding</h2><p style="opacity:.9;line-height:1.5;">${url.replace(/</g,'&lt;')} cannot open inside an iframe due to browser security headers (X-Frame-Options/CSP). Use <b>Open External</b> for full access and login support.</p></div></body></html>`;
-      el.browserFrame.src = `data:text/html;charset=utf-8,${encodeURIComponent(html)}`;
-    }
-
-    function renderBrowserTabs() {
-      const b = getSpace().browser;
-      el.browserTabs.innerHTML = b.tabs.map(t => `
-        <div class="btab ${t.id===b.activeTabId?'active':''}" data-tab="${t.id}">
-          <span class="name">${esc(t.title || 'Tab')}</span>
-          <button class="close-tab" data-close-tab="${t.id}">✕</button>
-        </div>
-      `).join('');
-      [...el.browserTabs.querySelectorAll('[data-tab]')].forEach(n => n.onclick = e => {
-        if (e.target.closest('[data-close-tab]')) return;
-        b.activeTabId = n.dataset.tab;
-        renderBrowserTabs();
-        loadActiveTab();
-        queueSave();
-      });
-      [...el.browserTabs.querySelectorAll('[data-close-tab]')].forEach(n => n.onclick = e => {
-        e.stopPropagation();
-        if (b.tabs.length === 1) return;
-        b.tabs = b.tabs.filter(t => t.id !== n.dataset.closeTab);
-        if (!b.tabs.some(t => t.id === b.activeTabId)) b.activeTabId = b.tabs[0].id;
-        renderBrowserTabs();
-        loadActiveTab();
-        queueSave();
-      });
-    }
-
-    function loadActiveTab() {
-      const tab = getActiveTab();
-      if (!tab) return;
-      el.browserUrl.value = tab.url;
-      if (!tab.url || tab.url === 'about:blank') { el.browserFrame.src = 'about:blank'; return; }
-      if (isKnownFrameBlocked(tab.url)) {
-        setBrowserBlockedMessage(tab.url);
-      } else {
-        el.browserFrame.src = tab.url;
-      }
-    }
-
-    function navigateBrowser(inputRaw) {
-      let v = (inputRaw || '').trim();
-      if (!v) return;
-      if (!/^https?:\/\//i.test(v)) v = v.includes('.') && !v.includes(' ') ? `https://${v}` : `https://www.google.com/search?q=${encodeURIComponent(v)}`;
-      const tab = getActiveTab();
-      if (!tab) return;
-      tab.url = v;
-      tab.title = v.replace(/^https?:\/\//,'').slice(0, 30);
-      logStudyEvent('navigate', { url: v.slice(0,120) });
-      renderBrowserTabs();
-      if (isKnownFrameBlocked(v)) {
-        setBrowserBlockedMessage(v);
-        window.open(v, '_blank');
-      } else {
-        loadActiveTab();
-      }
-      queueSave();
-    }
-
-    function setStudyViewerMode(mode='pdf') {
-      const showPdf = mode === 'pdf';
-      $('pdf-canvas').style.display = showPdf ? 'block' : 'none';
-      $('pdf-canvas-2').style.display = showPdf && splitPDF ? 'block' : 'none';
-      $('doc-text-viewer').style.display = mode === 'text' ? 'block' : 'none';
-      $('doc-image-viewer').style.display = mode === 'image' ? 'block' : 'none';
-      $('doc-html-editor').style.display = mode === 'html' ? 'block' : 'none';
-      $('doc-html-preview').style.display = mode === 'html' ? 'block' : 'none';
-      if (!showPdf) { pdfDoc = null; pdfDoc2 = null; $('pdf-page-info').textContent = 'Page -'; }
-    }
-
-    async function openStudyBook(book) {
-      if (!book) return;
-      currentBookTitle = book.title;
-      book.openedAt = Date.now();
-      const mime = (book.mime || '').toLowerCase();
-      const ext = (book.ext || '').toLowerCase();
-      const loader = book.dataUrl ? Promise.resolve(book.dataUrl) : getPDFFromDB(book.id);
-      const url = await loader;
-      if (!url) {
-        showToast('Error: File content not found in database.');
-        return;
-      }
-
-      if (mime.includes('pdf') || ext === 'pdf') {
-        setStudyViewerMode('pdf');
-        const last = Number(localStorage.getItem(`pdf-last-page:${currentBookTitle}`) || 1);
-        await loadPDF(url);
-        pdfPage = Math.max(1, Math.min(last, pdfDoc?.numPages || 1));
-        await renderPage();
-        renderThumbnails();
-        return;
-      }
-
-      if (mime.startsWith('image/') || ['png','jpg','jpeg','webp','gif'].includes(ext)) {
-        setStudyViewerMode('image');
-        $('doc-image-viewer').src = url;
-        $('pdf-search-results').innerHTML = '<div class="thumb-item">Image opened. Use diagram save from context menu.</div>';
-        return;
-      }
-
-      if (ext === 'docx' || mime.includes('wordprocessingml')) {
-        setStudyViewerMode('text');
-        try {
-          const ab = await fetch(url).then(r => r.arrayBuffer());
-          const out = await mammoth.extractRawText({ arrayBuffer: ab });
-          $('doc-text-viewer').textContent = out.value || 'No readable text in DOCX.';
-          getSpace().ocrCache[`doc:${book.id}`] = out.value || '';
-        } catch {
-          $('doc-text-viewer').textContent = 'Unable to parse this DOCX in current browser session.';
+    function startTimer() {
+      if (state.timer.running) return;
+      state.timer.running = true;
+      state.timer.intervalId = setInterval(() => {
+        if (state.timer.remaining <= 0) {
+          clearInterval(state.timer.intervalId);
+          state.timer.running = false;
+          state.timer.remaining = 0;
+          saveStorage();
+          renderTimer();
+          alert('Session complete — take a short break!');
+          return;
         }
-        return;
-      }
-
-      if (['html','htm','mhtml'].includes(ext) || mime.includes('html')) {
-        setStudyViewerMode('html');
-        try {
-          const text = atob(url.split(',')[1] || '');
-          $('doc-html-editor').value = text;
-          $('doc-html-preview').srcdoc = text;
-          getSpace().ocrCache[`doc:${book.id}`] = text.replace(/<[^>]+>/g, ' ');
-        } catch {
-          $('doc-html-editor').value = 'Unable to decode html/mhtml file.';
-        }
-        $('doc-html-editor').oninput = () => {
-          $('doc-html-preview').srcdoc = $('doc-html-editor').value;
-          getSpace().ocrCache[`doc:${book.id}`] = $('doc-html-editor').value.replace(/<[^>]+>/g, ' ');
-          queueSave();
-        };
-        return;
-      }
-
-      if (mime.startsWith('text/') || ['txt','md','csv','json'].includes(ext)) {
-        setStudyViewerMode('text');
-        try {
-          const text = atob(url.split(',')[1] || '');
-          $('doc-text-viewer').textContent = text;
-          getSpace().ocrCache[`doc:${book.id}`] = text;
-        } catch {
-          $('doc-text-viewer').textContent = 'Unable to decode text file.';
-        }
-        return;
-      }
-
-      setStudyViewerMode('text');
-      $('doc-text-viewer').textContent = 'This file type is stored, but preview is not supported yet.';
+        state.timer.remaining -= 1;
+        saveStorage();
+        renderTimer();
+      }, 1000);
     }
 
-    function renderBooks() {
-      const sp = getSpace();
-      const coverFor = (title='') => /physics/i.test(title) ? '📘' : /chem/i.test(title) ? '📗' : /math|algebra|calculus/i.test(title) ? '📙' : '📕';
-      const cardHtml = b => {
-        const total = Number(b.totalPages || 0);
-        const last = Number(b.lastPage || 0);
-        const progress = total ? Math.max(0, Math.min(100, Math.round((last / total) * 100))) : 0;
-        return `<div class="book-card" data-book="${b.id}"><div class="book-cover">${coverFor(b.title)}</div><div style="font-weight:600;">${esc(b.title)}</div><small>${(b.ext || 'pdf').toUpperCase()}</small><div class="book-meta"><span>Page ${last || 1}${total ? ` / ${total}` : ''}</span><span>${progress}%</span></div><div class="book-progress"><i style="width:${progress}%;"></i></div></div>`;
-      };
-      const books = sp.books || [];
-      const continueBooks = books.filter(b => Number(b.lastPage || 0) > 1).slice(0, 6);
-      const recentBooks = [...books].sort((a,b)=>Number(b.openedAt||0)-Number(a.openedAt||0)).slice(0,6);
-      el.bookshelf.innerHTML = books.length ?
-        `<div class="bookshelf-section-title">Continue Reading</div>${continueBooks.map(cardHtml).join('') || '<div class="book-card">No in-progress books yet.</div>'}` +
-        `<div class="bookshelf-section-title">Recent Books</div>${recentBooks.map(cardHtml).join('')}` +
-        `<div class="bookshelf-section-title">All Books</div>${books.map(cardHtml).join('')}`
-        : '<div class="book-card">No books yet.</div>';
-      [...el.bookshelf.querySelectorAll('[data-book]')].forEach(n => n.onclick = () => {
-        const b = sp.books.find(x => x.id === n.dataset.book);
-        openStudyBook(b);
-      });
+    function pauseTimer() {
+      if (!state.timer.running) return;
+      clearInterval(state.timer.intervalId);
+      state.timer.running = false;
+      saveStorage();
+      renderTimer();
     }
 
-    function renderVault() {
-      const sp = getSpace();
-      el.vaultList.innerHTML = sp.vault.map((v,i) => `<div class="vault-item"><div>${esc(v.text)}</div><small>${new Date(v.at).toLocaleString()}</small><div><button class="btn" data-vault-del="${i}">Delete</button></div></div>`).join('') || '<div class="vault-item">No important items.</div>';
-      [...el.vaultList.querySelectorAll('[data-vault-del]')].forEach(n => n.onclick = () => {
-        sp.vault.splice(Number(n.dataset.vaultDel), 1);
-        renderVault();
-        queueSave();
-      });
+    function resetTimer() {
+      pauseTimer();
+      state.timer.remaining = state.timer.duration;
+      saveStorage();
+      renderTimer();
     }
 
-    function renderDashboard() {
-      const sp = getSpace();
-      const today = totalTodayMinutes();
-      const streak = today > 0 ? 1 : 0;
-      $('m-today').textContent = `${today}m`;
-      $('m-streak').textContent = `${streak}d`;
-      $('m-tasks').textContent = String(sp.tasks.filter(t => t.done).length);
-      $('m-vault').textContent = `${sp.vault.length} / H:${sp.highlights.length}`;
-      const todayConcepts = (sp.knowledgeCards || []).filter(c => new Date(c.createdAt).toDateString() === new Date().toDateString());
-      if ($('m-concepts')) $('m-concepts').textContent = String(todayConcepts.length);
-      $('daily-goal').value = String(Number(sp.dailyGoal || 120));
-      const left = Math.max(0, Number(sp.dailyGoal || 120) - today);
-      const topApp = Object.entries(sp.analytics.appMinutes || {}).sort((a,b)=>b[1]-a[1])[0];
-      const topAppText = topApp ? `Top focus app: ${topApp[0].replace('-window','')} (${Math.round(topApp[1])}m)` : 'No app usage tracked yet.';
-      $('coach-text').textContent = `${left ? `Need ${left} more minutes today.` : 'Goal achieved.'} ${topAppText}`;
-      $('study-activity').innerHTML = (sp.analytics.events || []).slice(0,5).map(e => `<div class="panel" style="padding:6px;">${esc(e.type)} • ${new Date(e.at).toLocaleTimeString()}</div>`).join('') || '<div class="panel" style="padding:6px;">No activity yet.</div>';
-      const conceptsHtml = todayConcepts.slice(0,6).map(c => `<div class="panel" style="padding:6px;">${esc(c.concept)}</div>`).join('') || '<div class="panel" style="padding:6px;">No concepts detected today.</div>';
-      const subjectMinutes = state.spaceOrder.map(name => {
-        const mins = Object.values(state.spaces[name]?.analytics?.appMinutes || {}).reduce((a,b)=>a+Number(b||0),0);
-        return `<div class="panel" style="padding:6px;">${esc(name)} studied → ${Math.round(mins)} minutes</div>`;
-      }).join('');
-      $('dashboard-task-list').innerHTML = `<div style="padding:8px;font-weight:700;">Concepts learned today</div>${conceptsHtml}<div style="padding:8px;font-weight:700;">Study Analytics by Subject</div>${subjectMinutes}`;
+    function setTimerDuration(minutes) {
+      state.timer.duration = minutes * 60;
+      state.timer.remaining = state.timer.duration;
+      saveStorage();
+      renderTimer();
     }
 
-    function showStart() {
-      el.startMenu.style.display = 'block';
-      requestAnimationFrame(() => el.startMenu.classList.add('open'));
-    }
-    function hideStart() {
-      el.startMenu.classList.remove('open');
-      setTimeout(() => el.startMenu.style.display='none', 220);
-    }
-    function showQuickNote() {
-      el.quickNotePop.style.display = 'block';
-      requestAnimationFrame(() => el.quickNotePop.classList.add('open'));
-    }
-    function hideQuickNote() {
-      el.quickNotePop.classList.remove('open');
-      setTimeout(() => el.quickNotePop.style.display='none', 200);
-    }
-    function closePopups() {
-      hideStart();
-      hideQuickNote();
-    }
     function bindEvents() {
-      $('tb-start').onclick = () => {
-        if (el.startMenu.style.display === 'block') hideStart();
-        else { showStart(); renderStart(el.startSearch.value || ''); }
-      };
-      $('tb-quick-note').onclick = () => {
-        if (el.quickNotePop.style.display === 'block') hideQuickNote();
-        else showQuickNote();
-      };
-      $('tb-show-desktop').onclick = () => {
-        document.querySelectorAll('.window').forEach(w => { w.style.display='none'; w.classList.remove('active'); });
-        activeWindowId = '';
-        setActiveTaskbar('');
-      };
-      const startTimer = () => { const t = state.prefs.customTimer; if (t.running) return; t.running = true; t.lastTick = Date.now(); renderCustomTimer(); queueSave(); };
-      const pauseTimer = () => { const t = state.prefs.customTimer; t.running = false; renderCustomTimer(); queueSave(); };
-      const resetTimer = () => { const t = state.prefs.customTimer; t.running = false; t.seconds = 25*60; t.lastTick = 0; t.label = t.label || 'Study'; renderCustomTimer(); queueSave(); };
-      if (el.customTimer) {
-        el.customTimer.onclick = () => { const t = state.prefs.customTimer; t.running ? pauseTimer() : startTimer(); };
-        el.customTimer.ondblclick = () => resetTimer();
-      }
-      if ($('tb-letterpad')) $('tb-letterpad').onclick = () => { el.lpPanel.style.display = 'grid'; el.lpInput.focus(); };
-      if ($('mobile-letterpad-fab')) $('mobile-letterpad-fab').onclick = () => { el.lpPanel.style.display = 'grid'; el.lpInput.focus(); };
+      qsa('.tab').forEach(btn => btn.addEventListener('click', () => setTool(btn.dataset.tool)));
 
-      $('quick-note-save').onclick = () => {
-        const text = (el.quickNoteText.value || '').trim();
-        if (!text) return;
-        const sp = getSpace();
-        sp.quickNotes.unshift({ text, at: Date.now() });
-        sp.notes.unshift({ id: crypto.randomUUID(), title: 'Quick note', content: text, updatedAt: Date.now(), blocks: [{ type:'text', text, at: Date.now() }] });
-        sp.selectedNoteId = sp.notes[0].id;
-        el.quickNoteText.value = '';
-        renderNotes();
-        hideQuickNote();
-        queueSave();
-      };
-
-      $('add-space').onclick = () => {
-        const name = prompt('New space name?');
-        if (!name?.trim() || state.spaceOrder.includes(name.trim())) return;
-        const n = name.trim();
-        state.spaceOrder.push(n);
-        state.spaces[n] = baseSpace(n);
-        state.currentSpace = n;
-        renderAll();
-        queueSave();
-      };
-      $('rename-space').onclick = () => {
-        const cur = state.currentSpace;
-        const next = prompt('Rename space', cur);
-        if (!next?.trim() || next.trim() === cur || state.spaceOrder.includes(next.trim())) return;
-        const n = next.trim();
-        state.spaces[n] = state.spaces[cur];
-        delete state.spaces[cur];
-        state.spaceOrder = state.spaceOrder.map(x => x === cur ? n : x);
-        state.currentSpace = n;
-        renderAll();
-        queueSave();
-      };
-      $('delete-space').onclick = () => {
-        if (state.spaceOrder.length <= 1) return;
-        if (!confirm(`Delete space ${state.currentSpace}?`)) return;
-        delete state.spaces[state.currentSpace];
-        state.spaceOrder = state.spaceOrder.filter(x => x !== state.currentSpace);
-        state.currentSpace = state.spaceOrder[0];
-        renderAll();
-        queueSave();
-      };
-
-      el.startSearch.oninput = () => renderStart(el.startSearch.value || '');
-      [...document.querySelectorAll('.tb-btn[data-open]')].forEach(n => n.onclick = () => launchApp(n.dataset.open));
-
-      $('btn-login').onclick = async () => signInWithPopup(auth, provider);
-      $('btn-logout').onclick = async () => signOut(auth);
-      $('sync-now').onclick = saveNow;
-      $('open-desktop-from-dashboard').onclick = () => $('tb-show-desktop').click();
-
-      $('note-new').onclick = () => {
-        const sp = getSpace();
-        const note = { id: crypto.randomUUID(), title:'Untitled', content:'', updatedAt: Date.now(), blocks: [] };
-        sp.notes.unshift(note);
-        sp.selectedNoteId = note.id;
-        renderNotes();
-        queueSave();
-      };
-      $('note-delete').onclick = () => {
-        const sp = getSpace();
-        if (!sp.selectedNoteId || sp.notes.length <= 1) return;
-        sp.notes = sp.notes.filter(n => n.id !== sp.selectedNoteId);
-        sp.selectedNoteId = sp.notes[0]?.id || null;
-        renderNotes();
-        queueSave();
-      };
-      $('note-save').onclick = saveCurrentNote;
-      el.noteTitle.oninput = () => state.prefs.autosave && saveCurrentNote();
-      if (el.noteEditor) el.noteEditor.oninput = () => state.prefs.autosave && saveCurrentNote();
-      const slashMap = { '/concept':'concept', '/formula':'formula', '/example':'example', '/question':'question', '/image':'image', '/check':'checklist', '/text':'text', '/heading':'heading' };
-      if (el.noteBlockInput) el.noteBlockInput.oninput = () => {
-        const menu = $('note-slash-menu');
-        const raw = (el.noteBlockInput.value || '').trim().toLowerCase();
-        if (!menu) return;
-        if (!raw.startsWith('/')) { menu.style.display = 'none'; return; }
-        const items = Object.keys(slashMap).filter(k => k.startsWith(raw)).slice(0,8);
-        menu.innerHTML = items.map(i => `<div class="slash-item" data-slash="${i}">${i}</div>`).join('') || '<div class="slash-item">No command</div>';
-        menu.style.display = 'block';
-        [...menu.querySelectorAll('[data-slash]')].forEach(n => n.onclick = () => {
-          el.noteBlockInput.value = `${n.dataset.slash} `;
-          el.noteBlockInput.focus();
-          menu.style.display = 'none';
-        });
-      };
-      if (el.noteBlockInput) el.noteBlockInput.onkeydown = e => {
-        if (e.key !== 'Enter') return;
-        e.preventDefault();
-        const raw = (el.noteBlockInput.value || '').trim();
-        if (!raw) return;
-        const cmd = raw.split(' ')[0].toLowerCase();
-        const type = slashMap[cmd] || $('note-block-type').value || 'text';
-        const text = slashMap[cmd] ? raw.slice(cmd.length).trim() || 'New block' : raw;
-        const sp = getSpace();
-        const cur = sp.notes.find(n => n.id === sp.selectedNoteId);
-        if (!cur) return;
-        cur.blocks = cur.blocks || [];
-        cur.blocks.push({ type, text, at: Date.now() });
-        el.noteBlockInput.value = '';
-        if ($('note-slash-menu')) $('note-slash-menu').style.display = 'none';
-        renderNoteBlocks();
-        saveCurrentNote();
-      };
-      if ($('pin-to-vault')) $('pin-to-vault').onclick = () => {
-        const t = currentNoteText();
-        if (!t) return;
-        getSpace().vault.unshift({ text: t.slice(0,300), at: Date.now() });
-        renderVault();
-        queueSave();
-      };
-      if ($('note-highlight')) $('note-highlight').onclick = () => {
-        const sel = window.getSelection?.().toString().trim();
-        if (!sel) return;
-        addHighlight('notes', sel, 'selection');
-        renderHighlightsPanel();
-      };
-
-      if ($('add-book')) {
-        $('add-book').onclick = () => {
-          const file = $('pdf-upload').files[0];
-          if (!file) return showToast('Please select a file');
-          const title = ($('book-title').value || file.name).trim();
-          const reader = new FileReader();
-          reader.onload = async e => {
-            const id = crypto.randomUUID();
-            try {
-              await savePDFToDB(id, e.target.result);
-              const ext = file.name.split('.').pop().toLowerCase();
-              getSpace().books.unshift({ id, title, ext, mime: file.type, openedAt: Date.now(), totalPages:0, lastPage:1 });
-              $('pdf-upload').value = '';
-              $('book-title').value = '';
-              renderBooks();
-              queueSave();
-              showToast('Book added');
-            } catch (err) {
-              console.error(err);
-              showToast('Error saving book: ' + err.message);
-            }
-          };
-          reader.readAsDataURL(file);
-        };
-      }
-
-      $('task-add').onclick = () => {
-        const t = $('task-title').value.trim();
-        if (!t) return;
-        getSpace().tasks.unshift({ id: crypto.randomUUID(), title:t, subject:$('task-subject').value.trim(), due:$('task-due').value || '', done:false, at:Date.now() });
-        $('task-title').value = '';
-        renderTasks();
-        queueSave();
-      };
-
-      $('browser-new-tab').onclick = () => {
-        const b = getSpace().browser;
-        const t = { id: crypto.randomUUID(), title:'New Tab', url: state.prefs.homepage || 'about:blank' };
-        b.tabs.push(t);
-        b.activeTabId = t.id;
-        renderBrowserTabs();
-        loadActiveTab();
-        queueSave();
-      };
-      $('browser-go').onclick = () => navigateBrowser(el.browserUrl.value);
-      el.browserUrl.addEventListener('keydown', e => e.key === 'Enter' && navigateBrowser(el.browserUrl.value));
-      $('browser-open-external').onclick = () => { const u = getActiveTab()?.url; if (u) window.open(u, '_blank'); };
-
-      if (el.pdfSlider) el.pdfSlider.oninput = () => {
-        if (!pdfDoc) return;
-        pdfPage = Number(el.pdfSlider.value || 1);
-        renderPage();
-      };
-      ['bold','italic','h1','h2','code','quote'].forEach(k => {
-        const btn = $(`note-${k}`);
-        if (!btn) return;
-        btn.onclick = () => {
-          const ta = el.noteBlockInput || { value: '', selectionStart: 0, selectionEnd: 0, setRangeText: ()=>{} };
-          const sel = (ta.value || '').slice(ta.selectionStart || 0, ta.selectionEnd || 0) || 'text';
-          const wrap = {
-            bold: `**${sel}**`,
-            italic: `*${sel}*`,
-            h1: `
-# ${sel}
-`,
-            h2: `
-## ${sel}
-`,
-            code: `
-\`\`\`
-${sel}
-\`\`\`
-`,
-            quote: `
-> ${sel}
-`
-          }[k];
-          ta.setRangeText(wrap, ta.selectionStart, ta.selectionEnd, 'end');
-          renderNoteLivePreview();
-          if (state.prefs.autosave) saveCurrentNote();
-        };
+      const upload = qs('#file-upload');
+      upload.addEventListener('change', e => {
+        if (e.target.files.length) addFiles(e.target.files);
+        upload.value = '';
       });
-      if ($('open-split-study')) $('open-split-study').onclick = () => {
-        openWindow('bookshelf-window');
-        const p = $('bookshelf-window');
-        const n = $('notes-window');
-        const f = $('flashcards-window');
-        p.style.left='6px'; p.style.top='8px'; p.style.width='calc(42vw - 8px)'; p.style.height='calc(100vh - var(--taskbar-h) - 20px)';
-        openWindow('notes-window');
-        n.style.left='calc(42vw + 2px)'; n.style.top='8px'; n.style.width='calc(38vw - 8px)'; n.style.height='calc(100vh - var(--taskbar-h) - 20px)';
-        openWindow('flashcards-window');
-        f.style.left='calc(80vw + 2px)'; f.style.top='8px'; f.style.width='calc(20vw - 8px)'; f.style.height='calc(100vh - var(--taskbar-h) - 20px)';
-      };
 
-      $('browser-highlight').onclick = () => {
-        const text = prompt('Save important point from this site:');
-        if (!text?.trim()) return;
-        addHighlight('browser', text.trim(), getActiveTab()?.url || '');
-        getSpace().vault.unshift({ text: `[Web] ${text.trim()}`, at: Date.now() });
-        renderVault();
-        queueSave();
-      };
-      $('install-webapp').onclick = () => {
-        const url = (el.browserUrl.value || '').trim();
-        if (!url) return;
-        let host = 'Web App';
-        try { host = new URL(url).hostname.replace('www.',''); } catch {}
-        const name = prompt('App name', host);
-        if (!name?.trim()) return;
-        getSpace().apps.push({ id:`webapp:${crypto.randomUUID()}`, name:name.trim(), icon:'🌐', type:'webapp', url });
-        renderDesktop();
-        renderStart(el.startSearch.value || '');
-        queueSave();
-      };
-      $('uninstall-webapp').onclick = () => {
-        const apps = getSpace().apps.filter(a => a.type === 'webapp');
-        if (!apps.length) return;
-        const picked = Number(prompt(`Uninstall which app?\n${apps.map((a,i)=>`${i+1}. ${a.name}`).join('\n')}`) || '0') - 1;
-        if (picked < 0 || picked >= apps.length) return;
-        getSpace().apps = getSpace().apps.filter(a => a.id !== apps[picked].id);
-        renderDesktop();
-        renderStart(el.startSearch.value || '');
-        queueSave();
-      };
-
-      $('vault-add').onclick = () => {
-        const text = $('vault-input').value.trim();
-        if (!text) return;
-        getSpace().vault.unshift({ text, at: Date.now() });
-        $('vault-input').value = '';
-        renderVault();
-        queueSave();
-      };
-
-      $('save-goal').onclick = () => {
-        const val = Math.max(30, Math.min(600, Number($('daily-goal').value || 120)));
-        getSpace().dailyGoal = val;
-        renderDashboard();
-        queueSave();
-      };
-
-      $('apply-theme').onclick = () => {
-        state.theme.wallpaper = $('set-wallpaper').value.trim();
-        state.theme.accent = $('set-accent').value;
-        state.theme.glass = Number($('set-glass').value || 56);
-        state.theme.uiFontSize = Number($('set-font-size').value || 13);
-        state.theme.radius = Number($('set-radius').value || 10);
-        state.theme.fontFamily = $('set-font-family').value;
-        applyTheme();
-        queueSave();
-      };
-      $('settings-reset-layout').onclick = () => { getSpace().windows = {}; queueSave(); };
-      $('set-autosave').onchange = e => { state.prefs.autosave = e.target.checked; queueSave(); };
-      $('set-click-close').onchange = e => { state.prefs.clickClose = e.target.checked; queueSave(); };
-      $('set-open-start').onchange = e => { state.prefs.openStartOnLoad = e.target.checked; queueSave(); };
-      $('set-snap').onchange = e => { state.prefs.snap = e.target.checked; queueSave(); };
-      $('set-homepage').onchange = e => { state.prefs.homepage = e.target.value.trim() || 'https://www.wikipedia.org'; queueSave(); };
-
-      document.addEventListener('click', e => {
-        if (!state.prefs.clickClose) return;
-        const inStart = e.target.closest('#start-menu') || e.target.closest('#tb-start');
-        const inQ = e.target.closest('#quick-note-pop') || e.target.closest('#tb-quick-note');
-        if (!inStart && el.startMenu.style.display === 'block') hideStart();
-        if (!inQ && el.quickNotePop.style.display === 'block') hideQuickNote();
+      qs('#clear-books-btn').addEventListener('click', clearBookshelf);
+      qs('#reader-close').addEventListener('click', hideReader);
+      qs('#reader-search').addEventListener('click', () => {
+        const input = qs('#reader-search-input');
+        input.style.display = input.style.display === 'none' ? 'inline-flex' : 'none';
+        if (input.style.display !== 'none') input.focus();
       });
-      document.addEventListener('keydown', e => { if (e.key === 'Escape') closePopups(); });
-    }
-
-    function bindAnnotationOverlay() {
-      const c = el.annotCanvas;
-      const ctx = c.getContext('2d');
-      let drawing = false;
-      let mode = 'pen';
-      let size = 3;
-      let color = '#ff0000';
-      let lx = 0, ly = 0;
-
-      function resizeAnnot() { c.width = window.innerWidth; c.height = window.innerHeight; }
-      resizeAnnot();
-      window.addEventListener('resize', resizeAnnot);
-
-      c.addEventListener('mousedown', e => { drawing = true; lx=e.clientX; ly=e.clientY; });
-      window.addEventListener('mouseup', () => drawing = false);
-      c.addEventListener('mousemove', e => {
-        if (!drawing) return;
-        ctx.lineWidth = size;
-        ctx.lineCap = 'round';
-        if (mode === 'eraser') {
-          ctx.globalCompositeOperation = 'destination-out';
-          ctx.strokeStyle = 'rgba(0,0,0,1)';
-        } else {
-          ctx.globalCompositeOperation = 'source-over';
-          ctx.strokeStyle = color;
-        }
-        ctx.beginPath();
-        ctx.moveTo(lx, ly);
-        ctx.lineTo(e.clientX, e.clientY);
-        ctx.stroke();
-        lx=e.clientX; ly=e.clientY;
+      qs('#reader-search-input').addEventListener('input', e => {
+        const query = e.target.value.trim();
+        if (!query) return;
+        filterReaderText(query);
       });
-      $('annot-pen').onclick = () => mode = 'pen';
-      $('annot-eraser').onclick = () => mode = 'eraser';
-      $('annot-size').oninput = e => size = Number(e.target.value);
-      $('annot-color').oninput = e => color = e.target.value;
-      $('annot-clear').onclick = () => ctx.clearRect(0,0,c.width,c.height);
-      $('annot-exit').onclick = () => { el.annotOverlay.style.display='none'; el.annotTools.style.display='none'; };
+
+      qs('#new-note').addEventListener('click', createNote);
+      qs('#delete-note').addEventListener('click', deleteNote);
+      qs('#note-title').addEventListener('input', saveCurrentNote);
+      qs('#note-body').addEventListener('input', saveCurrentNote);
+
+      qs('#timer-start').addEventListener('click', startTimer);
+      qs('#timer-pause').addEventListener('click', pauseTimer);
+      qs('#timer-reset').addEventListener('click', resetTimer);
+      qsa('#timer-presets button').forEach(btn => btn.addEventListener('click', () => setTimerDuration(Number(btn.dataset.minutes))));
+
+      window.addEventListener('beforeunload', () => {
+        pauseTimer();
+        saveStorage();
+      });
     }
 
-    function renderSettingsValues() {
-      $('set-wallpaper').value = state.theme.wallpaper || '';
-      $('set-accent').value = state.theme.accent || '#4f8cff';
-      $('set-glass').value = String(state.theme.glass || 56);
-      $('set-font-size').value = String(state.theme.uiFontSize || 13);
-      $('set-radius').value = String(state.theme.radius || 10);
-      $('set-font-family').value = state.theme.fontFamily || '"Segoe UI", "Inter", sans-serif';
-      $('set-autosave').checked = !!state.prefs.autosave;
-      $('set-click-close').checked = !!state.prefs.clickClose;
-      $('set-open-start').checked = !!state.prefs.openStartOnLoad;
-      $('set-snap').checked = !!state.prefs.snap;
-      $('set-homepage').value = state.prefs.homepage || 'https://www.wikipedia.org';
+    function init() {
+      loadStorage();
+      renderBookshelf();
+      renderNotesList();
+      if (state.notes.length) selectNote(state.notes[0].id);
+      renderTimer();
+      bindEvents();
     }
 
-    function renderAll() {
-      applyTheme();
-      renderSpaces();
-      renderDesktop();
-      renderStart(el.startSearch.value || '');
-      renderNotes();
-      renderTasks();
-      renderBooks();
-      renderVault();
-      renderDashboard();
-      renderBrowserTabs();
-      loadActiveTab();
-      renderSettingsValues();
-      if (state.prefs.openStartOnLoad) showStart();
-      else hideStart();
-      hideQuickNote();
-      setActiveTaskbar('');
-      renderCustomTimer();
-    }
-
-    function setAuthUI(user) {
-      if (!user) {
-        $('btn-login').style.display = 'inline-block';
-        $('btn-logout').style.display = 'none';
-      } else {
-        $('btn-login').style.display = 'none';
-        $('btn-logout').style.display = 'inline-block';
-      }
-    }
-
-    bindWindowUX();
-    bindEvents();
-    bindAnnotationOverlay();
-
-    setInterval(() => {
-      tickCustomTimer();
-      el.clock.textContent = new Date().toLocaleString([], { hour:'2-digit', minute:'2-digit', day:'numeric', month:'short' });
-    }, 1000);
-
-    setInterval(() => {
-      renderDashboard();
-    }, 30000);
-
-    setInterval(() => {
-      if (!activeWindowId) return;
-      addAppMinutes(activeWindowId, 0.25);
-      if (Math.random() < 0.2) queueSave();
-    }, 15000);
-
-function markRunningIndicators() {
-  const open = new Set([...document.querySelectorAll('.window')].filter(w => w.style.display !== 'none').map(w => w.id));
-  [...document.querySelectorAll('.tb-btn[data-open]')].forEach(b => b.classList.toggle('running', open.has(b.dataset.open)));
-}
-const openWindowOriginal = openWindow;
-openWindow = function(id){ openWindowOriginal(id); markRunningIndicators(); state.session.lastOpenWindows = [...document.querySelectorAll('.window')].filter(w=>w.style.display!=='none').map(w=>w.id); };
-const closeWindowOriginal = closeWindow;
-closeWindow = function(id){ closeWindowOriginal(id); markRunningIndicators(); state.session.lastOpenWindows = [...document.querySelectorAll('.window')].filter(w=>w.style.display!=='none').map(w=>w.id); };
-
-function renderNoteBlocks() {
-  const sp = getSpace();
-  const cur = sp.notes.find(n => n.id === sp.selectedNoteId);
-  if (!cur) return;
-  cur.blocks = cur.blocks || [];
-  const c = $('note-blocks');
-  c.innerHTML = cur.blocks.map((b, i) => `
-    <div class="note-block" draggable="true" data-type="${esc(b.type || 'text')}" data-block-index="${i}">
-      <div class="block-top">
-        <span class="block-tag">${esc(b.type || 'text')}</span>
-        <div class="block-controls">
-          <button class="btn" data-up-block="${i}" title="Move up">↑</button>
-          <button class="btn" data-down-block="${i}" title="Move down">↓</button>
-          <button class="btn" data-del-block="${i}" title="Delete">✕</button>
-        </div>
-      </div>
-      <div class="block-content" contenteditable="true" data-editable-block="${i}">${esc(b.text || '')}</div>
-    </div>
-  `).join('') || '<div class="note-block">No blocks yet. Type /concept in the editor bar and press Enter.</div>';
-
-  c.querySelectorAll('[data-del-block]').forEach(n => n.onclick = () => {
-    cur.blocks.splice(Number(n.dataset.delBlock),1);
-    renderNoteBlocks();
-    saveCurrentNote();
-  });
-  c.querySelectorAll('[data-up-block]').forEach(n => n.onclick = () => {
-    const i = Number(n.dataset.upBlock);
-    if (i <= 0) return;
-    [cur.blocks[i-1], cur.blocks[i]] = [cur.blocks[i], cur.blocks[i-1]];
-    renderNoteBlocks();
-    saveCurrentNote();
-  });
-  c.querySelectorAll('[data-down-block]').forEach(n => n.onclick = () => {
-    const i = Number(n.dataset.downBlock);
-    if (i >= cur.blocks.length - 1) return;
-    [cur.blocks[i+1], cur.blocks[i]] = [cur.blocks[i], cur.blocks[i+1]];
-    renderNoteBlocks();
-    saveCurrentNote();
-  });
-
-  c.querySelectorAll('[data-editable-block]').forEach(n => {
-    n.oninput = () => {
-      const i = Number(n.dataset.editableBlock);
-      if (!cur.blocks[i]) return;
-      cur.blocks[i].text = n.innerText;
-    };
-    n.onblur = () => saveCurrentNote();
-    n.onkeydown = e => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        const i = Number(n.dataset.editableBlock);
-        cur.blocks.splice(i + 1, 0, { type:'text', text:'', at:Date.now() });
-        renderNoteBlocks();
-        const nx = c.querySelector(`[data-editable-block="${i+1}"]`);
-        nx?.focus();
-        saveCurrentNote();
-      }
-    };
-  });
-
-  const blocks = [...c.querySelectorAll('[data-block-index]')];
-  let dragIdx = -1;
-  blocks.forEach(node => {
-    node.ondragstart = () => { dragIdx = Number(node.dataset.blockIndex); };
-    node.ondragover = e => e.preventDefault();
-    node.ondrop = () => {
-      const dropIdx = Number(node.dataset.blockIndex);
-      if (dragIdx < 0 || dragIdx === dropIdx) return;
-      const item = cur.blocks.splice(dragIdx,1)[0];
-      cur.blocks.splice(dropIdx,0,item);
-      renderNoteBlocks();
-      saveCurrentNote();
-    };
-  });
-  if (window.MathJax?.typesetPromise) MathJax.typesetPromise([c]).catch(()=>{});
-}
-
-
-function createFlashcardsFromContent() { /* removed for simplicity */ }
-
-function renderFlashcardReview() { /* removed for simplicity */ }
-
-function renderKnowledgeGraph() { /* removed for simplicity */ }
-
-function renderRevisionSummary() { /* removed for simplicity */ }
-
-async function runOCROnCurrentView() {
-  if (pdfDoc) return runOCRForPage(pdfPage);
-  const active = document.querySelector('.window.active');
-  if (!active) return '';
-  const t = (active.querySelector('textarea.field')?.value || active.innerText || '').slice(0, 5000);
-  return t;
-}
-
-function setupContextMenus() {
-  const desktopCtx = $('desktop-context');
-  const winCtx = $('window-context');
-  el.desktop.addEventListener('contextmenu', e => {
-    e.preventDefault();
-    desktopCtx.style.display = 'block';
-    desktopCtx.style.left = `${e.clientX}px`;
-    desktopCtx.style.top = `${e.clientY}px`;
-  });
-  document.querySelectorAll('.window .titlebar').forEach(bar => bar.addEventListener('contextmenu', e => {
-    e.preventDefault();
-    const id = bar.dataset.window;
-    winCtx.dataset.window = id;
-    winCtx.style.display = 'block';
-    winCtx.style.left = `${e.clientX}px`;
-    winCtx.style.top = `${e.clientY}px`;
-  }));
-  document.addEventListener('click', () => { desktopCtx.style.display='none'; winCtx.style.display='none'; });
-  [...desktopCtx.querySelectorAll('[data-ctx]')].forEach(i => i.onclick = () => {
-    if (i.dataset.ctx === 'refresh') renderDesktop();
-    if (i.dataset.ctx === 'new-note') $('note-new').click();
-    if (i.dataset.ctx === 'focus') launchApp('focus-window');
-  });
-  [...winCtx.querySelectorAll('[data-wctx]')].forEach(i => i.onclick = () => {
-    const id = winCtx.dataset.window;
-    const w = $(id);
-    if (!w) return;
-    if (i.dataset.wctx === 'left') { w.style.left='8px'; w.style.top='8px'; w.style.width='calc(50vw - 12px)'; w.style.height='calc(100vh - var(--taskbar-h) - 20px)'; }
-    if (i.dataset.wctx === 'right') { w.style.left='calc(50vw + 4px)'; w.style.top='8px'; w.style.width='calc(50vw - 12px)'; w.style.height='calc(100vh - var(--taskbar-h) - 20px)'; }
-    if (i.dataset.wctx === 'top') { w.style.left='8px'; w.style.top='8px'; w.style.width='calc(100vw - 16px)'; w.style.height='calc(50vh)'; }
-    saveWindowRect(id); queueSave();
-  });
-}
-
-async function runOCRForPage(pageNumber) {
-  const sp = getSpace();
-  const key = `${currentBookTitle || 'book'}:${pageNumber}`;
-  if (sp.ocrCache[key]) return sp.ocrCache[key];
-  const page = await pdfDoc.getPage(pageNumber);
-  const vp = page.getViewport({ scale: 1.4 });
-  const c = document.createElement('canvas');
-  c.width = vp.width; c.height = vp.height;
-  await page.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
-  const { data } = await Tesseract.recognize(c, 'eng');
-  sp.ocrCache[key] = data.text || '';
-  queueSave();
-  return sp.ocrCache[key];
-}
-
-async function loadPDF(url, second = false){
-  if (!second) setStudyViewerMode('pdf');
-  const loadingTask = pdfjsLib.getDocument(url);
-  const doc = await loadingTask.promise;
-  if (second) { pdfDoc2 = doc; pdfPage2 = 1; } else { pdfDoc = doc; pdfPage = 1; }
-  await renderPage(second);
-  if (!second) renderThumbnails();
-}
-
-async function renderPage(second = false){
-  const doc = second ? pdfDoc2 : pdfDoc;
-  if (!doc) return;
-  const pageNo = second ? pdfPage2 : pdfPage;
-  const canvas = second ? $('pdf-canvas-2') : $('pdf-canvas');
-  const page = await doc.getPage(pageNo);
-  const viewport = page.getViewport({scale: pdfScale});
-  canvas.width = viewport.width;
-  canvas.height = viewport.height;
-  await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
-  if (!second) {
-    $('pdf-page-info').textContent = `Page ${pdfPage} / ${pdfDoc.numPages}`;
-    if (el.pdfSlider) { el.pdfSlider.max = String(pdfDoc.numPages || 1); el.pdfSlider.value = String(pdfPage); }
-    localStorage.setItem(`pdf-last-page:${currentBookTitle}`, String(pdfPage));
-    const sp = getSpace();
-    const book = (sp.books || []).find(b => b.title === currentBookTitle);
-    if (book) {
-      book.lastPage = pdfPage;
-      book.totalPages = pdfDoc.numPages || book.totalPages || 0;
-      book.openedAt = Date.now();
-    }
-  }
-  renderPDFSidebars();
-}
-
-async function renderThumbnails() {
-  if (!pdfDoc) return;
-  const container = $('pdf-thumbnails');
-  const total = pdfDoc.numPages;
-  container.innerHTML = '';
-  for (let i = 1; i <= Math.min(total, 25); i++) {
-    const item = document.createElement('div');
-    item.className = `thumb-item ${i===pdfPage?'active':''}`;
-    item.textContent = `Page ${i}`;
-    item.onclick = () => { pdfPage = i; renderPage(); renderThumbnails(); };
-    container.appendChild(item);
-  }
-}
-
-function detectFormula(text='') {
-  return /=|∫|Σ|sigma|\\vec|vector|Δ/i.test(text);
-}
-
-function renderPDFSidebars() {
-  const sp = getSpace();
-  const b = (sp.bookmarks || []).filter(x => x.book === (currentBookTitle || x.book)).slice(0, 12);
-  $('pdf-bookmarks').innerHTML = `<div style="font-weight:700;padding:4px;">Bookmarks</div>` + (b.map(x => `<div class="thumb-item" data-bmk="${x.page}">Page ${x.page}</div>`).join('') || '<div class="thumb-item">No bookmarks.</div>');
-  [...$('pdf-bookmarks').querySelectorAll('[data-bmk]')].forEach(n => n.onclick = () => { pdfPage = Number(n.dataset.bmk); renderPage(); renderThumbnails(); });
-  const hs = (sp.highlights || []).filter(h => h.book === currentBookTitle).slice(0, 12);
-  $('pdf-highlight-list').innerHTML = `<div style="font-weight:700;padding:4px;">Highlight Timeline</div>` + (hs.map(h => `<div class="thumb-item" data-hp="${h.page}">P${h.page}: ${esc(h.text.slice(0,40))}</div>`).join('') || '<div class="thumb-item">No highlights.</div>');
-  [...$('pdf-highlight-list').querySelectorAll('[data-hp]')].forEach(n => n.onclick = () => { pdfPage = Number(n.dataset.hp); renderPage(); renderThumbnails(); });
-}
-
-function setupAdvancedBindings() {
-  const viewer = $('pdf-viewer-container');
-  if (viewer && el.floatingHl) {
-    viewer.addEventListener('mouseup', e => {
-      const t = window.getSelection?.().toString().trim();
-      if (!t || !pdfDoc) { el.floatingHl.style.display='none'; return; }
-      el.floatingHl.style.display='flex';
-      el.floatingHl.style.left=`${Math.min(window.innerWidth-340, e.clientX)}px`;
-      el.floatingHl.style.top=`${Math.max(40, e.clientY-42)}px`;
-      el.floatingHl.dataset.sel = t;
-    });
-    document.addEventListener('mousedown', ev => { if (!ev.target.closest('#floating-highlight-toolbar')) el.floatingHl.style.display='none'; });
-    [...el.floatingHl.querySelectorAll('[data-hl-kind]')].forEach(b => b.onclick = () => {
-      $('pdf-highlight-color').value = b.dataset.hlKind;
-      const text = el.floatingHl.dataset.sel || '';
-      if (!text) return;
-      const meta = { id: crypto.randomUUID(), type: b.dataset.hlKind, text, source: `${currentBookTitle || 'Book'} – Page ${pdfPage}`, at: Date.now(), page: pdfPage, book: currentBookTitle || 'Book' };
-      const sp = getSpace();
-      sp.highlights.unshift(meta);
-      sp.vault.unshift({ text: `[From Book: ${meta.book} – Page ${meta.page}]\n${meta.text}`, at: Date.now() });
-      renderHighlightsPanel(); renderVault(); renderPDFSidebars(); queueSave();
-      el.floatingHl.style.display='none';
-    });
-  }
-  $('pdf-next').onclick = () => { if (!pdfDoc || pdfPage >= pdfDoc.numPages) return; pdfPage++; renderPage(); renderThumbnails(); };
-  $('pdf-prev').onclick = () => { if (!pdfDoc || pdfPage <= 1) return; pdfPage--; renderPage(); renderThumbnails(); };
-  $('pdf-zoom-in').onclick = () => { pdfScale += 0.15; renderPage(); if (splitPDF) renderPage(true); };
-  $('pdf-zoom-out').onclick = () => { pdfScale = Math.max(0.6, pdfScale - 0.15); renderPage(); if (splitPDF) renderPage(true); };
-  $('pdf-run-search').onclick = async () => {
-    const q = ($('pdf-search').value || '').trim().toLowerCase();
-    if (!q) return;
-    if (!pdfDoc) {
-      const txt = ($('doc-text-viewer').textContent || '').toLowerCase();
-      $('pdf-search-results').innerHTML = txt.includes(q)
-        ? `<div class="thumb-item">Found in current document preview</div>`
-        : `<div class="thumb-item">No results in current document</div>`;
-      return;
-    }
-    const out = [];
-    for (let i = 1; i <= Math.min(pdfDoc.numPages, 15); i++) {
-      const page = await pdfDoc.getPage(i);
-      const txt = await page.getTextContent();
-      let merged = txt.items.map(x => x.str).join(' ');
-      if (!merged.trim()) merged = await runOCRForPage(i);
-      if (merged.toLowerCase().includes(q)) out.push({ page: i, sample: merged.slice(0,120) });
-    }
-    $('pdf-search-results').innerHTML = out.map(r => `<div class="thumb-item" data-goto="${r.page}">P${r.page}: ${esc(r.sample)}</div>`).join('') || 'No results';
-    [...$('pdf-search-results').querySelectorAll('[data-goto]')].forEach(n => n.onclick = () => { pdfPage = Number(n.dataset.goto); renderPage(); renderThumbnails(); });
-  };
-
-  $('pdf-highlight').onclick = () => {
-    const text = prompt('Highlight text');
-    if (!text?.trim()) return;
-    const kind = $('pdf-highlight-color').value;
-    const source = `${currentBookTitle || 'Book'} – Page ${pdfPage}`;
-    const meta = { id: crypto.randomUUID(), type: kind, text: text.trim(), source, at: Date.now(), page: pdfPage, book: currentBookTitle || 'Book' };
-    const sp = getSpace();
-    sp.highlights.unshift(meta);
-    const prefix = `[From Book: ${meta.book} – Page ${meta.page}]\n`;
-    sp.vault.unshift({ text: `${prefix}${meta.text}`, at: Date.now() });
-    $('workspace-notes').innerText += `\n${prefix}${meta.text}`;
-
-    renderHighlightsPanel(); renderVault();   renderPDFSidebars(); queueSave();
-  };
-
-  $('pdf-bookmark-page').onclick = () => {
-    const sp = getSpace();
-    sp.bookmarks.unshift({ id: crypto.randomUUID(), page: pdfPage, book: currentBookTitle || 'Book', at: Date.now() });
-    renderPDFSidebars();
-    queueSave();
-  };
-
-  $('pdf-open-notes-side').onclick = () => {
-    openWindow('bookshelf-window');
-    const p = $('bookshelf-window');
-    const n = $('notes-window');
-    p.style.left='8px'; p.style.top='8px'; p.style.width='calc(55vw - 12px)'; p.style.height='calc(100vh - var(--taskbar-h) - 20px)';
-    openWindow('notes-window');
-    n.style.left='calc(55vw + 2px)'; n.style.top='8px'; n.style.width='calc(45vw - 12px)'; n.style.height='calc(100vh - var(--taskbar-h) - 20px)';
-    saveWindowRect('bookshelf-window'); saveWindowRect('notes-window');
-    queueSave();
-  };
-
-  $('save-formula-vault').onclick = () => {
-    const text = prompt('Formula');
-    if (!text?.trim()) return;
-    getSpace().formulaVault.unshift({ formula: text.trim(), book: currentBookTitle || 'Book', page: pdfPage, at: Date.now() });
-     queueSave();
-  };
-
-  $('[data-note-pane="list"]')?.addEventListener('click', ()=> { const nl = $('notes-layout'); if (nl) nl.className='app-body mobile-pane-list'; });
-  $('[data-note-pane="editor"]')?.addEventListener('click', ()=> { const nl = $('notes-layout'); if (nl) nl.className='app-body mobile-pane-editor'; });
-
-  $('note-add-block').onclick = () => {
-    const sp = getSpace();
-    const cur = sp.notes.find(n => n.id === sp.selectedNoteId);
-    if (!cur) return;
-    cur.blocks = cur.blocks || [];
-    const t = $('note-block-type').value;
-    cur.blocks.push({ type: t, text: '', at: Date.now() });
-    renderNoteBlocks();
-    const idx = cur.blocks.length - 1;
-    $('note-blocks')?.querySelector(`[data-editable-block="${idx}"]`)?.focus();
-    saveCurrentNote();
-  };
-  $('note-add-block-fab').onclick = () => $('note-add-block').click();
-  if ($('note-generate-flashcards')) $('note-generate-flashcards').onclick = () => {};
-  if ($('note-exam-template')) $('note-exam-template').onclick = () => {
-    const tpl = `# Chapter
-## Definitions
--
-## Core Formulas
--
-## PYQ Patterns
--
-## Mistakes to Avoid
--
-## 1-day Revision`;
-    const sp = getSpace(); const cur = sp.notes.find(n => n.id === sp.selectedNoteId); if (!cur) return;
-    cur.blocks = cur.blocks || []; cur.blocks.push({ type:'heading', text:'Exam Template', at:Date.now() }); cur.blocks.push({ type:'text', text: tpl, at:Date.now() });
-    renderNoteBlocks(); saveCurrentNote();
-  };
-  if ($('note-quick-revision')) $('note-quick-revision').onclick = () => {};
-
-  if ($('note-generate-quiz')) $('note-generate-quiz').onclick = () => {};
-
-  $('flash-prev').onclick = () => { flashIndex = Math.max(0, flashIndex - 1);  };
-  $('flash-next').onclick = () => { flashIndex = Math.min((getSpace().flashcards||[]).length - 1, flashIndex + 1);  };
-  $('flash-flip').onclick = () => { flashFlipped = !flashFlipped;  };
-
-  $('focus-start').onclick = () => {
-    clearInterval(pomodoroTimer);
-    pomodoroRemaining = 25 * 60;
-    pomodoroTimer = setInterval(() => {
-      pomodoroRemaining--;
-      const m = Math.floor(pomodoroRemaining / 60), s = pomodoroRemaining % 60;
-      $('focus-timer').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-      if (pomodoroRemaining <= 0) { clearInterval(pomodoroTimer); showToast('Pomodoro completed'); }
-    }, 1000);
-  };
-  $('focus-stop').onclick = () => clearInterval(pomodoroTimer);
-  $('focus-fullscreen').onclick = () => document.documentElement.requestFullscreen?.();
-    $('lp-close').onclick = () => el.lpPanel.style.display = 'none';
-  $('lp-clear').onclick = () => { el.lpInput.value=''; };
-  $('lp-save-vault').onclick = () => {
-    const txt = (el.lpInput.value || '').trim(); if (!txt) return;
-    getSpace().vault.unshift({ text: txt, at: Date.now() });
-    renderVault(); queueSave();
-  };
-  $('lp-save-notes').onclick = () => {
-    const txt = (el.lpInput.value || '').trim(); if (!txt) return;
-    const sp = getSpace(); const cur = sp.notes.find(n => n.id === sp.selectedNoteId) || sp.notes[0]; if (!cur) return;
-    const sourceMeta = `${currentBookTitle || 'Quick Capture'}${pdfDoc ? ` • p${pdfPage}` : ''}`;
-    cur.content = `${cur.content || ''}
-
-[Quick Capture ${sourceMeta}]
-${txt}`.trim();
-    if (el.noteEditor) el.noteEditor.value = cur.content;
-    saveCurrentNote();
-    el.lpInput.value = '';
-    showToast('Saved to Notes');
-  };
-  $('ocr-run-current').onclick = async () => {
-    $('ocr-center-text').textContent = 'Processing OCR...';
-    const txt = await runOCROnCurrentView();
-    $('ocr-center-text').textContent = txt || 'No OCR content found for current app.';
-  };
-  $('ocr-send-to-notes').onclick = () => {
-    const txt = ($('ocr-center-text').textContent || '').trim();
-    if (!txt) return;
-    const sp = getSpace();
-    const cur = sp.notes.find(n => n.id === sp.selectedNoteId) || sp.notes[0];
-    if (!cur) return;
-    cur.content = `${cur.content || ''}\n\n[OCR Capture]\n${txt.slice(0,2000)}`.trim();
-    cur.updatedAt = Date.now();
-    renderNotes();
-    queueSave();
-    showToast('OCR sent to Notes');
-  };
-
-
-  $('pdf-canvas').addEventListener('contextmenu', e => {
-    e.preventDefault();
-    const action = prompt('PDF context: type "diagram" to save diagram from current page');
-    if ((action || '').toLowerCase() !== 'diagram') return;
-    const data = $('pdf-canvas').toDataURL('image/png');
-    const sp = getSpace();
-    sp.vault.unshift({ text: `[Diagram] ${currentBookTitle || 'Book'} p${pdfPage}`, image: data, at: Date.now() });
-    const cur = sp.notes.find(n => n.id === sp.selectedNoteId);
-    if (cur) {
-      cur.blocks = cur.blocks || [];
-      cur.blocks.push({ type:'image', text:data, at: Date.now(), source:`${currentBookTitle} p${pdfPage}` });
-    }
-    $('workspace-notes').innerText += `
-[Diagram saved from ${currentBookTitle || 'Book'} page ${pdfPage}]`;
-    renderVault();
-    renderNoteBlocks();
-    queueSave();
-  });
-
-  $('workspace-notes').addEventListener('dragover', e => { e.preventDefault(); e.currentTarget.classList.add('drop-target'); });
-  $('workspace-notes').addEventListener('dragleave', e => e.currentTarget.classList.remove('drop-target'));
-
-  // Intelligent search over notes/highlights/knowledge/formulas/OCR
-  el.startSearch.addEventListener('keydown', async e => {
-    if (e.key !== 'Enter') return;
-    const q = (el.startSearch.value || '').toLowerCase().trim();
-    const sp = getSpace();
-    const grouped = {
-      Notes: (sp.notes || []).filter(n => `${n.title} ${n.content}`.toLowerCase().includes(q)).map(n => n.title || 'Untitled'),
-      Highlights: (sp.highlights || []).filter(h => (h.text || '').toLowerCase().includes(q)).map(h => `p${h.page || '?'} • ${h.text.slice(0,60)}`),
-      Formulas: (sp.formulaVault || []).filter(f => (f.formula || '').toLowerCase().includes(q)).map(f => `${f.formula} • p${f.page}`),
-      OCR: Object.entries(sp.ocrCache || {}).filter(([,v]) => (v || '').toLowerCase().includes(q)).map(([k]) => k)
-    };
-    const html = Object.entries(grouped).map(([k,v]) => `<div style="font-weight:700;padding:4px 0;">${k}</div>${(v.slice(0,8).map(x => `<div class="thumb-item">${esc(String(x))}</div>`).join('') || '<div class="thumb-item">No matches</div>')}`).join('');
-    $('pdf-search-results').innerHTML = html || 'No global matches';
-  });
-}
-
-const renderNotesOriginal = renderNotes;
-renderNotes = function(){ renderNotesOriginal(); };
-
-const renderAllOriginal = renderAll;
-renderAll = function() {
-  renderAllOriginal();
-  markRunningIndicators();
-  renderNoteBlocks();
-
-
-
-  renderPDFSidebars();
-  renderKnowledgeCardsList();
-  $('focus-analytics').innerHTML = Object.entries(getSpace().analytics.appMinutes || {}).map(([k,v]) => `<div>${k.replace('-window','')}: ${Math.round(v)} minutes</div>`).join('') || 'No analytics yet.';
-};
-
-
-function initPDFViewer() {
-  if (pdfDoc) renderPage();
-}
-
-function openPDFDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open('studyos-pdf-cache', 2);
-    req.onupgradeneeded = () => {
-      if (!req.result.objectStoreNames.contains('pdfs')) {
-        req.result.createObjectStore('pdfs');
-      }
-    };
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
-}
-
-async function savePDFToDB(id, dataUrl) {
-  const db = await openPDFDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction('pdfs', 'readwrite');
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-    tx.objectStore('pdfs').put(dataUrl, id);
-  });
-}
-
-async function getPDFFromDB(id) {
-  try {
-    const db = await openPDFDB();
-    return await new Promise(resolve => {
-      const tx = db.transaction('pdfs', 'readonly');
-      const req = tx.objectStore('pdfs').get(id);
-      req.onsuccess = () => resolve(req.result || null);
-      req.onerror = () => resolve(null);
-    });
-  } catch { return null; }
-}
-
-setupContextMenus();
-setupAdvancedBindings();
-
-onAuthStateChanged(auth, async user => {
-  currentUser = user;
-  setAuthUI(user);
-  state = await loadState(user);
-  renderAll();
-  el.status.textContent = user ? 'Loaded Firebase' : 'Loaded local';
-  document.querySelectorAll('.window').forEach(w => { w.style.display='none'; w.classList.remove('active'); });
-  (state.session.lastOpenWindows || []).forEach(id => openWindow(id));
-  activeWindowId = '';
-  setActiveTaskbar('');
-});
-
-window.addEventListener('error', e => showToast(`Runtime error: ${e.message}`));
-window.addEventListener('unhandledrejection', e => showToast(`Async error: ${e.reason?.message || e.reason || 'unknown'}`));
+    init();
   </script>
 </body>
 </html>
