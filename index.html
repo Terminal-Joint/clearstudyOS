@@ -561,8 +561,6 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       </aside>
     </div>
   </section>
-    </div>
-  </section>
 
 
 
@@ -1463,7 +1461,10 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       const ext = (book.ext || '').toLowerCase();
       const loader = book.dataUrl ? Promise.resolve(book.dataUrl) : getPDFFromDB(book.id);
       const url = await loader;
-      if (!url) return;
+      if (!url) {
+        showToast('Error: File content not found in database.');
+        return;
+      }
 
       if (mime.includes('pdf') || ext === 'pdf') {
         setStudyViewerMode('pdf');
@@ -1756,14 +1757,19 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
         const reader = new FileReader();
         reader.onload = async e => {
           const id = crypto.randomUUID();
-          await savePDFToDB(id, e.target.result);
-          const ext = file.name.split('.').pop().toLowerCase();
-          getSpace().books.unshift({ id, title, ext, mime: file.type, openedAt: Date.now(), totalPages:0, lastPage:1 });
-          $('pdf-upload').value = '';
-          $('book-title').value = '';
-          renderBooks();
-          queueSave();
-          showToast('Book added');
+          try {
+            await savePDFToDB(id, e.target.result);
+            const ext = file.name.split('.').pop().toLowerCase();
+            getSpace().books.unshift({ id, title, ext, mime: file.type, openedAt: Date.now(), totalPages:0, lastPage:1 });
+            $('pdf-upload').value = '';
+            $('book-title').value = '';
+            renderBooks();
+            queueSave();
+            showToast('Book added');
+          } catch (err) {
+            console.error(err);
+            showToast('Error saving book: ' + err.message);
+          }
         };
         reader.readAsDataURL(file);
       };
@@ -2481,19 +2487,25 @@ function initPDFViewer() {
 
 function openPDFDB() {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open('studyos-pdf-cache', 1);
-    req.onupgradeneeded = () => req.result.createObjectStore('pdfs');
+    const req = indexedDB.open('studyos-pdf-cache', 2);
+    req.onupgradeneeded = () => {
+      if (!req.result.objectStoreNames.contains('pdfs')) {
+        req.result.createObjectStore('pdfs');
+      }
+    };
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
   });
 }
 
 async function savePDFToDB(id, dataUrl) {
-  try {
-    const db = await openPDFDB();
+  const db = await openPDFDB();
+  return new Promise((resolve, reject) => {
     const tx = db.transaction('pdfs', 'readwrite');
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
     tx.objectStore('pdfs').put(dataUrl, id);
-  } catch {}
+  });
 }
 
 async function getPDFFromDB(id) {
