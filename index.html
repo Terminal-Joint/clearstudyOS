@@ -333,6 +333,15 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
     #note-slash-menu .slash-item:hover { background: rgba(255,255,255,.12); }
     #note-add-block-fab { position: absolute; right: 14px; bottom: 14px; border-radius: 999px; width: 42px; height: 42px; display:none; place-items:center; font-size:20px; }
     .bookshelf-section-title { padding:6px 4px; font-weight:700; opacity:.95; }
+
+    #tb-center .tb-btn[data-open="planner-window"],
+    #tb-center .tb-btn[data-open="browser-window"],
+    #tb-center .tb-btn[data-open="vault-window"],
+    #tb-center .tb-btn[data-open="flashcards-window"],
+    #tb-center .tb-btn[data-open="graph-window"],
+    #tb-center .tb-btn[data-open="ocr-window"] { display:none; }
+    #notes-window .toolbar > .panel:nth-child(2),
+    #notes-window .toolbar > .panel:nth-child(3) { display:none; }
     .book-meta { display:flex; justify-content:space-between; gap:8px; font-size:11px; opacity:.86; margin-top:6px; }
     .book-progress { height:6px; border-radius:999px; background:rgba(255,255,255,.12); margin-top:6px; overflow:hidden; }
     .book-progress > i { display:block; height:100%; background:linear-gradient(90deg, #69a1ff, #8d63ff); }
@@ -550,15 +559,16 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       <aside class="panel" style="overflow:auto;"><div id="notes-list" style="overflow:auto;"></div></aside>
       <section class="panel" style="display:flex;flex-direction:column;gap:8px;padding:8px;">
         <input id="note-title" class="field" placeholder="Title">
-        <input id="note-block-input" class="field" placeholder="Type /concept, /formula, /example, /question then Enter">
+        <textarea id="note-editor" class="field" style="min-height:320px;resize:vertical;" placeholder="Write your notes here..."></textarea>
+        <input id="note-block-input" class="field" placeholder="Type /concept, /formula, /example, /question then Enter" style="display:none;">
         <div id="note-slash-menu"></div>
-        <div id="note-blocks" style="display:grid;gap:8px;overflow:auto;min-height:220px;"></div>
+        <div id="note-blocks" style="display:none;gap:8px;overflow:auto;min-height:220px;"></div>
         <button class="btn primary" id="note-add-block-fab" title="Add block">+</button>
         <input type="hidden" id="note-content" value="">
       </section>
       <aside class="panel" style="display:grid;grid-template-rows:1fr 1fr 1fr;gap:8px;overflow:hidden;">
         <div id="notes-highlights" style="overflow:auto;"></div>
-        <div id="note-links" style="overflow:auto;"></div>
+        <div id="note-links" style="overflow:auto;display:none;"></div>
         <div id="note-live-preview" class="panel" style="padding:8px;overflow:auto;"></div>
       </aside>
     </div>
@@ -617,8 +627,8 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       </section>
       <aside class="panel" style="display:grid;grid-template-rows:minmax(0,1fr) 130px 130px 130px;gap:8px;padding:8px;">
         <div id="workspace-notes" contenteditable="true" class="field" style="overflow:auto;min-height:120px;">Drop highlights here to build connections...</div>
-        <div id="workspace-links" style="overflow:auto;"></div><div class="highlight-legend"><div>🟡 Concept</div><div>🔵 Formula</div><div>🟢 Example</div><div>🔴 Doubt</div></div><div id="detected-concepts" style="overflow:auto;"></div>
-        <div id="knowledge-cards-list" style="overflow:auto;border-top:1px solid rgba(255,255,255,.14);"></div>
+        <div id="workspace-links" style="overflow:auto;"></div><div class="highlight-legend"><div>🟡 Highlight</div><div>🔵 Important</div><div>🟢 Example</div><div>🔴 Doubt</div></div><div id="detected-concepts" style="overflow:auto;display:none;"></div>
+        <div id="knowledge-cards-list" style="overflow:auto;border-top:1px solid rgba(255,255,255,.14);display:none;"></div>
         <div id="pdf-search-results" style="overflow:auto;"></div>
       </aside>
     </div>
@@ -721,7 +731,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
   <aside id="global-letterpad" class="global-letterpad">
     <div style="display:flex;align-items:center;gap:8px;"><b style="margin-right:auto;">Letterpad</b><button class="btn" id="lp-close">Close</button></div>
     <textarea id="lp-input" class="field" placeholder="Write idea / formula / concept..."></textarea>
-    <select id="lp-tag" class="field"><option value="concept">Concept</option><option value="formula">Formula</option><option value="doubt">Doubt</option><option value="idea">Idea</option></select>
+    <select id="lp-tag" class="field" style="display:none;"><option value="idea">Idea</option></select>
     <div style="display:flex;gap:6px;"><button class="btn primary" id="lp-save-notes">Save → Notes</button><button class="btn" id="lp-save-vault">Save → Vault</button><button class="btn" id="lp-clear">Clear</button></div>
   </aside>
 
@@ -755,23 +765,16 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
     const CORE_APPS = [
       { id:'dashboard-window', name:'Dashboard', icon:'📊' },
       { id:'notes-window', name:'Notes', icon:'📝' },
-      { id:'planner-window', name:'Planner', icon:'📅' },
-      { id:'browser-window', name:'Browser', icon:'🌐' },
       { id:'pdf-window', name:'Bookshelf', icon:'📚' },
-      { id:'vault-window', name:'Vault', icon:'⭐' },
-      { id:'settings-window', name:'Settings', icon:'⚙️' },
-      { id:'flashcards-window', name:'Flashcards', icon:'🃏' },
-      { id:'graph-window', name:'Knowledge Graph', icon:'🕸️' },
       { id:'focus-window', name:'Focus', icon:'⏱️' },
-      { id:'ocr-window', name:'OCR Center', icon:'🔎' }
+      { id:'settings-window', name:'Settings', icon:'⚙️' }
     ];
-
     const $ = id => document.getElementById(id);
     const el = {
       bookshelf: $('bookshelf'),
       desktop: $('desktop'), startMenu: $('start-menu'), startSearch: $('start-search'), startGrid: $('start-grid'),
       spaces: $('spaces'), recommendedList: $('recommended-list'), quickNotePop: $('quick-note-pop'), quickNoteText: $('quick-note-text'),
-      notesList: $('notes-list'), noteTitle: $('note-title'), noteContent: $('note-content'), taskList: $('task-list'),
+      notesList: $('notes-list'), noteTitle: $('note-title'), noteEditor: $('note-editor'), noteContent: $('note-content'), taskList: $('task-list'),
       notesHighlights: $('notes-highlights'), noteLinks: $('note-links'), startPinned: $('start-pinned'), knowledgeCardsList: $('knowledge-cards-list'), noteLivePreview: $('note-live-preview'), noteBlockInput: $('note-block-input'), floatingHl: $('floating-highlight-toolbar'), pdfSlider: $('pdf-page-slider'), detectedConcepts: $('detected-concepts'), lpPanel: $('global-letterpad'), lpInput: $('lp-input'), lpTag: $('lp-tag'),
       browserTabs: $('browser-tabs'), browserUrl: $('browser-url'), browserFrame: $('browser-frame'),
       vaultList: $('vault-list'),
@@ -1292,6 +1295,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       sp.selectedNoteId = cur.id;
       el.noteTitle.value = cur.title || '';
       el.noteContent.value = cur.content || '';
+      if (el.noteEditor) el.noteEditor.value = cur.content || '';
       if (el.noteBlockInput) el.noteBlockInput.value = '';
       renderHighlightsPanel();
       renderNoteLinksPanel(cur);
@@ -1342,16 +1346,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       return cards;
     }
 
-    function addKnowledgeFromText(text, source='Notes', page='') {
-      const sp = getSpace();
-      const cards = createKnowledgeCardsFromText(text, source, page);
-      cards.forEach(c => {
-        const exists = sp.knowledgeCards.some(x => x.concept.toLowerCase() === c.concept.toLowerCase() && x.source === c.source && String(x.page||'') === String(c.page||''));
-        if (!exists) sp.knowledgeCards.unshift(c);
-      });
-      renderKnowledgeCardsList();
-      queueSave();
-    }
+    function addKnowledgeFromText() { /* knowledge automation removed for reliability */ }
 
     function renderNoteLinksPanel(curNote) {
       const sp = getSpace();
@@ -1365,15 +1360,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       [...el.noteLinks.querySelectorAll('[data-back-note]')].forEach(n => n.onclick = () => { sp.selectedNoteId = n.dataset.backNote; renderNotes(); });
     }
 
-    function renderKnowledgeCardsList() {
-      const sp = getSpace();
-      if (!el.knowledgeCardsList) return;
-      el.knowledgeCardsList.innerHTML = `<div style="padding:6px;font-weight:700;">Knowledge Cards</div>` + ((sp.knowledgeCards || []).slice(0, 18).map(c => `<div class="thumb-item"><b>${esc(c.concept)}</b><div>${esc(c.definition || c.formula || c.kind)}</div><small>${esc(c.source)} ${c.page ? `• p${esc(String(c.page))}` : ''}</small></div>`).join('') || '<div class="thumb-item">No knowledge cards yet.</div>');
-      if (el.detectedConcepts) {
-        const concepts = [...new Set((sp.knowledgeCards || []).slice(0,20).map(c => c.concept))];
-        el.detectedConcepts.innerHTML = `<div style="font-weight:700;">Detected Concepts</div>` + (concepts.map(c => `<div class="thumb-item">• ${esc(c)}</div>`).join('') || '<div class="thumb-item">No concepts detected.</div>');
-      }
-    }
+    function renderKnowledgeCardsList() { if (el.knowledgeCardsList) el.knowledgeCardsList.innerHTML = ''; if (el.detectedConcepts) el.detectedConcepts.innerHTML=''; }
 
 
 
@@ -1381,8 +1368,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       const sp = getSpace();
       const cur = sp.notes.find(n => n.id === sp.selectedNoteId) || sp.notes[0];
       if (!cur) return '';
-      const blocksText = (cur.blocks || []).map(b => b.text || '').filter(Boolean).join('\n');
-      return (blocksText || cur.content || '').trim();
+      return (el.noteEditor?.value || cur.content || '').trim();
     }
 
     function renderNoteLivePreview() {
@@ -1398,7 +1384,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       const cur = sp.notes.find(n => n.id === sp.selectedNoteId);
       if (!cur) return;
       cur.title = el.noteTitle.value;
-      cur.content = currentNoteText();
+      cur.content = (el.noteEditor?.value || currentNoteText());
       el.noteContent.value = cur.content;
       cur.updatedAt = Date.now();
       logStudyEvent('save-note', { title: cur.title || 'Untitled' });
@@ -1758,6 +1744,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       };
       $('note-save').onclick = saveCurrentNote;
       el.noteTitle.oninput = () => state.prefs.autosave && saveCurrentNote();
+      if (el.noteEditor) el.noteEditor.oninput = () => state.prefs.autosave && saveCurrentNote();
       const slashMap = { '/concept':'concept', '/formula':'formula', '/example':'example', '/question':'question', '/image':'image', '/check':'checklist', '/text':'text', '/heading':'heading' };
       if (el.noteBlockInput) el.noteBlockInput.oninput = () => {
         const menu = $('note-slash-menu');
@@ -2338,8 +2325,7 @@ function setupAdvancedBindings() {
       const sp = getSpace();
       sp.highlights.unshift(meta);
       sp.vault.unshift({ text: `[From Book: ${meta.book} – Page ${meta.page}]\n${meta.text}`, at: Date.now() });
-      addKnowledgeFromText(text, 'PDF', pdfPage);
-      renderHighlightsPanel(); renderVault(); renderPDFSidebars(); renderKnowledgeCardsList(); queueSave();
+      renderHighlightsPanel(); renderVault(); renderPDFSidebars(); queueSave();
       el.floatingHl.style.display='none';
     });
   }
@@ -2380,8 +2366,7 @@ function setupAdvancedBindings() {
     const prefix = `[From Book: ${meta.book} – Page ${meta.page}]\n`;
     sp.vault.unshift({ text: `${prefix}${meta.text}`, at: Date.now() });
     $('workspace-notes').innerText += `\n${prefix}${meta.text}`;
-    if (detectFormula(text)) sp.formulaVault.unshift({ formula: text.trim(), book: meta.book, page: meta.page, at: Date.now() });
-    addKnowledgeFromText(text.trim(), 'PDF', pdfPage);
+
     renderHighlightsPanel(); renderVault(); renderKnowledgeGraph(); renderRevisionSummary(); renderPDFSidebars(); queueSave();
   };
 
@@ -2478,30 +2463,19 @@ function setupAdvancedBindings() {
   $('lp-clear').onclick = () => { el.lpInput.value=''; };
   $('lp-save-vault').onclick = () => {
     const txt = (el.lpInput.value || '').trim(); if (!txt) return;
-    getSpace().vault.unshift({ text: `[${el.lpTag.value}] ${txt}`, at: Date.now() });
+    getSpace().vault.unshift({ text: txt, at: Date.now() });
     renderVault(); queueSave();
   };
   $('lp-save-notes').onclick = () => {
     const txt = (el.lpInput.value || '').trim(); if (!txt) return;
     const sp = getSpace(); const cur = sp.notes.find(n => n.id === sp.selectedNoteId) || sp.notes[0]; if (!cur) return;
-    cur.blocks = cur.blocks || [];
-    const detectTypeFromText = (text, selected='idea') => {
-      if (selected && selected !== 'idea') return selected === 'doubt' ? 'question' : selected;
-      const t = String(text || '').trim();
-      if (/=|∑|∫|\b(sigma|delta|vector)\b|\^|\\frac|\\sum|\\int/i.test(t)) return 'formula';
-      if (/\?$/.test(t)) return 'question';
-      if (t.length < 140) return 'concept';
-      return 'text';
-    };
-    const blockType = detectTypeFromText(txt, el.lpTag.value);
-    const sourceMeta = `${currentBookTitle || 'General Capture'}${pdfDoc ? ` • p${pdfPage}` : ''}`;
-    cur.blocks.push({ type: blockType, text: txt, at: Date.now(), source:'letterpad', meta:{ book: currentBookTitle || '', page: pdfPage || '', timestamp: Date.now() } });
-    if (blockType === 'formula') {
-      sp.formulaVault = sp.formulaVault || [];
-      sp.formulaVault.unshift({ formula: txt, book: currentBookTitle || 'Letterpad', page: pdfPage || '', at: Date.now() });
-    }
-    addKnowledgeFromText(txt, `Letterpad (${sourceMeta})`, pdfDoc ? pdfPage : '');
-    renderNoteBlocks(); saveCurrentNote();
+    const sourceMeta = `${currentBookTitle || 'Quick Capture'}${pdfDoc ? ` • p${pdfPage}` : ''}`;
+    cur.content = `${cur.content || ''}
+
+[Quick Capture ${sourceMeta}]
+${txt}`.trim();
+    if (el.noteEditor) el.noteEditor.value = cur.content;
+    saveCurrentNote();
     el.lpInput.value = '';
     showToast('Saved to Notes');
   };
@@ -2518,7 +2492,6 @@ function setupAdvancedBindings() {
     if (!cur) return;
     cur.content = `${cur.content || ''}\n\n[OCR Capture]\n${txt.slice(0,2000)}`.trim();
     cur.updatedAt = Date.now();
-    addKnowledgeFromText(txt.slice(0,600), 'OCR', pdfPage || '');
     renderNotes();
     queueSave();
     showToast('OCR sent to Notes');
@@ -2565,7 +2538,7 @@ function setupAdvancedBindings() {
 }
 
 const renderNotesOriginal = renderNotes;
-renderNotes = function(){ renderNotesOriginal(); renderNoteBlocks(); renderKnowledgeGraph(); renderRevisionSummary(); };
+renderNotes = function(){ renderNotesOriginal(); renderRevisionSummary(); };
 
 const renderAllOriginal = renderAll;
 renderAll = function() {
