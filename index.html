@@ -496,7 +496,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       <section class="panel" style="display:flex;flex-direction:column;gap:8px;padding:8px;">
         <input id="note-title" class="field" placeholder="Title">
         <div id="note-blocks" style="display:grid;gap:8px;overflow:auto;max-height:360px;"></div>
-        <textarea id="note-content" class="field" style="min-height:180px;resize:vertical;" placeholder="Legacy note text or summary..."></textarea>
+        <textarea id="note-content" class="field" style="min-height:180px;resize:vertical;" placeholder="Legacy note text or summary..."></textarea><div id="note-live-preview" class="panel" style="padding:8px;min-height:90px;overflow:auto;"></div>
       </section>
     </div>
   </section>
@@ -513,7 +513,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       <div id="browser-tabs"></div>
     </div>
     <div class="toolbar"><button class="btn" id="browser-new-tab">+ Tab</button><input id="browser-url" class="field" style="flex:1;" placeholder="Search Google or enter URL"><button class="btn primary" id="browser-go">Go</button><button class="btn" id="browser-highlight">Save Highlight</button><button class="btn" id="browser-open-external">Open External</button><button class="btn" id="install-webapp">Install App</button><button class="btn" id="uninstall-webapp">Uninstall App</button></div>
-    <div class="app-body" style="padding:8px;"><iframe id="browser-frame" src="https://www.google.com" referrerpolicy="no-referrer"></iframe></div>
+    <div class="app-body" style="padding:8px;"><iframe id="browser-frame" src="https://www.wikipedia.org" referrerpolicy="no-referrer"></iframe></div>
   </section>
 
   <section id="pdf-window" class="window" style="left:150px;top:80px;width:min(1200px,96vw);height:min(760px,88vh);">
@@ -759,7 +759,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
         vault: [],
         highlights: [],
         analytics: { appMinutes: {}, events: [] },
-        browser: { tabs:[{ id: crypto.randomUUID(), title:'Google', url:'https://www.google.com' }], activeTabId:null },
+        browser: { tabs:[{ id: crypto.randomUUID(), title:'Home', url:'https://www.wikipedia.org' }], activeTabId:null },
         quickNotes: [],
         apps: CORE_APPS.map(a => ({ id: a.id, name: a.name, icon: a.icon, type:'core' })),
         windows: {},
@@ -1222,6 +1222,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       renderHighlightsPanel();
       renderNoteLinksPanel(cur);
       renderKnowledgeCardsList();
+      renderNoteLivePreview();
     }
 
     function renderHighlightsPanel() {
@@ -1294,6 +1295,15 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       const sp = getSpace();
       if (!el.knowledgeCardsList) return;
       el.knowledgeCardsList.innerHTML = `<div style="padding:6px;font-weight:700;">Knowledge Cards</div>` + ((sp.knowledgeCards || []).slice(0, 18).map(c => `<div class="thumb-item"><b>${esc(c.concept)}</b><div>${esc(c.definition || c.formula || c.kind)}</div><small>${esc(c.source)} ${c.page ? `• p${esc(String(c.page))}` : ''}</small></div>`).join('') || '<div class="thumb-item">No knowledge cards yet.</div>');
+    }
+
+
+    function renderNoteLivePreview() {
+      const panel = $('note-live-preview');
+      if (!panel) return;
+      const txt = el.noteContent?.value || '';
+      panel.innerHTML = `<div style="font-weight:700;margin-bottom:6px;">Live Preview</div>` + esc(txt).replace(/\n/g,'<br>');
+      if (window.MathJax?.typesetPromise) MathJax.typesetPromise([panel]).catch(()=>{});
     }
 
     function saveCurrentNote() {
@@ -1556,19 +1566,169 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       hideStart();
       hideQuickNote();
     }
+    function bindEvents() {
+      $('tb-start').onclick = () => {
+        if (el.startMenu.style.display === 'block') hideStart();
+        else { showStart(); renderStart(el.startSearch.value || ''); }
+      };
+      $('tb-quick-note').onclick = () => {
+        if (el.quickNotePop.style.display === 'block') hideQuickNote();
+        else showQuickNote();
+      };
+      $('tb-show-desktop').onclick = () => {
+        document.querySelectorAll('.window').forEach(w => { w.style.display='none'; w.classList.remove('active'); });
+        activeWindowId = '';
+        setActiveTaskbar('');
+      };
+      $('tb-annot').onclick = () => {
+        el.annotOverlay.style.display = 'block';
+        el.annotTools.style.display = 'flex';
+      };
 
-    function bindAnnotationOverlay() {
-      const c = el.annotCanvas;
-      const ctx = c.getContext('2d');
+      $('quick-note-save').onclick = () => {
+        const text = (el.quickNoteText.value || '').trim();
+        if (!text) return;
+        const sp = getSpace();
+        sp.quickNotes.unshift({ text, at: Date.now() });
+        sp.notes.unshift({ id: crypto.randomUUID(), title: 'Quick note', content: text, updatedAt: Date.now(), blocks: [{ type:'text', text, at: Date.now() }] });
+        sp.selectedNoteId = sp.notes[0].id;
+        el.quickNoteText.value = '';
+        renderNotes();
+        hideQuickNote();
+        queueSave();
+      };
+
+      $('add-space').onclick = () => {
+        const name = prompt('New space name?');
+        if (!name?.trim() || state.spaceOrder.includes(name.trim())) return;
+        const n = name.trim();
+        state.spaceOrder.push(n);
+        state.spaces[n] = baseSpace(n);
+        state.currentSpace = n;
+        renderAll();
+        queueSave();
+      };
+      $('rename-space').onclick = () => {
+        const cur = state.currentSpace;
+        const next = prompt('Rename space', cur);
+        if (!next?.trim() || next.trim() === cur || state.spaceOrder.includes(next.trim())) return;
+        const n = next.trim();
+        state.spaces[n] = state.spaces[cur];
+        delete state.spaces[cur];
+        state.spaceOrder = state.spaceOrder.map(x => x === cur ? n : x);
+        state.currentSpace = n;
+        renderAll();
+        queueSave();
+      };
+      $('delete-space').onclick = () => {
+        if (state.spaceOrder.length <= 1) return;
+        if (!confirm(`Delete space ${state.currentSpace}?`)) return;
+        delete state.spaces[state.currentSpace];
+        state.spaceOrder = state.spaceOrder.filter(x => x !== state.currentSpace);
+        state.currentSpace = state.spaceOrder[0];
+        renderAll();
+        queueSave();
+      };
+
+      el.startSearch.oninput = () => renderStart(el.startSearch.value || '');
+      [...document.querySelectorAll('.tb-btn[data-open]')].forEach(n => n.onclick = () => launchApp(n.dataset.open));
+
+      $('btn-login').onclick = async () => signInWithPopup(auth, provider);
+      $('btn-logout').onclick = async () => signOut(auth);
+      $('sync-now').onclick = saveNow;
+      $('open-desktop-from-dashboard').onclick = () => $('tb-show-desktop').click();
+
+      $('note-new').onclick = () => {
+        const sp = getSpace();
+        const note = { id: crypto.randomUUID(), title:'Untitled', content:'', updatedAt: Date.now(), blocks: [] };
+        sp.notes.unshift(note);
+        sp.selectedNoteId = note.id;
+        renderNotes();
+        queueSave();
+      };
+      $('note-delete').onclick = () => {
+        const sp = getSpace();
+        if (!sp.selectedNoteId || sp.notes.length <= 1) return;
+        sp.notes = sp.notes.filter(n => n.id !== sp.selectedNoteId);
+        sp.selectedNoteId = sp.notes[0]?.id || null;
+        renderNotes();
+        queueSave();
+      };
+      $('note-save').onclick = saveCurrentNote;
+      el.noteTitle.oninput = () => state.prefs.autosave && saveCurrentNote();
+      el.noteContent.oninput = () => { renderNoteLivePreview(); if (state.prefs.autosave) saveCurrentNote(); };
+      $('pin-to-vault').onclick = () => {
+        const t = (el.noteContent.value || '').trim();
+        if (!t) return;
+        getSpace().vault.unshift({ text: t.slice(0,300), at: Date.now() });
+        renderVault();
+        queueSave();
+      };
+      $('note-highlight').onclick = () => {
+        const sel = window.getSelection?.().toString().trim();
+        if (!sel) return;
+        addHighlight('notes', sel, 'selection');
+        renderHighlightsPanel();
+      };
+
+      $('task-add').onclick = () => {
+        const t = $('task-title').value.trim();
+        if (!t) return;
+        getSpace().tasks.unshift({ id: crypto.randomUUID(), title:t, subject:$('task-subject').value.trim(), due:$('task-due').value || '', done:false, at:Date.now() });
+        $('task-title').value = '';
+        renderTasks();
+        queueSave();
+      };
+
+      $('browser-new-tab').onclick = () => {
+        const b = getSpace().browser;
+        const t = { id: crypto.randomUUID(), title:'New Tab', url: state.prefs.homepage || 'https://www.wikipedia.org' };
+        b.tabs.push(t);
+        b.activeTabId = t.id;
+        renderBrowserTabs();
+        loadActiveTab();
+        queueSave();
+      };
+      $('browser-go').onclick = () => navigateBrowser(el.browserUrl.value);
+      el.browserUrl.addEventListener('keydown', e => e.key === 'Enter' && navigateBrowser(el.browserUrl.value));
+      $('browser-open-external').onclick = () => { const u = getActiveTab()?.url; if (u) window.open(u, '_blank'); };
+      $('browser-highlight').onclick = () => {
+        const text = prompt('Save important point from this site:');
+        if (!text?.trim()) return;
+        addHighlight('browser', text.trim(), getActiveTab()?.url || '');
+        getSpace().vault.unshift({ text: `[Web] ${text.trim()}`, at: Date.now() });
+        renderVault();
+        queueSave();
+      };
+      $('install-webapp').onclick = () => {
+        const url = (el.browserUrl.value || '').trim();
+        if (!url) return;
+        let host = 'Web App';
+        try { host = new URL(url).hostname.replace('www.',''); } catch {}
+        const name = prompt('App name', host);
+        if (!name?.trim()) return;
+        getSpace().apps.push({ id:`webapp:${crypto.randomUUID()}`, name:name.trim(), icon:'🌐', type:'webapp', url });
+        renderDesktop();
+        renderStart(el.startSearch.value || '');
+        queueSave();
+      };
+      $('uninstall-webapp').onclick = () => {
+        const apps = getSpace().apps.filter(a => a.type === 'webapp');
+        if (!apps.length) return;
+        const picked = Number(prompt(`Uninstall which app?\n${apps.map((a,i)=>`${i+1}. ${a.name}`).join('\n')}`) || '0') - 1;
+        if (picked < 0 || picked >= apps.length) return;
+        getSpace().apps = getSpace().apps.filter(a => a.id !== apps[picked].id);
+        renderDesktop();
+        renderStart(el.startSearch.value || '');
+        queueSave();
+      };
 
       $('vault-add').onclick = () => {
         const text = $('vault-input').value.trim();
         if (!text) return;
         getSpace().vault.unshift({ text, at: Date.now() });
-        addHighlight('vault', text, 'Direct save');
         $('vault-input').value = '';
         renderVault();
-        renderDashboard();
         queueSave();
       };
 
@@ -1589,10 +1749,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
         applyTheme();
         queueSave();
       };
-      $('settings-reset-layout').onclick = () => {
-        getSpace().windows = {};
-        queueSave();
-      };
+      $('settings-reset-layout').onclick = () => { getSpace().windows = {}; queueSave(); };
       $('set-autosave').onchange = e => { state.prefs.autosave = e.target.checked; queueSave(); };
       $('set-click-close').onchange = e => { state.prefs.clickClose = e.target.checked; queueSave(); };
       $('set-open-start').onchange = e => { state.prefs.openStartOnLoad = e.target.checked; queueSave(); };
@@ -1606,10 +1763,47 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
         if (!inStart && el.startMenu.style.display === 'block') hideStart();
         if (!inQ && el.quickNotePop.style.display === 'block') hideQuickNote();
       });
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') closePopups(); });
+    }
 
-      document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') closePopups();
+    function bindAnnotationOverlay() {
+      const c = el.annotCanvas;
+      const ctx = c.getContext('2d');
+      let drawing = false;
+      let mode = 'pen';
+      let size = 3;
+      let color = '#ff0000';
+      let lx = 0, ly = 0;
+
+      function resizeAnnot() { c.width = window.innerWidth; c.height = window.innerHeight; }
+      resizeAnnot();
+      window.addEventListener('resize', resizeAnnot);
+
+      c.addEventListener('mousedown', e => { drawing = true; lx=e.clientX; ly=e.clientY; });
+      window.addEventListener('mouseup', () => drawing = false);
+      c.addEventListener('mousemove', e => {
+        if (!drawing) return;
+        ctx.lineWidth = size;
+        ctx.lineCap = 'round';
+        if (mode === 'eraser') {
+          ctx.globalCompositeOperation = 'destination-out';
+          ctx.strokeStyle = 'rgba(0,0,0,1)';
+        } else {
+          ctx.globalCompositeOperation = 'source-over';
+          ctx.strokeStyle = color;
+        }
+        ctx.beginPath();
+        ctx.moveTo(lx, ly);
+        ctx.lineTo(e.clientX, e.clientY);
+        ctx.stroke();
+        lx=e.clientX; ly=e.clientY;
       });
+      $('annot-pen').onclick = () => mode = 'pen';
+      $('annot-eraser').onclick = () => mode = 'eraser';
+      $('annot-size').oninput = e => size = Number(e.target.value);
+      $('annot-color').oninput = e => color = e.target.value;
+      $('annot-clear').onclick = () => ctx.clearRect(0,0,c.width,c.height);
+      $('annot-exit').onclick = () => { el.annotOverlay.style.display='none'; el.annotTools.style.display='none'; };
     }
 
     function renderSettingsValues() {
