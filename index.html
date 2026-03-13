@@ -549,7 +549,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
 <span class="pill" id="pdf-page-info">Page 0 / 0</span><input id="pdf-page-slider" type="range" min="1" max="1" value="1" style="width:150px;">
 <button class="btn" id="pdf-zoom-in">Zoom +</button>
 <button class="btn" id="pdf-zoom-out">Zoom −</button>
-
+<button class="btn" id="pdf-toggle-split">Split View</button>
 <button class="btn" id="pdf-fullscreen">Fullscreen</button>
 <input id="pdf-search" class="field" placeholder="Search in PDF/OCR" style="max-width:170px;">
 <button class="btn" id="pdf-run-search">Search</button>
@@ -1627,6 +1627,19 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
         setActiveTaskbar('');
       };
       $('tb-letterpad').onclick = () => { el.lpPanel.style.display = 'grid'; el.lpInput.focus(); };
+
+      $('quick-note-save').onclick = () => {
+        const text = (el.quickNoteText.value || '').trim();
+        if (!text) return;
+        const sp = getSpace();
+        sp.quickNotes.unshift({ text, at: Date.now() });
+        sp.notes.unshift({ id: crypto.randomUUID(), title: 'Quick note', content: text, updatedAt: Date.now(), blocks: [{ type:'text', text, at: Date.now() }] });
+        sp.selectedNoteId = sp.notes[0].id;
+        el.quickNoteText.value = '';
+        renderNotes();
+        hideQuickNote();
+        queueSave();
+      };
 
       $('quick-note-save').onclick = () => {
         const text = (el.quickNoteText.value || '').trim();
