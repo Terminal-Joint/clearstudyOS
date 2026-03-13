@@ -8,6 +8,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script src="https://unpkg.com/mammoth/mammoth.browser.min.js"></script>
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc =
 "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
@@ -448,7 +449,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
 
   <section id="notes-window" class="window" style="left:100px;top:70px;">
     <div class="titlebar" data-window="notes-window"><div class="title">Notes</div><div class="w-controls"><button class="ctrl min" data-close="notes-window">—</button><button class="ctrl max" data-max="notes-window">▢</button><button class="ctrl close" data-close="notes-window">✕</button></div></div>
-    <div class="toolbar"><button class="btn" id="note-new">New</button><button class="btn" id="note-delete">Delete</button><button class="btn primary" id="note-save">Save</button><button class="btn" id="note-highlight">Highlight Selection</button><button class="btn" id="pin-to-vault">Pin to Vault</button><select id="note-block-type" class="field" style="max-width:140px;"><option value="text">Text</option><option value="heading">Heading</option><option value="formula">Formula</option><option value="checklist">Checklist</option><option value="quote">Quote</option><option value="code">Code</option><option value="image">Image</option></select><button class="btn" id="note-add-block">Add Block</button><button class="btn" id="note-generate-flashcards">Flashcards</button></div>
+    <div class="toolbar"><button class="btn" id="note-new">New</button><button class="btn" id="note-delete">Delete</button><button class="btn primary" id="note-save">Save</button><button class="btn" id="note-highlight">Highlight Selection</button><button class="btn" id="pin-to-vault">Pin to Vault</button><select id="note-block-type" class="field" style="max-width:140px;"><option value="text">Text</option><option value="heading">Heading</option><option value="formula">Formula</option><option value="checklist">Checklist</option><option value="quote">Quote</option><option value="code">Code</option><option value="image">Image</option></select><button class="btn" id="note-add-block">Add Block</button><button class="btn" id="note-generate-flashcards">Flashcards</button><button class="btn" id="note-exam-template">Exam Template</button><button class="btn" id="note-quick-revision">Quick Revision Note</button></div>
     <div class="app-body split">
       <aside class="panel" style="display:grid;grid-template-rows:1fr 150px 150px;min-height:0;">
         <div id="notes-list" style="overflow:auto;"></div>
@@ -481,7 +482,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
   <section id="pdf-window" class="window" style="left:150px;top:80px;width:min(1200px,96vw);height:min(760px,88vh);">
     <div class="titlebar" data-window="pdf-window"><div class="title">Bookshelf + PDF Workspace</div><div class="w-controls"><button class="ctrl min" data-close="pdf-window">—</button><button class="ctrl max" data-max="pdf-window">▢</button><button class="ctrl close" data-close="pdf-window">✕</button></div></div>
     <div class="toolbar">
-<input id="pdf-upload" type="file" accept="application/pdf">
+<input id="pdf-upload" type="file" accept=".pdf,.txt,.md,.png,.jpg,.jpeg,.webp,.gif,.docx">
 <input id="book-title" class="field" placeholder="Book title">
 <button class="btn primary" id="add-book">Add Book</button>
 <button class="btn" id="pdf-prev">◀ Page</button>
@@ -495,7 +496,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
 <button class="btn" id="pdf-run-search">Search</button>
 <select id="pdf-highlight-color" class="field" style="max-width:120px;"><option value="concept">Yellow Concept</option><option value="formula">Blue Formula</option><option value="example">Green Example</option><option value="doubt">Red Doubt</option></select>
 <button class="btn" id="pdf-highlight">Save Highlight</button><button class="btn" id="pdf-bookmark-page">Bookmark Page</button>
-<button class="btn" id="save-formula-vault">Save to Formula Vault</button>
+<button class="btn" id="save-formula-vault">Save to Formula Vault</button><button class="btn" id="pdf-open-notes-side">PDF + Notes</button>
 </div>
     <div class="app-body" style="display:grid;grid-template-columns:240px minmax(0,1fr) 280px;gap:8px;padding:8px;min-height:0;">
       <aside class="panel" style="display:grid;grid-template-rows:130px minmax(0,1fr) 110px 110px;overflow:hidden;">
@@ -506,9 +507,11 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
         <div id="pdf-viewer-container" style="width:100%;height:100%;overflow:auto;background:#111;display:grid;grid-template-columns:1fr;gap:8px;">
           <canvas id="pdf-canvas"></canvas>
           <canvas id="pdf-canvas-2" style="display:none;"></canvas>
+          <pre id="doc-text-viewer" class="field" style="display:none;white-space:pre-wrap;min-height:320px;"></pre>
+          <img id="doc-image-viewer" style="display:none;max-width:100%;height:auto;border-radius:8px;">
         </div>
       </section>
-      <aside class="panel" style="display:grid;grid-template-rows:minmax(0,1fr) 170px 130px;gap:8px;padding:8px;">
+      <aside class="panel" style="display:grid;grid-template-rows:minmax(0,1fr) 130px 130px 130px;gap:8px;padding:8px;">
         <div id="workspace-notes" contenteditable="true" class="field" style="overflow:auto;min-height:120px;">Drop highlights here to build connections...</div>
         <div id="workspace-links" style="overflow:auto;"></div>
         <div id="knowledge-cards-list" style="overflow:auto;border-top:1px solid rgba(255,255,255,.14);"></div>
@@ -607,7 +610,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       <button class="tb-btn" data-open="vault-window" title="Vault">⭐</button>
       <button class="tb-btn" data-open="settings-window" title="Settings">⚙️</button><button class="tb-btn" data-open="flashcards-window" title="Flashcards">🃏</button><button class="tb-btn" data-open="graph-window" title="Concept Map">🕸️</button><button class="tb-btn" data-open="focus-window" title="Focus">⏱️</button>
     </div>
-    <div id="tb-right"><button class="tb-btn" id="tb-quick-note" title="Quick note">🗒️</button><div class="pill" id="space-pill">Space</div><div class="pill" id="status-pill">Saved</div><div class="pill" id="clock-pill"></div><button class="tb-btn" id="btn-login" title="Login">👤</button><button class="tb-btn" id="btn-logout" title="Logout" style="display:none;">⇦</button></div>
+    <div id="tb-right"><button class="tb-btn" id="tb-quick-note" title="Quick note">🗒️</button><div class="pill" id="space-pill">Space</div><div class="pill" id="status-pill">Saved</div><div class="pill" id="custom-timer-pill" title="Click start/pause • Right click customize">Timer 25:00</div><div class="pill" id="clock-pill"></div><button class="tb-btn" id="btn-login" title="Login">👤</button><button class="tb-btn" id="btn-logout" title="Logout" style="display:none;">⇦</button></div>
   </div>
 
 
@@ -660,7 +663,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       notesHighlights: $('notes-highlights'), noteLinks: $('note-links'), startPinned: $('start-pinned'), knowledgeCardsList: $('knowledge-cards-list'),
       browserTabs: $('browser-tabs'), browserUrl: $('browser-url'), browserFrame: $('browser-frame'),
       studioCanvas: $('studio-canvas'), studioStickies: $('studio-stickies'), vaultList: $('vault-list'),
-      status: $('status-pill'), clock: $('clock-pill'), spacePill: $('space-pill'),
+      status: $('status-pill'), clock: $('clock-pill'), customTimer: $('custom-timer-pill'), spacePill: $('space-pill'),
       annotOverlay: $('annot-overlay'), annotCanvas: $('annot-canvas'), annotTools: $('annot-tools')
       ,toast: $('toast')
     };
@@ -670,6 +673,36 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       el.toast.style.display = 'block';
       clearTimeout(showToast._t);
       showToast._t = setTimeout(() => el.toast.style.display = 'none', ms);
+    }
+
+
+    function formatSeconds(sec=0) {
+      const m = Math.floor(Math.max(0, sec) / 60);
+      const s = Math.max(0, sec) % 60;
+      return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+
+    function renderCustomTimer() {
+      const t = state.prefs.customTimer || { label:'Study', seconds:1500, running:false };
+      if (!el.customTimer) return;
+      el.customTimer.textContent = `${t.label} ${formatSeconds(t.seconds)}`;
+      el.customTimer.style.borderColor = t.running ? 'var(--accent)' : 'var(--line)';
+    }
+
+    function tickCustomTimer() {
+      const t = state.prefs.customTimer;
+      if (!t?.running) return;
+      const now = Date.now();
+      const prev = t.lastTick || now;
+      const delta = Math.floor((now - prev) / 1000);
+      if (delta <= 0) return;
+      t.seconds = Math.max(0, t.seconds - delta);
+      t.lastTick = now;
+      if (t.seconds === 0) {
+        t.running = false;
+        showToast(`⏰ ${t.label} timer done`);
+      }
+      renderCustomTimer();
     }
 
     let currentUser = null;
@@ -722,7 +755,8 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
           clickClose: true,
           openStartOnLoad: false,
           snap: true,
-          homepage: 'https://www.wikipedia.org'
+          homepage: 'https://www.wikipedia.org',
+          customTimer: { label:'Study', seconds:1500, running:false, lastTick:0 }
         },
         installedAppsGlobal: [],
         session: { lastOpenWindows: [] }
@@ -763,6 +797,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       if (!s.spaceOrder.includes(s.currentSpace)) s.currentSpace = s.spaceOrder[0];
       s.theme = { ...b.theme, ...(s.theme || {}) };
       s.prefs = { ...b.prefs, ...(s.prefs || {}) };
+      s.prefs.customTimer = { ...b.prefs.customTimer, ...(s.prefs.customTimer || {}) };
       s.installedAppsGlobal = s.installedAppsGlobal || [];
       return s;
     }
@@ -1280,20 +1315,76 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       queueSave();
     }
 
+    function setStudyViewerMode(mode='pdf') {
+      const showPdf = mode === 'pdf';
+      $('pdf-canvas').style.display = showPdf ? 'block' : 'none';
+      $('pdf-canvas-2').style.display = showPdf && splitPDF ? 'block' : 'none';
+      $('doc-text-viewer').style.display = mode === 'text' ? 'block' : 'none';
+      $('doc-image-viewer').style.display = mode === 'image' ? 'block' : 'none';
+      if (!showPdf) { pdfDoc = null; pdfDoc2 = null; $('pdf-page-info').textContent = 'Page -'; }
+    }
+
+    async function openStudyBook(book) {
+      if (!book) return;
+      currentBookTitle = book.title;
+      const mime = (book.mime || '').toLowerCase();
+      const ext = (book.ext || '').toLowerCase();
+      const loader = book.dataUrl ? Promise.resolve(book.dataUrl) : getPDFFromDB(book.id);
+      const url = await loader;
+      if (!url) return;
+
+      if (mime.includes('pdf') || ext === 'pdf') {
+        setStudyViewerMode('pdf');
+        const last = Number(localStorage.getItem(`pdf-last-page:${currentBookTitle}`) || 1);
+        await loadPDF(url);
+        pdfPage = Math.max(1, Math.min(last, pdfDoc?.numPages || 1));
+        await renderPage();
+        renderThumbnails();
+        return;
+      }
+
+      if (mime.startsWith('image/') || ['png','jpg','jpeg','webp','gif'].includes(ext)) {
+        setStudyViewerMode('image');
+        $('doc-image-viewer').src = url;
+        $('pdf-search-results').innerHTML = '<div class="thumb-item">Image opened. Use diagram save from context menu.</div>';
+        return;
+      }
+
+      if (ext === 'docx' || mime.includes('wordprocessingml')) {
+        setStudyViewerMode('text');
+        try {
+          const ab = await fetch(url).then(r => r.arrayBuffer());
+          const out = await mammoth.extractRawText({ arrayBuffer: ab });
+          $('doc-text-viewer').textContent = out.value || 'No readable text in DOCX.';
+          getSpace().ocrCache[`doc:${book.id}`] = out.value || '';
+        } catch {
+          $('doc-text-viewer').textContent = 'Unable to parse this DOCX in current browser session.';
+        }
+        return;
+      }
+
+      if (mime.startsWith('text/') || ['txt','md','csv','json'].includes(ext)) {
+        setStudyViewerMode('text');
+        try {
+          const text = atob(url.split(',')[1] || '');
+          $('doc-text-viewer').textContent = text;
+          getSpace().ocrCache[`doc:${book.id}`] = text;
+        } catch {
+          $('doc-text-viewer').textContent = 'Unable to decode text file.';
+        }
+        return;
+      }
+
+      setStudyViewerMode('text');
+      $('doc-text-viewer').textContent = 'This file type is stored, but preview is not supported yet.';
+    }
+
     function renderBooks() {
       const sp = getSpace();
-      el.bookshelf.innerHTML = sp.books.map(b => `<div class="book-item" data-book="${b.id}"><div>${esc(b.title)}</div><small>${new Date(b.addedAt).toLocaleDateString()}</small></div>`).join('') || '<div class="book-item">No books yet.</div>';
+      el.bookshelf.innerHTML = sp.books.map(b => `<div class="book-item" data-book="${b.id}"><div>${esc(b.title)}</div><small>${(b.ext || 'pdf').toUpperCase()} • ${new Date(b.addedAt).toLocaleDateString()}</small></div>`).join('') || '<div class="book-item">No books yet.</div>';
       [...el.bookshelf.querySelectorAll('[data-book]')].forEach(n => n.onclick = () => {
         const b = sp.books.find(x => x.id === n.dataset.book);
-        if (b) {
-          currentBookTitle = b.title;
-          const last = Number(localStorage.getItem(`pdf-last-page:${currentBookTitle}`) || 1);
-          const loader = b.dataUrl ? Promise.resolve(b.dataUrl) : getPDFFromDB(b.id);
-          loader.then(url => {
-            if (!url) return;
-            loadPDF(url).then(() => { pdfPage = Math.max(1, Math.min(last, pdfDoc?.numPages || 1)); renderPage(); renderThumbnails(); });
-          });
-        }
+        openStudyBook(b);
       });
     }
 
@@ -1435,6 +1526,31 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
         if (el.startMenu.style.display === 'block') hideStart();
         else { showStart(); renderStart(el.startSearch.value || ''); }
       };
+      el.customTimer.onclick = () => {
+        const t = state.prefs.customTimer;
+        t.running = !t.running;
+        t.lastTick = Date.now();
+        renderCustomTimer();
+        queueSave();
+      };
+      el.customTimer.ondblclick = () => {
+        const t = state.prefs.customTimer;
+        t.running = false;
+        t.seconds = 25 * 60;
+        renderCustomTimer();
+        queueSave();
+      };
+      el.customTimer.oncontextmenu = e => {
+        e.preventDefault();
+        const mins = Number(prompt('Timer minutes', String(Math.ceil((state.prefs.customTimer.seconds||1500)/60))) || 25);
+        const label = prompt('Timer label', state.prefs.customTimer.label || 'Study');
+        state.prefs.customTimer.seconds = Math.max(1, mins) * 60;
+        state.prefs.customTimer.label = (label || 'Study').slice(0,16);
+        state.prefs.customTimer.running = false;
+        renderCustomTimer();
+        queueSave();
+      };
+
       $('tb-quick-note').onclick = () => {
         if (el.quickNotePop.style.display === 'block') hideQuickNote();
         else showQuickNote();
@@ -1443,6 +1559,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
         document.querySelectorAll('.window').forEach(w => { w.style.display = 'none'; w.classList.remove('active'); });
         activeWindowId = '';
         setActiveTaskbar('');
+      renderCustomTimer();
       };
       $('tb-annot').onclick = () => {
         el.annotOverlay.style.display = 'block';
@@ -1611,7 +1728,8 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       $('add-book').onclick = async () => {
         const file = $('pdf-upload').files?.[0];
         if (!file) return;
-        const title = $('book-title').value.trim() || file.name.replace(/\.pdf$/i, '');
+        const ext = (file.name.split('.').pop() || '').toLowerCase();
+        const title = $('book-title').value.trim() || file.name.replace(/\.[^.]+$/i, '');
         const dataUrl = await new Promise((resolve, reject) => {
           const fr = new FileReader();
           fr.onload = () => resolve(fr.result);
@@ -1620,12 +1738,12 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
         });
         const sp = getSpace();
         const bookId = crypto.randomUUID();
-        sp.books.unshift({ id: bookId, title, dataUrl, addedAt: Date.now() });
+        sp.books.unshift({ id: bookId, title, dataUrl, addedAt: Date.now(), mime: file.type || '', ext });
         await savePDFToDB(bookId, dataUrl);
         currentBookTitle = title;
-        logStudyEvent('book-add', { title });
+        logStudyEvent('book-add', { title, type: ext });
         renderBooks();
-        loadPDF(dataUrl);
+        await openStudyBook(sp.books[0]);
         queueSave();
       };
       $('pdf-highlight').onclick = () => {
@@ -1757,6 +1875,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
       else hideStart();
       hideQuickNote();
       setActiveTaskbar('');
+      renderCustomTimer();
     }
 
     function setAuthUI(user) {
@@ -1774,6 +1893,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
     bindAnnotationOverlay();
 
     setInterval(() => {
+      tickCustomTimer();
       el.clock.textContent = new Date().toLocaleString([], { hour:'2-digit', minute:'2-digit', day:'numeric', month:'short' });
       renderDashboard();
     }, 1000);
@@ -1942,6 +2062,7 @@ async function runOCRForPage(pageNumber) {
 }
 
 async function loadPDF(url, second = false){
+  if (!second) setStudyViewerMode('pdf');
   const loadingTask = pdfjsLib.getDocument(url);
   const doc = await loadingTask.promise;
   if (second) { pdfDoc2 = doc; pdfPage2 = 1; } else { pdfDoc = doc; pdfPage = 1; }
@@ -2010,7 +2131,14 @@ function setupAdvancedBindings() {
   };
   $('pdf-run-search').onclick = async () => {
     const q = ($('pdf-search').value || '').trim().toLowerCase();
-    if (!q || !pdfDoc) return;
+    if (!q) return;
+    if (!pdfDoc) {
+      const txt = ($('doc-text-viewer').textContent || '').toLowerCase();
+      $('pdf-search-results').innerHTML = txt.includes(q)
+        ? `<div class="thumb-item">Found in current document preview</div>`
+        : `<div class="thumb-item">No results in current document</div>`;
+      return;
+    }
     const out = [];
     for (let i = 1; i <= Math.min(pdfDoc.numPages, 15); i++) {
       const page = await pdfDoc.getPage(i);
@@ -2046,6 +2174,17 @@ function setupAdvancedBindings() {
     queueSave();
   };
 
+  $('pdf-open-notes-side').onclick = () => {
+    openWindow('pdf-window');
+    const p = $('pdf-window');
+    const n = $('notes-window');
+    p.style.left='8px'; p.style.top='8px'; p.style.width='calc(55vw - 12px)'; p.style.height='calc(100vh - var(--taskbar-h) - 20px)';
+    openWindow('notes-window');
+    n.style.left='calc(55vw + 2px)'; n.style.top='8px'; n.style.width='calc(45vw - 12px)'; n.style.height='calc(100vh - var(--taskbar-h) - 20px)';
+    saveWindowRect('pdf-window'); saveWindowRect('notes-window');
+    queueSave();
+  };
+
   $('save-formula-vault').onclick = () => {
     const text = prompt('Formula');
     if (!text?.trim()) return;
@@ -2064,6 +2203,31 @@ function setupAdvancedBindings() {
     renderNoteBlocks(); saveCurrentNote();
   };
   $('note-generate-flashcards').onclick = () => { createFlashcardsFromContent(); openWindow('flashcards-window'); };
+  $('note-exam-template').onclick = () => {
+    const tpl = `# Chapter
+## Definitions
+-
+## Core Formulas
+-
+## PYQ Patterns
+-
+## Mistakes to Avoid
+-
+## 1-day Revision`;
+    el.noteContent.value = `${el.noteContent.value}
+
+${tpl}`.trim();
+    saveCurrentNote();
+  };
+  $('note-quick-revision').onclick = () => {
+    const sp = getSpace();
+    const summary = (sp.knowledgeCards || []).slice(0,8).map(c => `• ${c.concept}: ${c.definition || c.formula || c.kind}`).join('\n');
+    el.noteContent.value = `${el.noteContent.value}
+
+[QUICK REVISION]
+${summary}`.trim();
+    saveCurrentNote();
+  };
   $('flash-prev').onclick = () => { flashIndex = Math.max(0, flashIndex - 1); renderFlashcardReview(); };
   $('flash-next').onclick = () => { flashIndex = Math.min((getSpace().flashcards||[]).length - 1, flashIndex + 1); renderFlashcardReview(); };
   $('flash-flip').onclick = () => { flashFlipped = !flashFlipped; renderFlashcardReview(); };
