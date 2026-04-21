@@ -1,2651 +1,979 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='52' font-size='52'%3E%F0%9F%93%98%3C/text%3E%3C/svg%3E" />
-  <title>For Clear PCM - Personal Study Workspace</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-<script src="https://unpkg.com/mammoth/mammoth.browser.min.js"></script>
-<script>
-pdfjsLib.GlobalWorkerOptions.workerSrc =
-"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-</script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-    :root {
-      --taskbar-h: 58px;
-      --radius-win: 10px;
-      --glass: rgba(16, 22, 40, 0.56);
-      --line: rgba(255,255,255,.18);
-      --text: #f5f7ff;
-      --accent: #4f8cff;
-      --wallpaper: url('https://images.unsplash.com/photo-1604079628040-94301bb21b91?q=80&w=1974&auto=format&fit=crop');
-      --window-bg: rgba(23, 30, 54, 0.72);
-      --font-size-ui: 13px;
-      --font-family-ui: "Segoe UI", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-    }
-    * { box-sizing: border-box; }
-    html, body {
-      margin: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      font-family: var(--font-family-ui);
-      font-size: var(--font-size-ui);
-      color: var(--text);
-    }
-    body {
-      background:
-        radial-gradient(120% 100% at 20% 10%, rgba(102,132,255,.30), transparent 48%),
-        radial-gradient(120% 100% at 90% 10%, rgba(177,114,255,.22), transparent 42%),
-        var(--wallpaper) center/cover no-repeat;
-    }
-    .glass {
-      background: var(--glass);
-      backdrop-filter: blur(16px) saturate(145%);
-      -webkit-backdrop-filter: blur(16px) saturate(145%);
-      border: 1px solid var(--line);
-      box-shadow: 0 14px 34px rgba(0,0,0,.34);
-    }
-    .btn, .field, select {
-      font: inherit;
-      color: var(--text);
-      border-radius: 8px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.10);
-      padding: 7px 10px;
-    }
-    .btn { cursor: pointer; }
-    .btn:hover { background: rgba(255,255,255,.17); }
-    .btn.primary { background: var(--accent); border-color: transparent; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AEEE 2026 — Complete Master Sheet (CSE Target)</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0e0e11; --bg2: #14141a; --bg3: #1c1c24; --bg4: #252530;
+  --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.13);
+  --text: #e8e6f0; --text2: #9896a8; --text3: #5e5c6e;
+  --font: 'Syne', sans-serif; --mono: 'JetBrains Mono', monospace;
+  --m-acc: #7c6dfa; --m-lt: #b3abfc; --m-bg: rgba(124,109,250,0.08); --m-bd: rgba(124,109,250,0.22);
+  --p-acc: #2dd4bf; --p-lt: #7ee8da; --p-bg: rgba(45,212,191,0.07); --p-bd: rgba(45,212,191,0.20);
+  --c-acc: #f59e0b; --c-lt: #fcd34d; --c-bg: rgba(245,158,11,0.07); --c-bd: rgba(245,158,11,0.20);
+  --q-acc: #e879f9; --q-lt: #f0abfc; --q-bg: rgba(232,121,249,0.07); --q-bd: rgba(232,121,249,0.20);
+  --e-acc: #fb923c; --e-lt: #fdba74; --e-bg: rgba(251,146,60,0.07); --e-bd: rgba(251,146,60,0.20);
+  --ok: #4ade80; --warn: #fb923c; --danger: #f87171; --radius: 10px; --rsm: 6px;
+}
+body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.6; }
 
-    #desktop {
-      position: absolute;
-      inset: 10px 10px calc(var(--taskbar-h) + 10px) 10px;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
-      grid-auto-rows: 110px;
-      gap: 10px;
-      align-content: start;
-      overflow: auto;
-      user-select: none;
-    }
-    .desktop-icon {
-      width: 92px;
-      justify-self: center;
-      text-align: center;
-      border-radius: 10px;
-      padding: 6px;
-      cursor: pointer;
-      position: relative;
-    }
-    .desktop-icon:hover { background: rgba(255,255,255,.15); }
-    .tile {
-      width: 54px;
-      height: 54px;
-      margin: 0 auto;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.35);
-      background: rgba(255,255,255,.16);
-      display: grid;
-      place-items: center;
-      font-size: 26px;
-    }
-    .label {
-      margin-top: 6px;
-      font-size: 12px;
-      text-shadow: 0 2px 6px rgba(0,0,0,.6);
-      word-break: break-word;
-    }
-    .icon-edit {
-      position: absolute;
-      top: 4px;
-      right: 4px;
-      width: 18px;
-      height: 18px;
-      border-radius: 6px;
-      display: none;
-      border: 1px solid var(--line);
-      background: rgba(0,0,0,.35);
-      font-size: 11px;
-      line-height: 16px;
-      text-align: center;
-    }
-    .desktop-icon:hover .icon-edit { display: inline-block; }
+/* ── Header ── */
+.hdr { padding: 28px 28px 0; max-width: 840px; margin: 0 auto; }
+.hdr-tag {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: var(--m-bg); border: 1px solid var(--m-bd); color: var(--m-lt);
+  font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  padding: 4px 12px; border-radius: 20px; margin-bottom: 14px;
+}
+.hdr-tag::before { content: '◉'; font-size: 8px; }
+h1 {
+  font-size: clamp(20px, 4vw, 30px); font-weight: 800; line-height: 1.2; margin-bottom: 6px;
+  background: linear-gradient(130deg, #fff 25%, #a99dfc); -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent; background-clip: text;
+}
+.hdr-sub { font-size: 13px; color: var(--text2); margin-bottom: 18px; max-width: 580px; }
 
-    #taskbar {
-      position: fixed;
-      left: 10px;
-      right: 10px;
-      bottom: 8px;
-      height: var(--taskbar-h);
-      border-radius: 12px;
-      z-index: 9000;
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      align-items: center;
-      gap: 10px;
-      padding: 0 10px;
-    }
-    #tb-left, #tb-center, #tb-right { display: flex; align-items: center; gap: 8px; }
-    #tb-center { justify-content: center; }
-    #tb-right { justify-content: flex-end; }
-    .tb-btn {
-      position: relative;
-      border: 1px solid transparent;
-      background: transparent;
-      color: var(--text);
-      border-radius: 8px;
-      height: 38px;
-      min-width: 38px;
-      padding: 0 9px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-    .tb-btn:hover { background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.2); }
-    .tb-btn.active::after {
-      content: '';
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      bottom: 2px;
-      width: 20px;
-      height: 3px;
-      border-radius: 999px;
-      background: #fff;
-    }
-    .pill {
-      border: 1px solid var(--line);
-      border-radius: 9px;
-      background: rgba(255,255,255,.12);
-      padding: 6px 10px;
-      font-size: 12px;
-      white-space: nowrap;
-    }
+/* ── Goal strip ── */
+.gstrip { max-width: 840px; margin: 0 auto; padding: 0 28px 20px; }
+.ginner {
+  background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--radius);
+  padding: 12px 18px; display: flex; flex-wrap: wrap; gap: 14px; align-items: center;
+}
+.gpill { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 500; }
+.gpill .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.gpill span { color: var(--text2); } .gpill strong { color: var(--text); }
 
-    #start-menu, #quick-note-pop {
-      position: fixed;
-      bottom: 74px;
-      border-radius: 12px;
-      z-index: 9400;
-      display: none;
-      opacity: 0;
-      transition: transform .22s ease, opacity .2s ease;
-    }
-    #start-menu.open, #quick-note-pop.open { opacity: 1; }
+/* ── Nav ── */
+.navwrap { max-width: 840px; margin: 0 auto; padding: 0 28px 18px; }
+.nav { display: flex; gap: 7px; flex-wrap: wrap; }
+.nbtn {
+  font-family: var(--font); font-size: 12px; font-weight: 600; letter-spacing: .02em;
+  padding: 7px 15px; border-radius: 20px; border: 1px solid var(--border2);
+  background: var(--bg3); color: var(--text2); cursor: pointer; transition: all .15s;
+}
+.nbtn:hover { color: var(--text); background: var(--bg4); }
+.am { background: var(--m-bg) !important; border-color: var(--m-bd) !important; color: var(--m-lt) !important; }
+.ap { background: var(--p-bg) !important; border-color: var(--p-bd) !important; color: var(--p-lt) !important; }
+.ac { background: var(--c-bg) !important; border-color: var(--c-bd) !important; color: var(--c-lt) !important; }
+.aq { background: var(--q-bg) !important; border-color: var(--q-bd) !important; color: var(--q-lt) !important; }
+.ae { background: var(--e-bg) !important; border-color: var(--e-bd) !important; color: var(--e-lt) !important; }
 
-    #start-menu {
-      left: 50%;
-      transform: translateX(-50%) translateY(16px) scale(.98);
-      width: min(900px, 96vw);
-      padding: 12px;
-    }
-    #start-menu.open { transform: translateX(-50%) translateY(0) scale(1); }
-    #start-search { width: 100%; }
-    #space-row { display: flex; gap: 8px; align-items: center; margin: 10px 0; flex-wrap: wrap; }
-    .space-chip {
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.10);
-      color: var(--text);
-      border-radius: 999px;
-      padding: 6px 10px;
-      cursor: pointer;
-      font-size: 12px;
-    }
-    .space-chip.active { background: var(--accent); border-color: transparent; }
-    #start-grid {
-      display: grid;
-      grid-template-columns: repeat(6, minmax(0,1fr));
-      gap: 8px;
-    }
-    .start-item {
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.08);
-      border-radius: 10px;
-      padding: 10px;
-      text-align: center;
-      cursor: pointer;
-      min-height: 70px;
-    }
-    #recommended {
-      margin-top: 10px;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 10px;
-      background: rgba(255,255,255,.06);
-    }
-    #recommended-list { display: grid; gap: 7px; margin-top: 8px; }
-    .rec-item { border: 1px solid var(--line); border-radius: 8px; padding: 7px 8px; cursor: pointer; background: rgba(255,255,255,.06); }
+/* ── Main ── */
+.main { max-width: 840px; margin: 0 auto; padding: 0 28px 60px; }
+.sec { display: none; } .sec.vis { display: block; }
 
-    #quick-note-pop {
-      right: 12px;
-      width: min(360px, 92vw);
-      transform: translateY(16px);
-      padding: 10px;
-    }
-    #quick-note-pop.open { transform: translateY(0); }
-    #quick-note-text { width: 100%; min-height: 120px; resize: vertical; }
+/* ── Cards ── */
+.card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+  margin-bottom: 10px; overflow: hidden; transition: border-color .14s;
+}
+.card:hover { border-color: var(--border2); }
+.chdr {
+  padding: 13px 16px; display: flex; justify-content: space-between; align-items: center;
+  cursor: pointer; user-select: none; gap: 10px;
+}
+.chdr:hover { background: var(--bg3); }
+.ctitle { font-size: 14px; font-weight: 600; color: var(--text); flex: 1; }
+.cmeta { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.badge {
+  font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+  padding: 2px 8px; border-radius: 20px; border: 1px solid;
+}
+.bm { background: var(--m-bg); color: var(--m-lt); border-color: var(--m-bd); }
+.bp { background: var(--p-bg); color: var(--p-lt); border-color: var(--p-bd); }
+.bc { background: var(--c-bg); color: var(--c-lt); border-color: var(--c-bd); }
+.bq { background: var(--q-bg); color: var(--q-lt); border-color: var(--q-bd); }
+.be { background: var(--e-bg); color: var(--e-lt); border-color: var(--e-bd); }
+.bnew { background: rgba(74,222,128,.1); color: var(--ok); border-color: rgba(74,222,128,.28); }
+.chev { font-size: 10px; color: var(--text3); transition: transform .18s; }
+.card.open .chev { transform: rotate(180deg); }
+.cbody { padding: 0 16px 16px; display: none; }
+.card.open .cbody { display: block; }
 
-    .window {
-      position: absolute;
-      display: none;
-      flex-direction: column;
-      min-width: 330px;
-      min-height: 240px;
-      width: min(980px, 94vw);
-      height: min(720px, 86vh);
-      left: 80px;
-      top: 64px;
-      border-radius: var(--radius-win);
-      overflow: hidden;
-      z-index: 500;
-      background: var(--window-bg);
-      border: 1px solid var(--line);
-      backdrop-filter: blur(12px);
-    }
-    .window.active { z-index: 1300; }
-    .titlebar {
-      height: 36px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 0 8px;
-      border-bottom: 1px solid var(--line);
-      background: rgba(255,255,255,.06);
-      cursor: move;
-      user-select: none;
-    }
-    .title {
-      font-size: 12px;
-      font-weight: 600;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      margin-right: auto;
-    }
-    .w-controls { display: flex; gap: 4px; margin-left: auto; }
-    .ctrl {
-      width: 28px;
-      height: 24px;
-      border-radius: 6px;
-      border: 1px solid transparent;
-      background: transparent;
-      color: #fff;
-      cursor: pointer;
-      font-size: 13px;
-      display: grid;
-      place-items: center;
-    }
-    .ctrl:hover { background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.2); }
-    .ctrl.close:hover { background: #c42b1c; border-color: #c42b1c; }
+/* ── Rows ── */
+.slbl {
+  font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--text3); margin: 14px 0 7px;
+}
+.frow {
+  display: flex; gap: 10px; align-items: flex-start; padding: 7px 11px;
+  border-radius: var(--rsm); background: var(--bg3); border: 1px solid var(--border);
+  margin-bottom: 5px; transition: border-color .12s;
+}
+.frow:hover { border-color: var(--border2); }
+.fm { font-family: var(--mono); font-size: 12px; color: var(--text); font-weight: 500; min-width: 185px; flex-shrink: 0; line-height: 1.5; }
+.fn { font-size: 12px; color: var(--text2); line-height: 1.55; padding-top: 1px; }
+.crow {
+  padding: 6px 11px; border-left: 2px solid var(--border2);
+  border-radius: 0 var(--rsm) var(--rsm) 0; margin-bottom: 5px;
+}
+.crow p { font-size: 13px; color: var(--text); line-height: 1.6; }
+.crow span { font-size: 11px; color: var(--text3); display: block; margin-top: 2px; }
 
-    .toolbar {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-wrap: wrap;
-      padding: 6px 8px;
-      border-bottom: 1px solid var(--line);
-      background: rgba(255,255,255,.05);
-    }
-    .app-body { flex: 1; min-height: 0; overflow: auto; padding: 8px; }
-    .panel { border: 1px solid var(--line); border-radius: 9px; background: rgba(255,255,255,.06); }
-    .split { display: grid; grid-template-columns: 270px 1fr; gap: 8px; height: 100%; }
+/* ── Tips ── */
+.tip { padding: 10px 13px; border-radius: var(--rsm); font-size: 12px; line-height: 1.6; margin-top: 11px; border: 1px solid; }
+.tm { background: var(--m-bg); border-color: var(--m-bd); color: var(--m-lt); }
+.tp { background: var(--p-bg); border-color: var(--p-bd); color: var(--p-lt); }
+.tc { background: var(--c-bg); border-color: var(--c-bd); color: var(--c-lt); }
+.tq { background: var(--q-bg); border-color: var(--q-bd); color: var(--q-lt); }
+.te { background: var(--e-bg); border-color: var(--e-bd); color: var(--e-lt); }
+.tw { background: rgba(251,146,60,.08); border-color: rgba(251,146,60,.28); color: var(--warn); }
+.tok { background: rgba(74,222,128,.07); border-color: rgba(74,222,128,.25); color: var(--ok); }
 
-    .resize-handle { position: absolute; z-index: 1400; }
-    .resize-handle.e { top:8px; bottom:8px; right:-4px; width:8px; cursor:ew-resize; }
-    .resize-handle.w { top:8px; bottom:8px; left:-4px; width:8px; cursor:ew-resize; }
-    .resize-handle.n { left:8px; right:8px; top:-4px; height:8px; cursor:ns-resize; }
-    .resize-handle.s { left:8px; right:8px; bottom:-4px; height:8px; cursor:ns-resize; }
-    .resize-handle.ne { top:-4px; right:-4px; width:10px; height:10px; cursor:nesw-resize; }
-    .resize-handle.nw { top:-4px; left:-4px; width:10px; height:10px; cursor:nwse-resize; }
-    .resize-handle.se { bottom:-4px; right:-4px; width:10px; height:10px; cursor:nwse-resize; }
-    .resize-handle.sw { bottom:-4px; left:-4px; width:10px; height:10px; cursor:nesw-resize; }
+/* ── Divider ── */
+.divider { display: flex; align-items: center; gap: 10px; margin: 18px 0 10px; }
+.divider-line { flex: 1; height: 1px; background: var(--border); }
+.divider-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text3); white-space: nowrap; }
 
-    .note-item, .task-row, .book-item, .vault-item, .sticky-item {
-      padding: 8px;
-      border-bottom: 1px solid rgba(255,255,255,.12);
-      cursor: pointer;
-    }
-    .note-item.active { background: rgba(79,140,255,.32); }
-    .note-block {
-      border: 1px solid rgba(255,255,255,.14);
-      border-radius: 10px;
-      padding: 10px;
-      background: rgba(255,255,255,.04);
-      display: grid;
-      gap: 6px;
-    }
-    .note-block .block-top { display:flex; align-items:center; justify-content:space-between; gap:8px; }
-    .note-block .block-tag { font-size: 11px; text-transform: uppercase; letter-spacing:.04em; opacity:.85; padding:2px 8px; border-radius:999px; border:1px solid var(--line); }
-    .note-block[data-type="concept"] .block-tag { background: rgba(255,214,10,.18); }
-    .note-block[data-type="formula"] .block-tag { background: rgba(50,150,255,.2); }
-    .note-block[data-type="example"] .block-tag { background: rgba(62,190,100,.2); }
-    .note-block[data-type="question"] .block-tag { background: rgba(255,110,110,.2); }
-    .note-block .block-controls { display:none; gap:5px; }
-    .note-block:hover .block-controls, .note-block:focus-within .block-controls { display:flex; }
-    .note-block .block-content { min-height: 28px; outline:none; white-space: pre-wrap; }
-    #note-slash-menu { display:none; position:absolute; z-index:20; max-width:210px; padding:6px; border-radius:10px; border:1px solid var(--line); background:rgba(10,18,33,.96); }
-    #note-slash-menu .slash-item { padding:6px 8px; border-radius:6px; cursor:pointer; }
-    #note-slash-menu .slash-item:hover { background: rgba(255,255,255,.12); }
-    #note-add-block-fab { position: absolute; right: 14px; bottom: 14px; border-radius: 999px; width: 42px; height: 42px; display:none; place-items:center; font-size:20px; }
-    .bookshelf-section-title { padding:6px 4px; font-weight:700; opacity:.95; }
-
-
-
-    .book-meta { display:flex; justify-content:space-between; gap:8px; font-size:11px; opacity:.86; margin-top:6px; }
-    .book-progress { height:6px; border-radius:999px; background:rgba(255,255,255,.12); margin-top:6px; overflow:hidden; }
-    .book-progress > i { display:block; height:100%; background:linear-gradient(90deg, #69a1ff, #8d63ff); }
-
-    .cards { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; }
-    .card { padding: 10px; border-radius: 10px; border: 1px solid var(--line); background: rgba(255,255,255,.08); }
-    .card b { font-size: 22px; }
-
-    /* Chrome-like browser */
-    #browser-top { padding: 4px 6px 0; border-bottom: 1px solid var(--line); background: rgba(255,255,255,.04); }
-    #browser-tabs {
-      display: flex;
-      align-items: end;
-      gap: 4px;
-      overflow: auto;
-      padding-bottom: 4px;
-    }
-    .btab {
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.08);
-      color: var(--text);
-      border-radius: 8px 8px 0 0;
-      min-width: 150px;
-      max-width: 240px;
-      height: 30px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 0 8px;
-      cursor: pointer;
-    }
-    .btab.active { background: rgba(79,140,255,.34); }
-    .btab .name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12px; flex: 1; }
-    .btab .close-tab {
-      width: 18px;
-      height: 18px;
-      border-radius: 5px;
-      border: 1px solid transparent;
-      background: transparent;
-      color: #fff;
-      font-size: 11px;
-      cursor: pointer;
-    }
-    .btab .close-tab:hover { background: rgba(255,255,255,.22); }
-    #browser-frame { width:100%; height:100%; border:0; background:#fff; border-radius:8px; }
-
-    /* Global annotation overlay */
-    #annot-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 12000;
-      display: none;
-      pointer-events: none;
-    }
-    #annot-canvas {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: auto;
-      cursor: crosshair;
-    }
-    #annot-tools {
-      position: fixed;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 12500;
-      display: none;
-      align-items: center;
-      gap: 8px;
-      padding: 8px;
-      border-radius: 10px;
-      pointer-events: auto;
-    }
-
-    @media (max-width: 1100px) {
-      .cards { grid-template-columns: repeat(2, minmax(0,1fr)); }
-      #start-grid { grid-template-columns: repeat(4, minmax(0,1fr)); }
-      .split { grid-template-columns: 1fr; }
-      .pill { display: none; }
-    }
-    @media (max-width: 700px) {
-      #start-grid { grid-template-columns: repeat(3, minmax(0,1fr)); }
-      .tb-btn { min-width: 34px; height: 34px; }
-      #taskbar { height: 52px; }
-      .window { width: calc(100vw - 16px); height: calc(100vh - 72px); left: 8px; top: 8px; }
-    }
-    .global-letterpad {
-      position: fixed;
-      right: 10px;
-      top: 70px;
-      width: min(360px, 92vw);
-      max-height: calc(100vh - 90px);
-      z-index: 15000;
-      display: none;
-      grid-template-rows: auto 1fr auto auto;
-      gap: 8px;
-      padding: 10px;
-      border-radius: 12px;
-      border: 1px solid var(--line);
-      background: rgba(8,14,28,.92);
-      backdrop-filter: blur(18px);
-      box-shadow: 0 22px 60px rgba(0,0,0,.45);
-    }
-    .global-letterpad textarea { width:100%; min-height:120px; resize:vertical; }
-    #mobile-letterpad-fab { display:none; position:fixed; right:14px; bottom:74px; z-index:15500; background:var(--accent); border-color:transparent; }
-    .window .app-body { position: relative; }
-
-    #bookshelf { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:12px; padding:10px; align-content:start; }
-    .book-card { border:1px solid var(--line); border-radius:12px; padding:8px; background:rgba(255,255,255,.05); cursor:pointer; transition:.2s transform,.2s background; }
-    .book-card:hover { transform: translateY(-2px); background:rgba(255,255,255,.12); }
-    .book-cover { height:120px; border-radius:10px; display:grid; place-items:center; font-size:34px; background:linear-gradient(135deg, rgba(79,140,255,.35), rgba(141,99,255,.25)); margin-bottom:8px; }
-    .floating-highlight {
-      position: fixed; z-index: 16000; display:none; gap:6px; padding:6px; border-radius:10px;
-      border:1px solid var(--line); background:rgba(9,16,30,.94); backdrop-filter: blur(8px);
-    }
-    .highlight-legend { display:grid; gap:6px; font-size:12px; }
-    ::-webkit-scrollbar { width: 9px; height: 9px; }
-    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.24); border-radius: 999px; }
-    ::-webkit-scrollbar-track { background: rgba(255,255,255,.05); }
-
-
-    @media (max-width: 900px) {
-      #bookshelf-window .app-body { grid-template-columns: 1fr !important; grid-template-rows: 180px minmax(0,1fr) 220px; }
-      .global-letterpad { right: 4px; left: 4px; top: auto; bottom: 64px; width: auto; max-height: 52vh; }
-      #notes-window .app-body { grid-template-columns: 1fr !important; }
-      #tb-right { gap: 4px; }
-      #tb-right .pill { padding: 4px 7px; font-size: 11px; }
-    }
-    @media (max-width: 560px) {
-      #taskbar { left: 4px; right: 4px; bottom: 4px; padding: 0 6px; }
-      #tb-center { gap: 4px; }
-      #tb-center .tb-btn { min-width: 30px; padding: 0 6px; }
-      #bookshelf-window .toolbar { gap: 4px; }
-      .toolbar .btn, .toolbar .field { padding: 5px 7px; }
-      #mobile-letterpad-fab { display:grid; place-items:center; }
-      #tb-letterpad { display:none; }
-      #notes-window .toolbar { grid-template-columns: 1fr !important; }
-      #notes-window .app-body > aside:last-child { display:none; }
-      #notes-mobile-tabs { display:flex !important; }
-      #note-add-block-fab { display:grid; }
-      #note-blocks .note-block { padding: 12px; }
-      #note-blocks .btn { min-height: 34px; }
-      #notes-layout.mobile-pane-list > section { display:none; }
-      #notes-layout.mobile-pane-editor > aside:first-child { display:none; }
-    }
-
-  </style>
+@media (max-width: 520px) {
+  .hdr, .navwrap, .gstrip, .main { padding-left: 14px; padding-right: 14px; }
+  .frow { flex-direction: column; gap: 3px; }
+  .fm { min-width: unset; }
+}
+</style>
 </head>
 <body>
-  <main id="desktop"></main>
 
-  <aside id="start-menu" class="glass">
-    <input id="start-search" class="field" placeholder="Search apps and note content..." />
-    <div id="space-row">
-      <div id="spaces" style="display:flex;gap:8px;flex-wrap:wrap;flex:1"></div>
-      <button class="btn" id="add-space">+ Space</button>
-      <button class="btn" id="rename-space">Rename</button>
-      <button class="btn" id="delete-space">Delete</button>
-    </div>
-    <div id="start-grid"></div>
-    <div id="recommended">
-      <b>Pinned Apps</b>
-      <div id="start-pinned" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:8px;"></div>
-      <b style="display:block;margin-top:10px;">Recent Items</b>
-      <div id="recommended-list"></div>
-    </div>
-  </aside>
-
-  <aside id="quick-note-pop" class="glass">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><b style="margin-right:auto;">Quick Note</b><button class="btn" id="quick-note-save">Save</button></div>
-    <textarea id="quick-note-text" class="field" placeholder="Write and save instantly..."></textarea>
-  </aside>
-
-  <section id="dashboard-window" class="window">
-    <div class="titlebar" data-window="dashboard-window"><div class="title">Dashboard</div><div class="w-controls"><button class="ctrl min" data-close="dashboard-window">—</button><button class="ctrl max" data-max="dashboard-window">▢</button><button class="ctrl close" data-close="dashboard-window">✕</button></div></div>
-    <div class="app-body">
-      <div class="cards">
-        <div class="card"><div>Today Minutes</div><b id="m-today">0m</b></div>
-        <div class="card"><div>Streak</div><b id="m-streak">0d</b></div>
-        <div class="card"><div>Tasks Done</div><b id="m-tasks">0</b></div>
-        <div class="card"><div>Vault Items</div><b id="m-vault">0</b></div>
-        <div class="card"><div>Concepts</div><b id="m-concepts">0</b></div>
-      </div>
-      <div class="panel" style="margin-top:10px;padding:10px;">
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-          <label>Daily goal <input class="field" id="daily-goal" type="number" min="30" max="600" style="width:110px"></label>
-          <button class="btn primary" id="save-goal">Save Goal</button>
-          <button class="btn" id="sync-now">Sync Now</button>
-          <button class="btn" id="open-desktop-from-dashboard">Show Desktop</button>
-        </div>
-        <div id="coach-text" style="margin-top:8px;opacity:.9;"></div>
-        <div id="study-activity" style="margin-top:8px;display:grid;gap:5px;font-size:12px;"></div>
-        <div id="dashboard-task-list" style="margin-top:8px;display:grid;gap:5px;font-size:12px;"></div>
-        <div id="dashboard-task-list" style="margin-top:8px;display:grid;gap:5px;font-size:12px;"></div>
-        <div id="dashboard-task-list" style="margin-top:8px;display:grid;gap:5px;font-size:12px;"></div>
-        <div id="dashboard-task-list" style="margin-top:8px;display:grid;gap:5px;font-size:12px;"></div>
-      </div>
-      <div class="panel" style="margin-top:10px;padding:10px;">
-        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;">
-          <input id="task-title" class="field" placeholder="Task" style="flex:1;">
-          <input id="task-subject" class="field" placeholder="Subject" style="width:140px;">
-          <input id="task-due" class="field" type="date" style="width:160px;">
-          <button class="btn primary" id="task-add">Add Task</button>
-        </div>
-        <div id="task-list" style="margin-top:10px;max-height:220px;overflow:auto;"></div>
-      </div>
-    </div>
-
-  </section>
-
-  <section id="notes-window" class="window" style="left:100px;top:70px;">
-    <div class="titlebar" data-window="notes-window"><div class="title">Notes</div><div class="w-controls"><button class="ctrl min" data-close="notes-window">—</button><button class="ctrl max" data-max="notes-window">▢</button><button class="ctrl close" data-close="notes-window">✕</button></div></div>
-    <div class="toolbar" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;">
-      <div class="panel" style="padding:6px;display:flex;gap:6px;flex-wrap:wrap;"><b>File</b><button class="btn" id="note-new">New</button><button class="btn primary" id="note-save">Save</button><button class="btn" id="note-delete">Delete</button><button class="btn" id="pin-to-vault">Pin to Vault</button></div>
-      <div class="panel" style="padding:6px;display:flex;gap:6px;flex-wrap:wrap;"><b>Blocks</b><select id="note-block-type" class="field" style="max-width:120px;"><option value="text">Text</option><option value="heading">Heading</option><option value="list">List</option></select><button class="btn" id="note-add-block">Add</button></div>
-      <div class="panel" style="padding:6px;display:flex;gap:6px;flex-wrap:wrap;"><b>Format</b><button class="btn" id="note-bold">B</button><button class="btn" id="note-italic">I</button><button class="btn" id="note-h1">H1</button><button class="btn" id="note-h2">H2</button><button class="btn" id="note-highlight">Highlight</button><button class="btn" id="note-generate-flashcards">Flashcards</button><button class="btn" id="note-exam-template">Exam</button><button class="btn" id="note-quick-revision">Revise</button><button class="btn" id="note-generate-quiz">Quiz</button></div>
-    </div>
-    <div id="notes-mobile-tabs" class="toolbar" style="display:none;gap:6px;padding-top:0;">
-      <button class="btn" data-note-pane="list">Notes</button>
-      <button class="btn" data-note-pane="editor">Editor</button>
-
-    </div>
-    <div class="app-body" id="notes-layout" style="display:grid;grid-template-columns:260px 1fr;gap:8px;min-height:0;">
-      <aside class="panel" style="overflow:auto;"><div id="notes-list" style="overflow:auto;"></div></aside>
-      <section class="panel" style="display:flex;flex-direction:column;gap:8px;padding:8px;">
-        <input id="note-title" class="field" placeholder="Title">
-        <textarea id="note-editor" class="field" style="min-height:320px;resize:vertical;" placeholder="Write your notes here..."></textarea>
-        <input id="note-block-input" class="field" placeholder="Type /concept, /formula, /example, /question then Enter" style="display:none;">
-        <div id="note-slash-menu"></div>
-        <div id="note-blocks" style="display:none;gap:8px;overflow:auto;min-height:220px;"></div>
-        <button class="btn primary" id="note-add-block-fab" title="Add block">+</button>
-        <input type="hidden" id="note-content" value="">
-      </section>
-      <aside class="panel" style="grid-template-rows:1fr 1fr 1fr 1fr 1fr;gap:8px;overflow:hidden;">
-        <div id="notes-highlights" style="overflow:auto;"></div>
-        <div id="note-links" style="overflow:auto;"></div>
-        <div style="padding:8px;display:flex;gap:8px;align-items:flex-end;">
-          <input id="vault-input" class="field" placeholder="Quick save to vault" style="flex:1;">
-          <button class="btn" id="vault-add">Save</button>
-        </div>
-        <div id="vault-list" style="overflow:auto;"></div>
-        <div id="note-live-preview" class="panel" style="padding:8px;overflow:auto;"></div>
-        <div id="detected-concepts" style="overflow:auto;padding:8px;" ></div>
-        <div id="knowledge-cards-list" style="overflow:auto;padding:8px;"></div>
-      </aside>
-    </div>
-  </section>
-
-
-
-
-
-  <section id="bookshelf-window" class="window" style="left:150px;top:80px;width:min(1200px,96vw);height:min(760px,88vh);">
-    <div class="titlebar" data-window="bookshelf-window"><div class="title">Bookshelf + PDF Workspace</div><div class="w-controls"><button class="ctrl min" data-close="bookshelf-window">—</button><button class="ctrl max" data-max="bookshelf-window">▢</button><button class="ctrl close" data-close="bookshelf-window">✕</button></div></div>
-    <div class="toolbar">
-<input id="pdf-upload" type="file" accept=".pdf,.txt,.md,.html,.htm,.mhtml,.png,.jpg,.jpeg,.webp,.gif,.docx">
-<input id="book-title" class="field" placeholder="Book title">
-<button class="btn primary" id="add-book">Add Book</button>
-<button class="btn" id="pdf-prev">◀ Page</button>
-<button class="btn" id="pdf-next">Page ▶</button>
-<span class="pill" id="pdf-page-info">Page 0 / 0</span>
-<input id="pdf-page-slider" type="range" min="1" value="1" style="flex:1;max-width:220px;">
-<button class="btn" id="pdf-zoom-in">Zoom +</button>
-<button class="btn" id="pdf-zoom-out">Zoom −</button>
-<input id="pdf-search" class="field" placeholder="Search" style="max-width:170px;">
-<button class="btn" id="pdf-run-search">Search</button>
-<button class="btn" id="pdf-highlight">Highlight</button>
-<input id="pdf-highlight-color" type="color" value="#ffe550" title="Highlight color" style="height:34px;width:34px;padding:0;border-radius:8px;">
-<button class="btn" id="pdf-bookmark-page">Bookmark</button>
-<button class="btn" id="pdf-open-notes-side">Open Notes</button>
-<button class="btn" id="save-formula-vault">Save Formula</button>
-<button class="btn" id="open-split-study">Split Study</button>
+<div class="hdr">
+  <div class="hdr-tag">Complete Master Sheet — Both Sheets Merged</div>
+  <h1>AEEE 2026 — All Formulas & Concepts<br>CSE Coimbatore Target (92+ Percentile)</h1>
+  <p class="hdr-sub">Every formula from your original sheet + all gap topics added. <span style="color:var(--ok);font-weight:600;">Green "NEW"</span> badges mark topics that were missing. Use this as your single study reference.</p>
 </div>
-    <div class="app-body" style="display:grid;grid-template-columns:240px 1fr;gap:8px;padding:8px;min-height:0;">
-      <aside class="panel" style="display:grid;grid-template-rows:130px minmax(0,1fr) 110px 110px;overflow:hidden;">
-        <div id="bookshelf" style="overflow:auto;border-bottom:1px solid rgba(255,255,255,.14);"></div>
-        <div id="pdf-thumbnails" style="overflow:auto;padding:6px;display:grid;gap:6px;"></div><div id="pdf-bookmarks" style="overflow:auto;padding:6px;border-top:1px solid rgba(255,255,255,.14);"></div><div id="pdf-highlight-list" style="overflow:auto;padding:6px;border-top:1px solid rgba(255,255,255,.14);"></div>
-      </aside>
-      <section class="panel" style="padding:8px;min-width:0;">
-        <div id="pdf-viewer-container" style="width:100%;height:100%;overflow:auto;background:#111;display:grid;grid-template-columns:1fr;gap:8px;">
-          <canvas id="pdf-canvas"></canvas>
-          <canvas id="pdf-canvas-2" style="display:none;"></canvas>
-          <pre id="doc-text-viewer" class="field" style="display:none;white-space:pre-wrap;min-height:320px;"></pre>
-        <div id="pdf-search-results" style="margin-top:8px;max-height:180px;overflow:auto;padding:8px;border:1px solid rgba(255,255,255,.14);border-radius:10px;background:rgba(255,255,255,.05);"></div>
-          <img id="doc-image-viewer" style="display:none;max-width:100%;height:auto;border-radius:8px;">
-          <textarea id="doc-html-editor" class="field" style="display:none;min-height:220px;"></textarea>
-          <iframe id="doc-html-preview" style="display:none;width:100%;min-height:280px;border:1px solid rgba(255,255,255,.2);border-radius:8px;"></iframe>
-        </div>
-      </section>
-    </div>
-  </section>
 
-
-
-
-
-
-
-
-
-
-
-  <section id="browser-window" class="window" style="left:160px;top:90px;width:min(1100px,94vw);height:min(720px,80vh);">
-    <div class="titlebar" data-window="browser-window"><div class="title">Browser</div><div class="w-controls"><button class="ctrl min" data-close="browser-window">—</button><button class="ctrl max" data-max="browser-window">▢</button><button class="ctrl close" data-close="browser-window">✕</button></div></div>
-    <div class="toolbar" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
-      <button class="btn" id="browser-new-tab">New Tab</button>
-      <input id="browser-url" class="field" placeholder="https://..." style="flex:1;min-width:220px;">
-      <button class="btn primary" id="browser-go">Go</button>
-      <button class="btn" id="browser-open-external">Open External</button>
-      <button class="btn" id="install-webapp">Install</button>
-      <button class="btn" id="uninstall-webapp">Uninstall</button>
-      <button class="btn" id="browser-highlight">Highlight</button>
-    </div>
-    <div class="app-body" style="display:flex;flex-direction:column;gap:8px;min-height:0;">
-      <div id="browser-tabs" style="display:flex;gap:6px;overflow:auto;padding:6px;"></div>
-      <iframe id="browser-frame" style="flex:1;border:1px solid rgba(255,255,255,.18);border-radius:10px;background:#000;" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
-    </div>
-  </section>
-
-  <section id="flashcards-window" class="window" style="left:180px;top:110px;width:min(520px,90vw);height:min(520px,70vh);">
-    <div class="titlebar" data-window="flashcards-window"><div class="title">Flashcards</div><div class="w-controls"><button class="ctrl min" data-close="flashcards-window">—</button><button class="ctrl max" data-max="flashcards-window">▢</button><button class="ctrl close" data-close="flashcards-window">✕</button></div></div>
-    <div class="toolbar" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
-      <button class="btn" id="flash-prev">◀</button>
-      <button class="btn" id="flash-flip">Flip</button>
-      <button class="btn" id="flash-next">▶</button>
-      <span style="flex:1;"></span>
-      <span style="opacity:.8;font-size:12px;">Use Notes → Generate Flashcards</span>
-    </div>
-    <div class="app-body panel" style="display:flex;align-items:center;justify-content:center;padding:16px;">
-      <div id="flashcard-content" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;text-align:center;font-size:18px;padding:8px;">
-        No flashcards yet.
-      </div>
-    </div>
-  </section>
-
-  <section id="ocr-window" class="window" style="left:180px;top:140px;width:min(640px,90vw);height:min(520px,72vh);">
-    <div class="titlebar" data-window="ocr-window"><div class="title">OCR</div><div class="w-controls"><button class="ctrl min" data-close="ocr-window">—</button><button class="ctrl max" data-max="ocr-window">▢</button><button class="ctrl close" data-close="ocr-window">✕</button></div></div>
-    <div class="toolbar" style="display:flex;gap:6px;flex-wrap:wrap;">
-      <button class="btn" id="ocr-run-current">Run OCR</button>
-      <button class="btn" id="ocr-send-to-notes">Send to Notes</button>
-    </div>
-    <div class="app-body panel" style="padding:10px;display:flex;flex-direction:column;gap:8px;">
-      <div id="ocr-center-text" style="flex:1;overflow:auto;padding:10px;border:1px solid rgba(255,255,255,.14);border-radius:10px;background:rgba(0,0,0,.3);white-space:pre-wrap;">Select text or run OCR to see results.</div>
-    </div>
-
-  <section id="
-
-  <section id="ocr-window" clas style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;"><h2 id="focus-timer">25:00</h2><div id="focus-analytics" style="font-size:12px;opacity:.8;">No analytics yet.</divp:140px;width:min(640px,90vw);height:min(520px,72vh);">
-    <div class="titlebar" data-window="ocr-window"><div class="title">OCR</div><div class="w-controls"><button class="ctrl min" data-close="ocr-window">—</button><button class="ctrl max" data-max="ocr-window">▢</button><button class="ctrl close" data-close="ocr-window">✕</button></div></div>
-    <div class="toolbar" style="display:flex;gap:6px;flex-wrap:wrap;">
-      <button class="btn" id="ocr-run-current">Run OCR</button>
-      <button class="btn" id="ocr-send-to-notes">Send to Notes</button>
-    </div>
-    <div class="app-body panel" style="padding:10px;display:flex;flex-direction:column;gap:8px;">
-      <div id="ocr-center-text" style="flex:1;overflow:auto;padding:10px;border:1px solid rgba(255,255,255,.14);border-radius:10px;background:rgba(0,0,0,.3);white-space:pre-wrap;">Select text or run OCR to see results.</div>
-    </div>
-  </section>
-
-  <section id="focus-window" class="window" style="left:200px;top:120px;width:min(600px,88vw);height:min(460px,70vh);">
-    <div class="titlebar" data-window="focus-window"><div class="title">Focus Mode</div><div class="w-controls"><button class="ctrl min" data-close="focus-window">—</button><button class="ctrl max" data-max="focus-window">▢</button><button class="ctrl close" data-close="focus-window">✕</button></div></div>
-    <div class="toolbar"><button class="btn primary" id="focus-start">Start Pomodoro</button><button class="btn" id="focus-stop">Stop</button><button class="btn" id="focus-fullscreen">Fullscreen</button></div>
-    <div class="app-body panel"><h2 id="focus-timer">25:00</h2></div>
-  </section>
-
-
-  <section id="settings-window" class="window" style="left:150px;top:82px;width:min(920px,94vw);height:min(700px,84vh);">
-    <div class="titlebar" data-window="settings-window"><div class="title">Settings</div><div class="w-controls"><button class="ctrl min" data-close="settings-window">—</button><button class="ctrl max" data-max="settings-window">▢</button><button class="ctrl close" data-close="settings-window">✕</button></div></div>
-    <div class="app-body" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-      <div class="panel" style="padding:9px;display:flex;flex-direction:column;gap:8px;">
-        <h4 style="margin:0;">Theme & Visuals</h4>
-        <label>Wallpaper URL <input id="set-wallpaper" class="field" placeholder="https://..."></label>
-        <label>Accent color <input id="set-accent" class="field" type="color"></label>
-        <label>Glass opacity <input id="set-glass" class="field" type="range" min="25" max="85"></label>
-        <label>UI font size <input id="set-font-size" class="field" type="range" min="11" max="18"></label>
-        <label>Window radius <input id="set-radius" class="field" type="range" min="6" max="16"></label>
-        <label>UI font family
-          <select id="set-font-family" class="field">
-            <option value='"Segoe UI", "Inter", sans-serif'>Segoe UI</option>
-            <option value='"Inter", "Segoe UI", sans-serif'>Inter</option>
-            <option value='"Arial", sans-serif'>Arial</option>
-            <option value='"Verdana", sans-serif'>Verdana</option>
-          </select>
-        </label>
-        <button class="btn primary" id="apply-theme">Apply Theme</button>
-      </div>
-      <div class="panel" style="padding:9px;display:flex;flex-direction:column;gap:8px;">
-        <h4 style="margin:0;">Behavior & Layout</h4>
-        <label><input type="checkbox" id="set-autosave"> Enable instant autosave while typing</label>
-        <label><input type="checkbox" id="set-click-close"> Click outside closes menus/popups</label>
-        <label><input type="checkbox" id="set-open-start"> Open start menu on load</label>
-        <label><input type="checkbox" id="set-snap"> Enable snap helpers</label>
-        <label>Preferred homepage <input id="set-homepage" class="field" placeholder="https://www.google.com"></label>
-        <button class="btn" id="settings-reset-layout">Reset window layout</button>
-      </div>
-    </div>
-  </section>
-
-  <div id="annot-overlay">
-    <canvas id="annot-canvas"></canvas>
+<div class="gstrip">
+  <div class="ginner">
+    <div class="gpill"><div class="dot" style="background:#4ade80"></div><span>Target:</span><strong>92–99 percentile</strong></div>
+    <div class="gpill"><div class="dot" style="background:#7c6dfa"></div><span>Score needed:</span><strong>210–240 / 300</strong></div>
+    <div class="gpill"><div class="dot" style="background:#f59e0b"></div><span>Slab 1:</span><strong>₹1.5L/yr</strong></div>
+    <div class="gpill"><div class="dot" style="background:#2dd4bf"></div><span>Slab 2:</span><strong>₹2.75L/yr</strong></div>
+    <div class="gpill"><div class="dot" style="background:#f87171"></div><span>Marking:</span><strong>+3 correct / −1 wrong</strong></div>
   </div>
-  <div id="annot-tools" class="glass">
-    <button class="btn" id="annot-pen">Pen</button>
-    <button class="btn" id="annot-eraser">Eraser</button>
-    <input id="annot-size" type="range" min="2" max="28" value="3">
-    <input id="annot-color" type="color" value="#ff4444" title="Annotation color">
-    <button class="btn" id="annot-clear">Clear</button>
-    <button class="btn" id="annot-exit">Exit</button>
+</div>
+
+<div class="navwrap">
+  <div class="nav">
+    <button class="nbtn am" onclick="show('m',this,'am')">Maths</button>
+    <button class="nbtn" onclick="show('p',this,'ap')">Physics</button>
+    <button class="nbtn" onclick="show('c',this,'ac')">Chemistry</button>
+    <button class="nbtn" onclick="show('q',this,'aq')">Quant Aptitude</button>
+    <button class="nbtn" onclick="show('e',this,'ae')">English</button>
   </div>
+</div>
 
-  <div id="toast" style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:19000;display:none;max-width:380px;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.25);background:rgba(13,20,37,.9);color:#fff;"></div>
+<div class="main">
 
-  <div id="taskbar" class="glass">
-    <div id="tb-left"><button class="tb-btn" id="tb-start" title="Start">⊞</button><button class="tb-btn" id="tb-show-desktop" title="Show desktop">🖥️</button><button class="tb-btn" id="tb-letterpad" title="Letterpad">✏️</button></div>
-    <div id="tb-center">
-      <button class="tb-btn" data-open="dashboard-window" title="Dashboard">📊</button>
-      <button class="tb-btn" data-open="notes-window" title="Notes">📝</button>
-      <button class="tb-btn" data-open="bookshelf-window" title="Bookshelf">📚</button>
-      <button class="tb-btn" data-open="browser-window" title="Browser">🌐</button>
-      <button class="tb-btn" data-open="flashcards-window" title="Flashcards">🧠</button>
-      <button class="tb-btn" data-open="ocr-window" title="OCR">🔎</button>
-      <button class="tb-btn" data-open="focus-window" title="Focus">⏱️</button>
-      <button class="tb-btn" data-open="settings-window" title="Settings">⚙️</button>
-    </div>
-    <div id="tb-right"><button class="tb-btn" id="tb-quick-note" title="Quick note">🗒️</button><div class="pill" id="space-pill">Space</div><div class="pill" id="status-pill">Saved</div><div class="pill" id="custom-timer-pill" title="Click start/pause • Right click customize">Timer 25:00</div><div class="pill" id="clock-pill"></div><button class="tb-btn" id="btn-login" title="Login">👤</button><button class="tb-btn" id="btn-logout" title="Logout" style="display:none;">⇦</button></div>
+<!-- ════════════════════════════════
+     MATHS
+════════════════════════════════ -->
+<div class="sec vis" id="sec-m">
+
+<!-- CALCULUS -->
+<div class="card open">
+  <div class="chdr" onclick="tog(this)">
+    <span class="ctitle">Calculus — Limits, Differentiation, Integration</span>
+    <div class="cmeta"><span class="badge bm">9–10 Qs</span><span class="chev">▼</span></div>
   </div>
-
-  <button id="mobile-letterpad-fab" class="tb-btn" title="Quick capture">✏️</button>
-  <aside id="global-letterpad" class="global-letterpad">
-    <div style="display:flex;align-items:center;gap:8px;"><b style="margin-right:auto;">Letterpad</b><button class="btn" id="lp-close">Close</button></div>
-    <textarea id="lp-input" class="field" placeholder="Write idea / formula / concept..."></textarea>
-    <select id="lp-tag" class="field" style="display:none;"><option value="idea">Idea</option></select>
-    <div style="display:flex;gap:6px;"><button class="btn primary" id="lp-save-notes">Save → Notes</button><button class="btn" id="lp-save-vault">Save → Vault</button><button class="btn" id="lp-clear">Clear</button></div>
-  <textarea id="workspace-notes" style="display:none;"></textarea>
-  </aside>
-
-  <div id="desktop-context"><div class="ctx-item" data-ctx="refresh">Refresh Desktop</div><div class="ctx-item" data-ctx="new-note">New Note</div><div class="ctx-item" data-ctx="focus">Open Focus Mode</div></div>
-  <div id="window-context"><div class="ctx-item" data-wctx="left">Snap Left</div><div class="ctx-item" data-wctx="right">Snap Right</div><div class="ctx-item" data-wctx="top">Snap Top</div></div>
-
-
-  <div id="floating-highlight-toolbar" class="floating-highlight"><button class="btn" data-hl-kind="concept">🟡 Concept</button><button class="btn" data-hl-kind="formula">🔵 Formula</button><button class="btn" data-hl-kind="example">🟢 Example</button><button class="btn" data-hl-kind="doubt">🔴 Doubt</button></div>
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyAPzgwYDQQqR4y8aRcu8BmXfhYoLPXDuVM",
-      authDomain: "forclearpcm.firebaseapp.com",
-      projectId: "forclearpcm",
-      storageBucket: "forclearpcm.firebasestorage.app",
-      messagingSenderId: "594895089425",
-      appId: "1:594895089425:web:65e09f36f7f519f8578fdb",
-      measurementId: "G-FM5Y4M0HB0"
-    };
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
-    const db = getFirestore(app);
-
-    const LOCAL_KEY = 'studyos11-pro-guest';
-
-    const CORE_APPS = [
-      { id:'dashboard-window', name:'Dashboard', icon:'📊' },
-      { id:'notes-window', name:'Notes', icon:'📝' },
-      { id:'bookshelf-window', name:'Bookshelf', icon:'📚' },
-      { id:'browser-window', name:'Browser', icon:'🌐' },
-      { id:'flashcards-window', name:'Flashcards', icon:'🧠' },
-      { id:'ocr-window', name:'OCR', icon:'🔎' },
-      { id:'focus-window', name:'Focus', icon:'⏱️' },
-      { id:'settings-window', name:'Settings', icon:'⚙️' }
-    ];
-    const $ = id => document.getElementById(id);
-    const el = {
-      bookshelf: $('bookshelf'),
-      desktop: $('desktop'), startMenu: $('start-menu'), startSearch: $('start-search'), startGrid: $('start-grid'),
-      spaces: $('spaces'), recommendedList: $('recommended-list'), quickNotePop: $('quick-note-pop'), quickNoteText: $('quick-note-text'),
-      notesList: $('notes-list'), noteTitle: $('note-title'), noteEditor: $('note-editor'), noteContent: $('note-content'), taskList: $('task-list'),
-      notesHighlights: $('notes-highlights'), noteLinks: $('note-links'), startPinned: $('start-pinned'), knowledgeCardsList: $('knowledge-cards-list'), noteLivePreview: $('note-live-preview'), noteBlockInput: $('note-block-input'), floatingHl: $('floating-highlight-toolbar'), pdfSlider: $('pdf-page-slider'), detectedConcepts: $('detected-concepts'), lpPanel: $('global-letterpad'), lpInput: $('lp-input'), lpTag: $('lp-tag'),
-      browserTabs: $('browser-tabs'), browserUrl: $('browser-url'), browserFrame: $('browser-frame'),
-      vaultList: $('vault-list'),
-      status: $('status-pill'), clock: $('clock-pill'), customTimer: $('custom-timer-pill'), spacePill: $('space-pill'),
-      annotOverlay: $('annot-overlay'), annotCanvas: $('annot-canvas'), annotTools: $('annot-tools')
-      ,toast: $('toast')
-    };
-
-    let pdfDoc = null;
-    let pdfDoc2 = null;
-    let pdfPage = 1;
-    let pdfPage2 = 1;
-    let pdfScale = 1.35;
-    let splitPDF = false;
-    let currentBookTitle = '';
-    let flashIndex = 0;
-    let flashFlipped = false;
-    let pomodoroTimer = null;
-    let pomodoroRemaining = 25 * 60;
-
-    function showToast(msg, ms=2400) {
-      el.toast.textContent = msg;
-      el.toast.style.display = 'block';
-      clearTimeout(showToast._t);
-      showToast._t = setTimeout(() => el.toast.style.display = 'none', ms);
-    }
-
-
-    function formatSeconds(sec=0) {
-      const m = Math.floor(Math.max(0, sec) / 60);
-      const s = Math.max(0, sec) % 60;
-      return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-    }
-
-    function renderCustomTimer() {
-      const t = state.prefs.customTimer || { label:'Study', seconds:1500, running:false };
-      if (!el.customTimer) return;
-      el.customTimer.textContent = `${t.label} ${formatSeconds(t.seconds)}`;
-      el.customTimer.style.borderColor = t.running ? 'var(--accent)' : 'var(--line)';
-    }
-
-    function tickCustomTimer() {
-      const t = state.prefs.customTimer;
-      if (!t?.running) return;
-      const now = Date.now();
-      const prev = t.lastTick || now;
-      const delta = Math.floor((now - prev) / 1000);
-      if (delta <= 0) return;
-      t.seconds = Math.max(0, t.seconds - delta);
-      t.lastTick = now;
-      if (t.seconds === 0) {
-        t.running = false;
-        showToast(`⏰ ${t.label} timer done`);
-      }
-      renderCustomTimer();
-    }
-
-    let currentUser = null;
-    let saveTimer = null;
-    let activeWindowId = '';
-
-    function baseSpace(name='Physics') {
-      return {
-        name,
-        notes: [{ id: crypto.randomUUID(), title: 'Welcome', content: 'Start writing your notes here.', updatedAt: Date.now() }],
-        selectedNoteId: null,
-        tasks: [],
-        books: [],
-        studio: { drawing:'', stickies:[] },
-        vault: [],
-        highlights: [],
-        analytics: { appMinutes: {}, events: [] },
-        browser: { tabs:[{ id: crypto.randomUUID(), title:'Home', url:'https://www.wikipedia.org' }], activeTabId:null },
-        quickNotes: [],
-        apps: CORE_APPS.map(a => ({ id: a.id, name: a.name, icon: a.icon, type:'core' })),
-        windows: {},
-        formulaVault: [],
-        flashcards: [],
-        ocrCache: {},
-        revisionSummaries: [],
-        knowledgeCards: [],
-        conceptLinks: {},
-        bookmarks: []
-      };
-    }
-
-    function baseState() {
-      const sp = baseSpace('Physics');
-      sp.selectedNoteId = sp.notes[0].id;
-      sp.browser.activeTabId = sp.browser.tabs[0].id;
-      return {
-        currentSpace: 'Physics',
-        spaceOrder: ['Physics','Chemistry','Mathematics'],
-        spaces: {
-          Physics: sp,
-          Chemistry: { ...baseSpace('Chemistry'), selectedNoteId: null },
-          Mathematics: { ...baseSpace('Mathematics'), selectedNoteId: null }
-        },
-        theme: {
-          wallpaper: '', accent:'#4f8cff', glass:56, uiFontSize:13, radius:10,
-          fontFamily:'"Segoe UI", "Inter", sans-serif'
-        },
-        prefs: {
-          autosave: true,
-          clickClose: true,
-          openStartOnLoad: false,
-          snap: true,
-          homepage: 'https://www.wikipedia.org',
-          customTimer: { label:'Study', seconds:1500, running:false, lastTick:0 }
-        },
-        installedAppsGlobal: [],
-        session: { lastOpenWindows: [] }
-      };
-    }
-
-    function normalize(raw) {
-      const b = baseState();
-      const s = { ...b, ...(raw || {}) };
-      s.spaceOrder = (s.spaceOrder?.length ? s.spaceOrder : b.spaceOrder).filter(Boolean);
-      s.spaces = s.spaces || {};
-      s.spaceOrder.forEach(name => {
-        const base = baseSpace(name);
-        const sp = { ...base, ...(s.spaces[name] || {}) };
-        sp.notes = (sp.notes?.length ? sp.notes : base.notes).map(n => ({ ...n, updatedAt: n.updatedAt || Date.now() }));
-        sp.selectedNoteId = sp.selectedNoteId && sp.notes.some(n => n.id === sp.selectedNoteId) ? sp.selectedNoteId : sp.notes[0]?.id || null;
-        sp.tasks = sp.tasks || [];
-        sp.formulaVault = sp.formulaVault || [];
-        sp.flashcards = sp.flashcards || [];
-        sp.ocrCache = sp.ocrCache || {};
-        sp.revisionSummaries = sp.revisionSummaries || [];
-        sp.knowledgeCards = sp.knowledgeCards || [];
-        sp.conceptLinks = sp.conceptLinks || {};
-        sp.bookmarks = sp.bookmarks || [];
-        sp.books = sp.books || [];
-        sp.studio = { drawing: sp.studio?.drawing || '', stickies: sp.studio?.stickies || [] };
-        sp.vault = sp.vault || [];
-        sp.highlights = sp.highlights || [];
-        sp.analytics = { appMinutes: sp.analytics?.appMinutes || {}, events: sp.analytics?.events || [] };
-        sp.quickNotes = sp.quickNotes || [];
-        sp.apps = sp.apps?.length ? sp.apps : base.apps;
-        const tabs = sp.browser?.tabs?.length ? sp.browser.tabs : [{ id: crypto.randomUUID(), title:'Google', url:(s.prefs?.homepage || 'https://www.google.com') }];
-        sp.browser = { tabs, activeTabId: sp.browser?.activeTabId || tabs[0].id };
-        if (!sp.browser.tabs.some(t => t.id === sp.browser.activeTabId)) sp.browser.activeTabId = sp.browser.tabs[0].id;
-        sp.windows = sp.windows || {};
-        s.spaces[name] = sp;
-      });
-      if (!s.spaceOrder.includes(s.currentSpace)) s.currentSpace = s.spaceOrder[0];
-      s.theme = { ...b.theme, ...(s.theme || {}) };
-      s.prefs = { ...b.prefs, ...(s.prefs || {}) };
-      s.prefs.customTimer = { ...b.prefs.customTimer, ...(s.prefs.customTimer || {}) };
-      s.installedAppsGlobal = s.installedAppsGlobal || [];
-      return s;
-    }
-
-    let state = normalize(null);
-    const getSpace = () => state.spaces[state.currentSpace];
-
-    function dayKey(ts=Date.now()) { return new Date(ts).toISOString().slice(0,10); }
-    function logStudyEvent(type, payload={}) {
-      const sp = getSpace();
-      sp.analytics.events.unshift({ type, payload, at: Date.now() });
-      sp.analytics.events = sp.analytics.events.slice(0, 300);
-    }
-    function addAppMinutes(appId, minutes=1) {
-      if (!appId) return;
-      const sp = getSpace();
-      sp.analytics.appMinutes[appId] = Number(sp.analytics.appMinutes[appId] || 0) + minutes;
-    }
-    function addHighlight(source, text, meta='') {
-      const t = (text || '').trim();
-      if (!t) return;
-      const sp = getSpace();
-      sp.highlights.unshift({ id: crypto.randomUUID(), source, text: t, meta, at: Date.now() });
-      sp.highlights = sp.highlights.slice(0, 400);
-      logStudyEvent('highlight', { source });
-      queueSave();
-    }
-
-    function totalTodayMinutes() {
-      const sp = getSpace();
-      const today = dayKey();
-      const mins = sp.tasks.filter(t => t.done && dayKey(t.doneAt || t.at) === today).length * 5
-        + sp.quickNotes.filter(n => dayKey(n.at) === today).length
-        + Math.round(Object.values(sp.analytics.appMinutes || {}).reduce((a,b)=>a+b,0));
-      return mins;
-    }
-
-    function buildCloudPayload(srcState) {
-      const payload = {
-        theme: { ...srcState.theme },
-        prefs: {
-          autosave: !!srcState.prefs.autosave,
-          openStartOnLoad: !!srcState.prefs.openStartOnLoad,
-          homepage: srcState.prefs.homepage || 'https://www.wikipedia.org',
-          customTimer: { ...(srcState.prefs.customTimer || { label:'Study', seconds:1500, running:false, lastTick:0 }) }
-        },
-        currentSpace: srcState.currentSpace,
-        spaceOrder: [...srcState.spaceOrder],
-        spaces: {}
-      };
-      srcState.spaceOrder.forEach(name => {
-        const sp = srcState.spaces[name];
-        payload.spaces[name] = {
-          notes: (sp.notes || []).map(n => ({
-            id: n.id,
-            title: n.title || '',
-            content: n.content || '',
-            blocks: n.blocks || [],
-            updatedAt: n.updatedAt || Date.now()
-          })),
-          selectedNoteId: sp.selectedNoteId || null
-        };
-      });
-      return payload;
-    }
-
-    function mergeCloudIntoLocal(localState, cloudPayload) {
-      if (!cloudPayload) return localState;
-      const merged = normalize(localState);
-      if (cloudPayload.theme) merged.theme = { ...merged.theme, ...cloudPayload.theme };
-      if (cloudPayload.prefs) merged.prefs = { ...merged.prefs, ...cloudPayload.prefs };
-      if (cloudPayload.spaceOrder?.length) merged.spaceOrder = cloudPayload.spaceOrder;
-      if (cloudPayload.currentSpace) merged.currentSpace = cloudPayload.currentSpace;
-      (merged.spaceOrder || []).forEach(name => {
-        const cloudSpace = cloudPayload.spaces?.[name];
-        if (!cloudSpace) return;
-        merged.spaces[name] = merged.spaces[name] || baseSpace(name);
-        merged.spaces[name].notes = (cloudSpace.notes || []).map(n => ({ ...n, updatedAt: n.updatedAt || Date.now() }));
-        if (cloudSpace.selectedNoteId) merged.spaces[name].selectedNoteId = cloudSpace.selectedNoteId;
-      });
-      return normalize(merged);
-    }
-
-    async function loadState(user) {
-      let local = null;
-      try { local = JSON.parse(localStorage.getItem(LOCAL_KEY) || 'null'); }
-      catch { local = null; }
-      if (!user) return normalize(local);
-
-      const ref = doc(db, 'users', user.uid, 'studyos', 'state');
-      const snap = await getDoc(ref);
-      const cloud = snap.exists() ? snap.data()?.payload : null;
-      return mergeCloudIntoLocal(local, cloud);
-    }
-
-    async function saveNow() {
-      if (!state) return;
-      el.status.textContent = 'Saving...';
-      try {
-        localStorage.setItem(LOCAL_KEY, JSON.stringify(state));
-        if (!currentUser) {
-          el.status.textContent = 'Saved local';
-          return;
-        }
-        const payload = buildCloudPayload(state);
-        const digest = JSON.stringify(payload);
-        if (saveNow._lastCloudDigest === digest) {
-          el.status.textContent = 'Saved local';
-          return;
-        }
-        const ref = doc(db, 'users', currentUser.uid, 'studyos', 'state');
-        await setDoc(ref, { payload, uid: currentUser.uid, updatedAt: serverTimestamp() }, { merge: true });
-        saveNow._lastCloudDigest = digest;
-        el.status.textContent = 'Saved Firebase (limited)';
-      } catch (err) {
-        el.status.textContent = 'Save failed';
-        showToast(`Save failed: ${err?.message || 'unknown error'}`, 4200);
-      }
-    }
-
-    function queueSave() {
-      clearTimeout(saveTimer);
-      saveTimer = setTimeout(saveNow, 900);
-    }
-
-    function esc(v='') {
-      return v.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
-    }
-
-    function applyTheme() {
-      document.documentElement.style.setProperty('--accent', state.theme.accent || '#4f8cff');
-      document.documentElement.style.setProperty('--glass-opacity', String((Number(state.theme.glass || 56))/100));
-      document.documentElement.style.setProperty('--font-size-ui', `${Number(state.theme.uiFontSize || 13)}px`);
-      document.documentElement.style.setProperty('--radius-win', `${Number(state.theme.radius || 10)}px`);
-      document.documentElement.style.setProperty('--font-family-ui', state.theme.fontFamily || '"Segoe UI", "Inter", sans-serif');
-      if (state.theme.wallpaper) document.documentElement.style.setProperty('--wallpaper', `url('${state.theme.wallpaper}')`);
-    }
-
-    function allAppEntries() {
-      return getSpace().apps;
-    }
-
-    function renderSpaces() {
-      el.spaces.innerHTML = state.spaceOrder.map(s => `<button class="space-chip ${s===state.currentSpace?'active':''}" data-space="${s}">${esc(s)}</button>`).join('');
-      [...el.spaces.querySelectorAll('[data-space]')].forEach(n => n.onclick = () => switchSpace(n.dataset.space));
-      el.spacePill.textContent = `Space: ${state.currentSpace}`;
-    }
-
-    function switchSpace(name) {
-      persistWindowRects();
-      state.currentSpace = name;
-      renderAll();
-      queueSave();
-    }
-
-    function renderDesktop() {
-      el.desktop.innerHTML = allAppEntries().map(a => `
-        <div class="desktop-icon" data-open="${a.id}">
-          <div class="icon-edit" data-edit-icon="${a.id}" title="Edit icon">✎</div>
-          <div class="tile">${a.icon || '📦'}</div>
-          <div class="label">${esc(a.name)}</div>
-        </div>
-      `).join('');
-      [...el.desktop.querySelectorAll('[data-open]')].forEach(n => n.ondblclick = e => {
-        if (e.target.closest('[data-edit-icon]')) return;
-        launchApp(n.dataset.open);
-      });
-      [...el.desktop.querySelectorAll('[data-edit-icon]')].forEach(n => n.onclick = e => {
-        e.stopPropagation();
-        const id = n.dataset.editIcon;
-        const app = getSpace().apps.find(x => x.id === id);
-        if (!app) return;
-        const icon = prompt('New icon (emoji/text)', app.icon || '📦');
-        if (icon == null) return;
-        app.icon = icon.trim() || app.icon;
-        const name = prompt('App name', app.name);
-        if (name != null && name.trim()) app.name = name.trim();
-        renderDesktop();
-        renderStart(el.startSearch.value || '');
-        queueSave();
-      });
-    }
-
-    function renderStart(filter='') {
-      const q = (filter || '').trim().toLowerCase();
-      const noteHits = Object.values(state.spaces).flatMap(sp => sp.notes || []).filter(n => q && `${n.title} ${n.content}`.toLowerCase().includes(q)).slice(0, 6).map(n => ({ id:`note:${n.id}`, icon:'📄', name:`Note: ${n.title || 'Untitled'}` }));
-      const apps = allAppEntries().filter(a => !q || a.name.toLowerCase().includes(q));
-      const entries = [...apps, ...noteHits].slice(0, 18);
-      el.startGrid.innerHTML = entries.map(a => `<div class="start-item" data-launch="${a.id}">${a.icon || '📦'}<div>${esc(a.name)}</div></div>`).join('');
-      [...el.startGrid.querySelectorAll('[data-launch]')].forEach(n => n.onclick = () => {
-        const id = n.dataset.launch;
-        if (id.startsWith('note:')) {
-          const noteId = id.slice(5);
-          const targetSpace = state.spaceOrder.find(sp => (state.spaces[sp].notes || []).some(x => x.id === noteId));
-          if (targetSpace) {
-            state.currentSpace = targetSpace;
-            state.spaces[targetSpace].selectedNoteId = noteId;
-            renderAll();
-            openWindow('notes-window');
-            initPDFViewer();
-          }
-        } else {
-          launchApp(id);
-        }
-        closePopups();
-      });
-
-      const pinned = allAppEntries().slice(0, 8);
-      el.startPinned.innerHTML = pinned.map(a => `<div class="start-item" data-pinned="${a.id}">${a.icon || '📦'}<div>${esc(a.name)}</div></div>`).join('');
-      [...el.startPinned.querySelectorAll('[data-pinned]')].forEach(n => n.onclick = () => { launchApp(n.dataset.pinned); closePopups(); });
-
-      const rec = [...getSpace().notes].sort((a,b)=>b.updatedAt-a.updatedAt).slice(0, 5);
-      el.recommendedList.innerHTML = rec.map(n => `<div class="rec-item" data-rec="${n.id}">${esc(n.title || 'Untitled')}<small style="display:block;opacity:.8;">Recent note</small></div>`).join('') || '<div class="rec-item">No recent notes</div>';
-      [...el.recommendedList.querySelectorAll('[data-rec]')].forEach(n => n.onclick = () => {
-        getSpace().selectedNoteId = n.dataset.rec;
-        renderNotes();
-        openWindow('notes-window');
-        closePopups();
-      });
-    }
-
-    function launchApp(id) {
-      if (id.startsWith('webapp:')) {
-        const app = getSpace().apps.find(a => a.id === id);
-        if (!app) return;
-        openWindow('browser-window');
-        const tab = getActiveTab();
-        tab.url = app.url;
-        tab.title = app.name;
-        renderBrowserTabs();
-        loadActiveTab();
-        queueSave();
-        return;
-      }
-      openWindow(id);
-    }
-
-    function setActiveTaskbar(id='') {
-      [...document.querySelectorAll('.tb-btn[data-open]')].forEach(b => b.classList.toggle('active', b.dataset.open === id));
-    }
-
-    function openWindow(id) {
-      const w = $(id);
-      if (!w) return;
-      document.querySelectorAll('.window').forEach(x => x.classList.remove('active'));
-      w.style.display = 'flex';
-      w.classList.add('active');
-      activeWindowId = id;
-      const rect = getSpace().windows[id];
-      if (rect) {
-        w.style.left = rect.left;
-        w.style.top = rect.top;
-        w.style.width = rect.width;
-        w.style.height = rect.height;
-      }
-      logStudyEvent('open-window', { id });
-      setActiveTaskbar(id);
-    }
-
-    function closeWindow(id) {
-      const w = $(id);
-      if (!w) return;
-      w.style.display = 'none';
-      w.classList.remove('active');
-      if (activeWindowId === id) activeWindowId = document.querySelector('.window.active')?.id || '';
-      saveWindowRect(id);
-      setActiveTaskbar(document.querySelector('.window.active')?.id || '');
-    }
-
-    function saveWindowRect(id) {
-      const w = $(id);
-      if (!w) return;
-      getSpace().windows[id] = {
-        left: w.style.left || `${w.offsetLeft}px`,
-        top: w.style.top || `${w.offsetTop}px`,
-        width: w.style.width || `${w.offsetWidth}px`,
-        height: w.style.height || `${w.offsetHeight}px`
-      };
-    }
-
-    function persistWindowRects() {
-      document.querySelectorAll('.window').forEach(w => saveWindowRect(w.id));
-    }
-
-    function bindWindowUX() {
-      document.querySelectorAll('.window').forEach(w => {
-        ['n','s','e','w','ne','nw','se','sw'].forEach(dir => {
-          const h = document.createElement('div');
-          h.className = `resize-handle ${dir}`;
-          h.dataset.resize = dir;
-          w.appendChild(h);
-        });
-      });
-
-      document.querySelectorAll('.titlebar').forEach(bar => {
-        bar.addEventListener('mousedown', e => {
-          if (e.target.closest('button,input,textarea,select,label')) return;
-          const id = bar.dataset.window;
-          const w = $(id);
-          const sx = e.clientX, sy = e.clientY, sl = w.offsetLeft, st = w.offsetTop;
-          const move = ev => {
-            w.style.left = `${Math.max(0, sl + ev.clientX - sx)}px`;
-            w.style.top = `${Math.max(0, st + ev.clientY - sy)}px`;
-          };
-          const up = () => {
-            window.removeEventListener('mousemove', move);
-            window.removeEventListener('mouseup', up);
-            saveWindowRect(id);
-            queueSave();
-          };
-          window.addEventListener('mousemove', move);
-          window.addEventListener('mouseup', up);
-        });
-      });
-
-      document.querySelectorAll('.resize-handle').forEach(h => {
-        h.addEventListener('mousedown', e => {
-          e.stopPropagation();
-          const w = h.closest('.window');
-          const dir = h.dataset.resize;
-          const sx=e.clientX, sy=e.clientY, sl=w.offsetLeft, st=w.offsetTop, sw=w.offsetWidth, sh=w.offsetHeight;
-          const move = ev => {
-            let l=sl,t=st,ww=sw,hh=sh;
-            if (dir.includes('e')) ww = Math.max(330, sw + ev.clientX - sx);
-            if (dir.includes('s')) hh = Math.max(240, sh + ev.clientY - sy);
-            if (dir.includes('w')) { ww = Math.max(330, sw - (ev.clientX - sx)); l = sl + (ev.clientX - sx); }
-            if (dir.includes('n')) { hh = Math.max(240, sh - (ev.clientY - sy)); t = st + (ev.clientY - sy); }
-            w.style.left = `${l}px`; w.style.top = `${t}px`; w.style.width = `${ww}px`; w.style.height = `${hh}px`;
-          };
-          const up = () => {
-            window.removeEventListener('mousemove', move);
-            window.removeEventListener('mouseup', up);
-            saveWindowRect(w.id);
-            queueSave();
-          };
-          window.addEventListener('mousemove', move);
-          window.addEventListener('mouseup', up);
-        });
-      });
-
-      document.querySelectorAll('[data-close]').forEach(b => b.onclick = () => closeWindow(b.dataset.close));
-      document.querySelectorAll('[data-max]').forEach(b => b.onclick = () => {
-        const id = b.dataset.max;
-        const w = $(id);
-        if (w.dataset.full === '1') {
-          const r = JSON.parse(w.dataset.restore || '{}');
-          if (r.left) {
-            w.style.left=r.left; w.style.top=r.top; w.style.width=r.width; w.style.height=r.height;
-          }
-          w.dataset.full = '0';
-        } else {
-          w.dataset.restore = JSON.stringify({ left:w.style.left||`${w.offsetLeft}px`, top:w.style.top||`${w.offsetTop}px`, width:w.style.width||`${w.offsetWidth}px`, height:w.style.height||`${w.offsetHeight}px` });
-          w.style.left='8px'; w.style.top='8px'; w.style.width='calc(100vw - 16px)'; w.style.height='calc(100vh - var(--taskbar-h) - 20px)';
-          w.dataset.full='1';
-        }
-        saveWindowRect(id);
-        queueSave();
-      });
-
-      document.querySelectorAll('.window').forEach(w => {
-        w.addEventListener('mousedown', () => {
-          document.querySelectorAll('.window').forEach(x => x.classList.remove('active'));
-          w.classList.add('active');
-          activeWindowId = w.id;
-          setActiveTaskbar(w.id);
-        });
-      });
-    }
-
-    function renderNotes() {
-      const sp = getSpace();
-      const notes = [...sp.notes].sort((a,b)=>b.updatedAt-a.updatedAt);
-      el.notesList.innerHTML = notes.map(n => `<div class="note-item ${n.id===sp.selectedNoteId?'active':''}" data-note="${n.id}"><div>${esc(n.title||'Untitled')}</div><small>${new Date(n.updatedAt).toLocaleString()}</small></div>`).join('');
-      [...el.notesList.querySelectorAll('[data-note]')].forEach(n => n.onclick = () => {
-        sp.selectedNoteId = n.dataset.note;
-        renderNotes();
-      });
-      const cur = sp.notes.find(n => n.id === sp.selectedNoteId) || sp.notes[0];
-      if (!cur) return;
-      sp.selectedNoteId = cur.id;
-      el.noteTitle.value = cur.title || '';
-      el.noteContent.value = cur.content || '';
-      if (el.noteEditor) el.noteEditor.value = cur.content || '';
-      if (el.noteBlockInput) el.noteBlockInput.value = '';
-      renderHighlightsPanel();
-      renderNoteLinksPanel(cur);
-      renderKnowledgeCardsList();
-      renderNoteLivePreview();
-    }
-
-    function renderHighlightsPanel() {
-      const sp = getSpace();
-      el.notesHighlights.innerHTML = `<div style="padding:8px;font-weight:700;">Highlights</div>` + ((sp.highlights || []).slice(0, 12).map(h => `<div class="note-item" data-highlight="${h.id}"><div>${esc(h.text.slice(0,90))}</div><small>${esc(h.source)} • ${new Date(h.at).toLocaleString()}</small></div>`).join('') || '<div class="note-item">No highlights yet.</div>');
-      [...el.notesHighlights.querySelectorAll('[data-highlight]')].forEach(n => n.onclick = () => {
-        const h = sp.highlights.find(x => x.id === n.dataset.highlight);
-        if (!h) return;
-        const insert = `\n\n[HIGHLIGHT • ${h.source}]\n${h.text}\n`;
-        el.noteContent.value = `${el.noteContent.value}${insert}`;
-        saveCurrentNote();
-      });
-    }
-
-
-    function parseConceptLinks(text='') {
-      const out = [];
-      const re = /\[\[([^\]]+)\]\]/g;
-      let m;
-      while ((m = re.exec(text))) out.push(m[1].trim());
-      return [...new Set(out)].filter(Boolean);
-    }
-
-    function createKnowledgeCardsFromText(text='', source='Notes', pageNumber='') {
-      const cards = [];
-      const lines = text.split(/\n+/).map(x => x.trim()).filter(Boolean).slice(0, 16);
-      lines.forEach(line => {
-        const isFormula = /[=∫ΣΔ→]|\\frac|\\sum|\\vec|sigma/i.test(line);
-        const defMatch = line.match(/^([A-Za-z][A-Za-z0-9\s]{2,40})\s+(is|means|refers to)\s+(.+)/i);
-        const exMatch = /example|for example/i.test(line);
-        const concept = (defMatch?.[1] || line.split(/[=:.-]/)[0] || 'Concept').trim().slice(0, 60);
-        cards.push({
-          id: crypto.randomUUID(),
-          concept,
-          definition: defMatch?.[3]?.trim() || (isFormula ? '' : line.slice(0, 200)),
-          formula: isFormula ? line.slice(0, 140) : '',
-          kind: isFormula ? 'formula' : (defMatch ? 'definition' : (exMatch ? 'example' : 'concept')),
-          source,
-          page: pageNumber || '',
-          createdAt: Date.now()
-        });
-      });
-      return cards;
-    }
-
-    function addKnowledgeFromText() { /* knowledge automation removed for reliability */ }
-
-    function renderNoteLinksPanel(curNote) {
-      const sp = getSpace();
-      const links = parseConceptLinks(curNote?.content || '');
-      const backlinks = (sp.notes || []).filter(n => n.id !== curNote?.id && links.some(l => (n.content || '').includes(`[[${l}]]`)));
-      sp.conceptLinks[curNote?.id || ''] = links;
-      el.noteLinks.innerHTML = `<div style="padding:8px;font-weight:700;">Related Concepts</div>` +
-        (links.map(l => `<div class="note-item" data-link="${esc(l)}">[[${esc(l)}]]</div>`).join('') || '<div class="note-item">No concept links.</div>') +
-        `<div style="padding:8px;font-weight:700;">Backlinks</div>` +
-        (backlinks.map(n => `<div class="note-item" data-back-note="${n.id}">${esc(n.title || 'Untitled')}</div>`).join('') || '<div class="note-item">No backlinks.</div>');
-      [...el.noteLinks.querySelectorAll('[data-back-note]')].forEach(n => n.onclick = () => { sp.selectedNoteId = n.dataset.backNote; renderNotes(); });
-    }
-
-    function renderKnowledgeCardsList() { if (el.knowledgeCardsList) el.knowledgeCardsList.innerHTML = ''; if (el.detectedConcepts) el.detectedConcepts.innerHTML=''; }
-
-
-
-    function currentNoteText() {
-      const sp = getSpace();
-      const cur = sp.notes.find(n => n.id === sp.selectedNoteId) || sp.notes[0];
-      if (!cur) return '';
-      return (el.noteEditor?.value || cur.content || '').trim();
-    }
-
-    function renderNoteLivePreview() {
-      const panel = $('note-live-preview');
-      if (!panel) return;
-      const txt = currentNoteText();
-      panel.innerHTML = `<div style="font-weight:700;margin-bottom:6px;">Live Preview</div>` + esc(txt).replace(/\n/g,'<br>');
-      if (window.MathJax?.typesetPromise) MathJax.typesetPromise([panel]).catch(()=>{});
-    }
-
-    function saveCurrentNote() {
-      const sp = getSpace();
-      const cur = sp.notes.find(n => n.id === sp.selectedNoteId);
-      if (!cur) return;
-      cur.title = el.noteTitle.value;
-      cur.content = (el.noteEditor?.value || currentNoteText());
-      el.noteContent.value = cur.content;
-      cur.updatedAt = Date.now();
-      logStudyEvent('save-note', { title: cur.title || 'Untitled' });
-      addKnowledgeFromText(cur.content || '', 'Notes', '');
-      renderNotes();
-      queueSave();
-      el.status.textContent = 'Note saved';
-    }
-
-    function renderTasks() {
-      const sp = getSpace();
-      el.taskList.innerHTML = sp.tasks.map(t => `
-        <div class="task-row">
-          <input type="checkbox" data-toggle="${t.id}" ${t.done ? 'checked' : ''}>
-          <div><div>${esc(t.title)}</div><small>${esc(t.subject || 'General')} ${t.due ? `• ${t.due}` : ''}</small></div>
-          <span>${t.done ? '✅' : '⏳'}</span>
-          <button class="btn" data-del="${t.id}">Delete</button>
-        </div>
-      `).join('');
-      [...el.taskList.querySelectorAll('[data-toggle]')].forEach(n => n.onchange = () => {
-        const t = sp.tasks.find(x => x.id === n.dataset.toggle);
-        if (!t) return;
-        t.done = n.checked;
-        t.doneAt = Date.now();
-        logStudyEvent('task-toggle', { title: t.title, done: t.done });
-        renderTasks();
-        queueSave();
-      });
-      [...el.taskList.querySelectorAll('[data-del]')].forEach(n => n.onclick = () => {
-        sp.tasks = sp.tasks.filter(x => x.id !== n.dataset.del);
-        renderTasks();
-        queueSave();
-      });
-    }
-
-    function getActiveTab() {
-      const b = getSpace().browser;
-      return b.tabs.find(t => t.id === b.activeTabId) || b.tabs[0];
-    }
-
-    function isKnownFrameBlocked(url='') {
-      try {
-        const h = new URL(url).hostname.toLowerCase();
-        return ['google.com','chatgpt.com','openai.com','accounts.google.com','gemini.google.com','copilot.microsoft.com','perplexity.ai'].some(d => h === d || h.endsWith(`.${d}`));
-      } catch { return false; }
-    }
-
-    function setBrowserBlockedMessage(url) {
-      const html = `<!doctype html><html><body style="margin:0;font-family:Segoe UI,Arial,sans-serif;background:#0b1220;color:#e5e7eb;display:grid;place-items:center;height:100vh;"><div style="max-width:620px;padding:24px;text-align:center;"><h2 style="margin:0 0 10px;">This site blocks embedding</h2><p style="opacity:.9;line-height:1.5;">${url.replace(/</g,'&lt;')} cannot open inside an iframe due to browser security headers (X-Frame-Options/CSP). Use <b>Open External</b> for full access and login support.</p></div></body></html>`;
-      el.browserFrame.src = `data:text/html;charset=utf-8,${encodeURIComponent(html)}`;
-    }
-
-    function renderBrowserTabs() {
-      const b = getSpace().browser;
-      el.browserTabs.innerHTML = b.tabs.map(t => `
-        <div class="btab ${t.id===b.activeTabId?'active':''}" data-tab="${t.id}">
-          <span class="name">${esc(t.title || 'Tab')}</span>
-          <button class="close-tab" data-close-tab="${t.id}">✕</button>
-        </div>
-      `).join('');
-      [...el.browserTabs.querySelectorAll('[data-tab]')].forEach(n => n.onclick = e => {
-        if (e.target.closest('[data-close-tab]')) return;
-        b.activeTabId = n.dataset.tab;
-        renderBrowserTabs();
-        loadActiveTab();
-        queueSave();
-      });
-      [...el.browserTabs.querySelectorAll('[data-close-tab]')].forEach(n => n.onclick = e => {
-        e.stopPropagation();
-        if (b.tabs.length === 1) return;
-        b.tabs = b.tabs.filter(t => t.id !== n.dataset.closeTab);
-        if (!b.tabs.some(t => t.id === b.activeTabId)) b.activeTabId = b.tabs[0].id;
-        renderBrowserTabs();
-        loadActiveTab();
-        queueSave();
-      });
-    }
-
-    function loadActiveTab() {
-      const tab = getActiveTab();
-      if (!tab) return;
-      el.browserUrl.value = tab.url;
-      if (!tab.url || tab.url === 'about:blank') { el.browserFrame.src = 'about:blank'; return; }
-      if (isKnownFrameBlocked(tab.url)) {
-        setBrowserBlockedMessage(tab.url);
-      } else {
-        el.browserFrame.src = tab.url;
-      }
-    }
-
-    function navigateBrowser(inputRaw) {
-      let v = (inputRaw || '').trim();
-      if (!v) return;
-      if (!/^https?:\/\//i.test(v)) v = v.includes('.') && !v.includes(' ') ? `https://${v}` : `https://www.google.com/search?q=${encodeURIComponent(v)}`;
-      const tab = getActiveTab();
-      if (!tab) return;
-      tab.url = v;
-      tab.title = v.replace(/^https?:\/\//,'').slice(0, 30);
-      logStudyEvent('navigate', { url: v.slice(0,120) });
-      renderBrowserTabs();
-      if (isKnownFrameBlocked(v)) {
-        setBrowserBlockedMessage(v);
-        window.open(v, '_blank');
-      } else {
-        loadActiveTab();
-      }
-      queueSave();
-    }
-
-    function setStudyViewerMode(mode='pdf') {
-      const showPdf = mode === 'pdf';
-      $('pdf-canvas').style.display = showPdf ? 'block' : 'none';
-      $('pdf-canvas-2').style.display = showPdf && splitPDF ? 'block' : 'none';
-      $('doc-text-viewer').style.display = mode === 'text' ? 'block' : 'none';
-      $('doc-image-viewer').style.display = mode === 'image' ? 'block' : 'none';
-      $('doc-html-editor').style.display = mode === 'html' ? 'block' : 'none';
-      $('doc-html-preview').style.display = mode === 'html' ? 'block' : 'none';
-      if (!showPdf) { pdfDoc = null; pdfDoc2 = null; $('pdf-page-info').textContent = 'Page -'; }
-    }
-
-    async function openStudyBook(book) {
-      if (!book) return;
-      currentBookTitle = book.title;
-      book.openedAt = Date.now();
-      const mime = (book.mime || '').toLowerCase();
-      const ext = (book.ext || '').toLowerCase();
-      const loader = book.dataUrl ? Promise.resolve(book.dataUrl) : getPDFFromDB(book.id);
-      const url = await loader;
-      if (!url) {
-        showToast('Error: File content not found in database.');
-        return;
-      }
-
-      if (mime.includes('pdf') || ext === 'pdf') {
-        setStudyViewerMode('pdf');
-        const last = Number(localStorage.getItem(`pdf-last-page:${currentBookTitle}`) || 1);
-        await loadPDF(url);
-        pdfPage = Math.max(1, Math.min(last, pdfDoc?.numPages || 1));
-        await renderPage();
-        renderThumbnails();
-        return;
-      }
-
-      if (mime.startsWith('image/') || ['png','jpg','jpeg','webp','gif'].includes(ext)) {
-        setStudyViewerMode('image');
-        $('doc-image-viewer').src = url;
-        $('pdf-search-results').innerHTML = '<div class="thumb-item">Image opened. Use diagram save from context menu.</div>';
-        return;
-      }
-
-      if (ext === 'docx' || mime.includes('wordprocessingml')) {
-        setStudyViewerMode('text');
-        try {
-          const ab = await fetch(url).then(r => r.arrayBuffer());
-          const out = await mammoth.extractRawText({ arrayBuffer: ab });
-          $('doc-text-viewer').textContent = out.value || 'No readable text in DOCX.';
-          getSpace().ocrCache[`doc:${book.id}`] = out.value || '';
-        } catch {
-          $('doc-text-viewer').textContent = 'Unable to parse this DOCX in current browser session.';
-        }
-        return;
-      }
-
-      if (['html','htm','mhtml'].includes(ext) || mime.includes('html')) {
-        setStudyViewerMode('html');
-        try {
-          const text = atob(url.split(',')[1] || '');
-          $('doc-html-editor').value = text;
-          $('doc-html-preview').srcdoc = text;
-          getSpace().ocrCache[`doc:${book.id}`] = text.replace(/<[^>]+>/g, ' ');
-        } catch {
-          $('doc-html-editor').value = 'Unable to decode html/mhtml file.';
-        }
-        $('doc-html-editor').oninput = () => {
-          $('doc-html-preview').srcdoc = $('doc-html-editor').value;
-          getSpace().ocrCache[`doc:${book.id}`] = $('doc-html-editor').value.replace(/<[^>]+>/g, ' ');
-          queueSave();
-        };
-        return;
-      }
-
-      if (mime.startsWith('text/') || ['txt','md','csv','json'].includes(ext)) {
-        setStudyViewerMode('text');
-        try {
-          const text = atob(url.split(',')[1] || '');
-          $('doc-text-viewer').textContent = text;
-          getSpace().ocrCache[`doc:${book.id}`] = text;
-        } catch {
-          $('doc-text-viewer').textContent = 'Unable to decode text file.';
-        }
-        return;
-      }
-
-      setStudyViewerMode('text');
-      $('doc-text-viewer').textContent = 'This file type is stored, but preview is not supported yet.';
-    }
-
-    function renderBooks() {
-      const sp = getSpace();
-      const coverFor = (title='') => /physics/i.test(title) ? '📘' : /chem/i.test(title) ? '📗' : /math|algebra|calculus/i.test(title) ? '📙' : '📕';
-      const cardHtml = b => {
-        const total = Number(b.totalPages || 0);
-        const last = Number(b.lastPage || 0);
-        const progress = total ? Math.max(0, Math.min(100, Math.round((last / total) * 100))) : 0;
-        return `<div class="book-card" data-book="${b.id}"><div class="book-cover">${coverFor(b.title)}</div><div style="font-weight:600;">${esc(b.title)}</div><small>${(b.ext || 'pdf').toUpperCase()}</small><div class="book-meta"><span>Page ${last || 1}${total ? ` / ${total}` : ''}</span><span>${progress}%</span></div><div class="book-progress"><i style="width:${progress}%;"></i></div></div>`;
-      };
-      const books = sp.books || [];
-      const continueBooks = books.filter(b => Number(b.lastPage || 0) > 1).slice(0, 6);
-      const recentBooks = [...books].sort((a,b)=>Number(b.openedAt||0)-Number(a.openedAt||0)).slice(0,6);
-      el.bookshelf.innerHTML = books.length ?
-        `<div class="bookshelf-section-title">Continue Reading</div>${continueBooks.map(cardHtml).join('') || '<div class="book-card">No in-progress books yet.</div>'}` +
-        `<div class="bookshelf-section-title">Recent Books</div>${recentBooks.map(cardHtml).join('')}` +
-        `<div class="bookshelf-section-title">All Books</div>${books.map(cardHtml).join('')}`
-        : '<div class="book-card">No books yet.</div>';
-      [...el.bookshelf.querySelectorAll('[data-book]')].forEach(n => n.onclick = () => {
-        const b = sp.books.find(x => x.id === n.dataset.book);
-        openStudyBook(b);
-      });
-    }
-
-    function renderVault() {
-      const sp = getSpace();
-      el.vaultList.innerHTML = sp.vault.map((v,i) => `<div class="vault-item"><div>${esc(v.text)}</div><small>${new Date(v.at).toLocaleString()}</small><div><button class="btn" data-vault-del="${i}">Delete</button></div></div>`).join('') || '<div class="vault-item">No important items.</div>';
-      [...el.vaultList.querySelectorAll('[data-vault-del]')].forEach(n => n.onclick = () => {
-        sp.vault.splice(Number(n.dataset.vaultDel), 1);
-        renderVault();
-        queueSave();
-      });
-    }
-
-    function renderDashboard() {
-      const sp = getSpace();
-      const today = totalTodayMinutes();
-      const streak = today > 0 ? 1 : 0;
-      $('m-today').textContent = `${today}m`;
-      $('m-streak').textContent = `${streak}d`;
-      $('m-tasks').textContent = String(sp.tasks.filter(t => t.done).length);
-      $('m-vault').textContent = `${sp.vault.length} / H:${sp.highlights.length}`;
-      const todayConcepts = (sp.knowledgeCards || []).filter(c => new Date(c.createdAt).toDateString() === new Date().toDateString());
-      if ($('m-concepts')) $('m-concepts').textContent = String(todayConcepts.length);
-      $('daily-goal').value = String(Number(sp.dailyGoal || 120));
-      const left = Math.max(0, Number(sp.dailyGoal || 120) - today);
-      const topApp = Object.entries(sp.analytics.appMinutes || {}).sort((a,b)=>b[1]-a[1])[0];
-      const topAppText = topApp ? `Top focus app: ${topApp[0].replace('-window','')} (${Math.round(topApp[1])}m)` : 'No app usage tracked yet.';
-      $('coach-text').textContent = `${left ? `Need ${left} more minutes today.` : 'Goal achieved.'} ${topAppText}`;
-      $('study-activity').innerHTML = (sp.analytics.events || []).slice(0,5).map(e => `<div class="panel" style="padding:6px;">${esc(e.type)} • ${new Date(e.at).toLocaleTimeString()}</div>`).join('') || '<div class="panel" style="padding:6px;">No activity yet.</div>';
-      const conceptsHtml = todayConcepts.slice(0,6).map(c => `<div class="panel" style="padding:6px;">${esc(c.concept)}</div>`).join('') || '<div class="panel" style="padding:6px;">No concepts detected today.</div>';
-      const subjectMinutes = state.spaceOrder.map(name => {
-        const mins = Object.values(state.spaces[name]?.analytics?.appMinutes || {}).reduce((a,b)=>a+Number(b||0),0);
-        return `<div class="panel" style="padding:6px;">${esc(name)} studied → ${Math.round(mins)} minutes</div>`;
-      }).join('');
-      $('dashboard-task-list').innerHTML = `<div style="padding:8px;font-weight:700;">Concepts learned today</div>${conceptsHtml}<div style="padding:8px;font-weight:700;">Study Analytics by Subject</div>${subjectMinutes}`;
-    }
-
-    function showStart() {
-      el.startMenu.style.display = 'block';
-      requestAnimationFrame(() => el.startMenu.classList.add('open'));
-    }
-    function hideStart() {
-      el.startMenu.classList.remove('open');
-      setTimeout(() => el.startMenu.style.display='none', 220);
-    }
-    function showQuickNote() {
-      el.quickNotePop.style.display = 'block';
-      requestAnimationFrame(() => el.quickNotePop.classList.add('open'));
-    }
-    function hideQuickNote() {
-      el.quickNotePop.classList.remove('open');
-      setTimeout(() => el.quickNotePop.style.display='none', 200);
-    }
-    function closePopups() {
-      hideStart();
-      hideQuickNote();
-    }
-    function bindEvents() {
-      $('tb-start').onclick = () => {
-        if (el.startMenu.style.display === 'block') hideStart();
-        else { showStart(); renderStart(el.startSearch.value || ''); }
-      };
-      $('tb-quick-note').onclick = () => {
-        if (el.quickNotePop.style.display === 'block') hideQuickNote();
-        else showQuickNote();
-      };
-      $('tb-show-desktop').onclick = () => {
-        document.querySelectorAll('.window').forEach(w => { w.style.display='none'; w.classList.remove('active'); });
-        activeWindowId = '';
-        setActiveTaskbar('');
-      };
-      const startTimer = () => { const t = state.prefs.customTimer; if (t.running) return; t.running = true; t.lastTick = Date.now(); renderCustomTimer(); queueSave(); };
-      const pauseTimer = () => { const t = state.prefs.customTimer; t.running = false; renderCustomTimer(); queueSave(); };
-      const resetTimer = () => { const t = state.prefs.customTimer; t.running = false; t.seconds = 25*60; t.lastTick = 0; t.label = t.label || 'Study'; renderCustomTimer(); queueSave(); };
-      if (el.customTimer) {
-        el.customTimer.onclick = () => { const t = state.prefs.customTimer; t.running ? pauseTimer() : startTimer(); };
-        el.customTimer.ondblclick = () => resetTimer();
-      }
-      if ($('tb-letterpad')) $('tb-letterpad').onclick = () => { el.lpPanel.style.display = 'grid'; el.lpInput.focus(); };
-      if ($('mobile-letterpad-fab')) $('mobile-letterpad-fab').onclick = () => { el.lpPanel.style.display = 'grid'; el.lpInput.focus(); };
-
-      $('quick-note-save').onclick = () => {
-        const text = (el.quickNoteText.value || '').trim();
-        if (!text) return;
-        const sp = getSpace();
-        sp.quickNotes.unshift({ text, at: Date.now() });
-        sp.notes.unshift({ id: crypto.randomUUID(), title: 'Quick note', content: text, updatedAt: Date.now(), blocks: [{ type:'text', text, at: Date.now() }] });
-        sp.selectedNoteId = sp.notes[0].id;
-        el.quickNoteText.value = '';
-        renderNotes();
-        hideQuickNote();
-        queueSave();
-      };
-
-      $('add-space').onclick = () => {
-        const name = prompt('New space name?');
-        if (!name?.trim() || state.spaceOrder.includes(name.trim())) return;
-        const n = name.trim();
-        state.spaceOrder.push(n);
-        state.spaces[n] = baseSpace(n);
-        state.currentSpace = n;
-        renderAll();
-        queueSave();
-      };
-      $('rename-space').onclick = () => {
-        const cur = state.currentSpace;
-        const next = prompt('Rename space', cur);
-        if (!next?.trim() || next.trim() === cur || state.spaceOrder.includes(next.trim())) return;
-        const n = next.trim();
-        state.spaces[n] = state.spaces[cur];
-        delete state.spaces[cur];
-        state.spaceOrder = state.spaceOrder.map(x => x === cur ? n : x);
-        state.currentSpace = n;
-        renderAll();
-        queueSave();
-      };
-      $('delete-space').onclick = () => {
-        if (state.spaceOrder.length <= 1) return;
-        if (!confirm(`Delete space ${state.currentSpace}?`)) return;
-        delete state.spaces[state.currentSpace];
-        state.spaceOrder = state.spaceOrder.filter(x => x !== state.currentSpace);
-        state.currentSpace = state.spaceOrder[0];
-        renderAll();
-        queueSave();
-      };
-
-      el.startSearch.oninput = () => renderStart(el.startSearch.value || '');
-      [...document.querySelectorAll('.tb-btn[data-open]')].forEach(n => n.onclick = () => launchApp(n.dataset.open));
-
-      $('btn-login').onclick = async () => signInWithPopup(auth, provider);
-      $('btn-logout').onclick = async () => signOut(auth);
-      $('sync-now').onclick = saveNow;
-      $('open-desktop-from-dashboard').onclick = () => $('tb-show-desktop').click();
-
-      $('note-new').onclick = () => {
-        const sp = getSpace();
-        const note = { id: crypto.randomUUID(), title:'Untitled', content:'', updatedAt: Date.now(), blocks: [] };
-        sp.notes.unshift(note);
-        sp.selectedNoteId = note.id;
-        renderNotes();
-        queueSave();
-      };
-      $('note-delete').onclick = () => {
-        const sp = getSpace();
-        if (!sp.selectedNoteId || sp.notes.length <= 1) return;
-        sp.notes = sp.notes.filter(n => n.id !== sp.selectedNoteId);
-        sp.selectedNoteId = sp.notes[0]?.id || null;
-        renderNotes();
-        queueSave();
-      };
-      $('note-save').onclick = saveCurrentNote;
-      el.noteTitle.oninput = () => state.prefs.autosave && saveCurrentNote();
-      if (el.noteEditor) el.noteEditor.oninput = () => state.prefs.autosave && saveCurrentNote();
-      const slashMap = { '/concept':'concept', '/formula':'formula', '/example':'example', '/question':'question', '/image':'image', '/check':'checklist', '/text':'text', '/heading':'heading' };
-      if (el.noteBlockInput) el.noteBlockInput.oninput = () => {
-        const menu = $('note-slash-menu');
-        const raw = (el.noteBlockInput.value || '').trim().toLowerCase();
-        if (!menu) return;
-        if (!raw.startsWith('/')) { menu.style.display = 'none'; return; }
-        const items = Object.keys(slashMap).filter(k => k.startsWith(raw)).slice(0,8);
-        menu.innerHTML = items.map(i => `<div class="slash-item" data-slash="${i}">${i}</div>`).join('') || '<div class="slash-item">No command</div>';
-        menu.style.display = 'block';
-        [...menu.querySelectorAll('[data-slash]')].forEach(n => n.onclick = () => {
-          el.noteBlockInput.value = `${n.dataset.slash} `;
-          el.noteBlockInput.focus();
-          menu.style.display = 'none';
-        });
-      };
-      if (el.noteBlockInput) el.noteBlockInput.onkeydown = e => {
-        if (e.key !== 'Enter') return;
-        e.preventDefault();
-        const raw = (el.noteBlockInput.value || '').trim();
-        if (!raw) return;
-        const cmd = raw.split(' ')[0].toLowerCase();
-        const type = slashMap[cmd] || $('note-block-type').value || 'text';
-        const text = slashMap[cmd] ? raw.slice(cmd.length).trim() || 'New block' : raw;
-        const sp = getSpace();
-        const cur = sp.notes.find(n => n.id === sp.selectedNoteId);
-        if (!cur) return;
-        cur.blocks = cur.blocks || [];
-        cur.blocks.push({ type, text, at: Date.now() });
-        el.noteBlockInput.value = '';
-        if ($('note-slash-menu')) $('note-slash-menu').style.display = 'none';
-        renderNoteBlocks();
-        saveCurrentNote();
-      };
-      if ($('pin-to-vault')) $('pin-to-vault').onclick = () => {
-        const t = currentNoteText();
-        if (!t) return;
-        getSpace().vault.unshift({ text: t.slice(0,300), at: Date.now() });
-        renderVault();
-        queueSave();
-      };
-      if ($('note-highlight')) $('note-highlight').onclick = () => {
-        const sel = window.getSelection?.().toString().trim();
-        if (!sel) return;
-        addHighlight('notes', sel, 'selection');
-        renderHighlightsPanel();
-      };
-
-      if ($('add-book')) {
-        $('add-book').onclick = () => {
-          const file = $('pdf-upload').files[0];
-          if (!file) return showToast('Please select a file');
-          const title = ($('book-title').value || file.name).trim();
-          const reader = new FileReader();
-          reader.onload = async e => {
-            const id = crypto.randomUUID();
-            try {
-              await savePDFToDB(id, e.target.result);
-              const ext = file.name.split('.').pop().toLowerCase();
-              getSpace().books.unshift({ id, title, ext, mime: file.type, openedAt: Date.now(), totalPages:0, lastPage:1 });
-              $('pdf-upload').value = '';
-              $('book-title').value = '';
-              renderBooks();
-              queueSave();
-              showToast('Book added');
-            } catch (err) {
-              console.error(err);
-              showToast('Error saving book: ' + err.message);
-            }
-          };
-          reader.readAsDataURL(file);
-        };
-      }
-
-      $('task-add').onclick = () => {
-        const t = $('task-title').value.trim();
-        if (!t) return;
-        getSpace().tasks.unshift({ id: crypto.randomUUID(), title:t, subject:$('task-subject').value.trim(), due:$('task-due').value || '', done:false, at:Date.now() });
-        $('task-title').value = '';
-        renderTasks();
-        queueSave();
-      };
-      if ($('task-add')) {
-        $('task-add').onclick = () => {
-          const t = $('task-title').value.trim();
-          if (!t) return;
-          getSpace().tasks.unshift({ id: crypto.randomUUID(), title:t, subject:$('task-subject').value.trim(), due:$('task-due').value || '', done:false, at:Date.now() });
-          $('task-title').value = '';
-          renderTasks();
-          queueSave();
-        };
-      }
-
-      $('browser-new-tab').onclick = () => {
-        const b = getSpace().browser;
-        const t = { id: crypto.randomUUID(), title:'New Tab', url: state.prefs.homepage || 'about:blank' };
-        b.tabs.push(t);
-        b.activeTabId = t.id;
-        renderBrowserTabs();
-        loadActiveTab();
-        queueSave();
-      };
-      $('browser-go').onclick = () => navigateBrowser(el.browserUrl.value);
-      el.browserUrl.addEventListener('keydown', e => e.key === 'Enter' && navigateBrowser(el.browserUrl.value));
-      $('browser-open-external').onclick = () => { const u = getActiveTab()?.url; if (u) window.open(u, '_blank'); };
-
-      if (el.pdfSlider) el.pdfSlider.oninput = () => {
-        if (!pdfDoc) return;
-        pdfPage = Number(el.pdfSlider.value || 1);
-        renderPage();
-      };
-      ['bold','italic','h1','h2','code','quote'].forEach(k => {
-        const btn = $(`note-${k}`);
-        if (!btn) return;
-        btn.onclick = () => {
-          const ta = el.noteBlockInput || { value: '', selectionStart: 0, selectionEnd: 0, setRangeText: ()=>{} };
-          const sel = (ta.value || '').slice(ta.selectionStart || 0, ta.selectionEnd || 0) || 'text';
-          const wrap = {
-            bold: `**${sel}**`,
-            italic: `*${sel}*`,
-            h1: `
-# ${sel}
-`,
-            h2: `
-## ${sel}
-`,
-            code: `
-\`\`\`
-${sel}
-\`\`\`
-`,
-            quote: `
-> ${sel}
-`
-          }[k];
-          ta.setRangeText(wrap, ta.selectionStart, ta.selectionEnd, 'end');
-          renderNoteLivePreview();
-          if (state.prefs.autosave) saveCurrentNote();
-        };
-      });
-      if ($('open-split-study')) $('open-split-study').onclick = () => {
-        openWindow('bookshelf-window');
-        const p = $('bookshelf-window');
-        const n = $('notes-window');
-        const f = $('flashcards-window');
-        p.style.left='6px'; p.style.top='8px'; p.style.width='calc(42vw - 8px)'; p.style.height='calc(100vh - var(--taskbar-h) - 20px)';
-        openWindow('notes-window');
-        n.style.left='calc(42vw + 2px)'; n.style.top='8px'; n.style.width='calc(38vw - 8px)'; n.style.height='calc(100vh - var(--taskbar-h) - 20px)';
-        openWindow('flashcards-window');
-        f.style.left='calc(80vw + 2px)'; f.style.top='8px'; f.style.width='calc(20vw - 8px)'; f.style.height='calc(100vh - var(--taskbar-h) - 20px)';
-      };
-
-      $('browser-highlight').onclick = () => {
-        const text = prompt('Save important point from this site:');
-        if (!text?.trim()) return;
-        addHighlight('browser', text.trim(), getActiveTab()?.url || '');
-        getSpace().vault.unshift({ text: `[Web] ${text.trim()}`, at: Date.now() });
-        renderVault();
-        queueSave();
-      };
-      $('install-webapp').onclick = () => {
-        const url = (el.browserUrl.value || '').trim();
-        if (!url) return;
-        let host = 'Web App';
-        try { host = new URL(url).hostname.replace('www.',''); } catch {}
-        const name = prompt('App name', host);
-        if (!name?.trim()) return;
-        getSpace().apps.push({ id:`webapp:${crypto.randomUUID()}`, name:name.trim(), icon:'🌐', type:'webapp', url });
-        renderDesktop();
-        renderStart(el.startSearch.value || '');
-        queueSave();
-      };
-      $('uninstall-webapp').onclick = () => {
-        const apps = getSpace().apps.filter(a => a.type === 'webapp');
-        if (!apps.length) return;
-        const picked = Number(prompt(`Uninstall which app?\n${apps.map((a,i)=>`${i+1}. ${a.name}`).join('\n')}`) || '0') - 1;
-        if (picked < 0 || picked >= apps.length) return;
-        getSpace().apps = getSpace().apps.filter(a => a.id !== apps[picked].id);
-        renderDesktop();
-        renderStart(el.startSearch.value || '');
-        queueSave();
-      };
-
-      $('vault-add').onclick = () => {
-        const text = $('vault-input').value.trim();
-        if (!text) return;
-        getSpace().vault.unshift({ text, at: Date.now() });
-        $('vault-input').value = '';
-        renderVault();
-        queueSave();
-      };
-
-      $('save-goal').onclick = () => {
-        const val = Math.max(30, Math.min(600, Number($('daily-goal').value || 120)));
-        getSpace().dailyGoal = val;
-        renderDashboard();
-        queueSave();
-      };
-
-      $('apply-theme').onclick = () => {
-        state.theme.wallpaper = $('set-wallpaper').value.trim();
-        state.theme.accent = $('set-accent').value;
-        state.theme.glass = Number($('set-glass').value || 56);
-        state.theme.uiFontSize = Number($('set-font-size').value || 13);
-        state.theme.radius = Number($('set-radius').value || 10);
-        state.theme.fontFamily = $('set-font-family').value;
-        applyTheme();
-        queueSave();
-      };
-      $('settings-reset-layout').onclick = () => { getSpace().windows = {}; queueSave(); };
-      $('set-autosave').onchange = e => { state.prefs.autosave = e.target.checked; queueSave(); };
-      $('set-click-close').onchange = e => { state.prefs.clickClose = e.target.checked; queueSave(); };
-      $('set-open-start').onchange = e => { state.prefs.openStartOnLoad = e.target.checked; queueSave(); };
-      $('set-snap').onchange = e => { state.prefs.snap = e.target.checked; queueSave(); };
-      $('set-homepage').onchange = e => { state.prefs.homepage = e.target.value.trim() || 'https://www.wikipedia.org'; queueSave(); };
-
-      document.addEventListener('click', e => {
-        if (!state.prefs.clickClose) return;
-        const inStart = e.target.closest('#start-menu') || e.target.closest('#tb-start');
-        const inQ = e.target.closest('#quick-note-pop') || e.target.closest('#tb-quick-note');
-        if (!inStart && el.startMenu.style.display === 'block') hideStart();
-        if (!inQ && el.quickNotePop.style.display === 'block') hideQuickNote();
-      });
-      document.addEventListener('keydown', e => { if (e.key === 'Escape') closePopups(); });
-    }
-
-    function bindAnnotationOverlay() {
-      const c = el.annotCanvas;
-      const ctx = c.getContext('2d');
-      let drawing = false;
-      let mode = 'pen';
-      let size = 3;
-      let color = '#ff0000';
-      let lx = 0, ly = 0;
-
-      function resizeAnnot() { c.width = window.innerWidth; c.height = window.innerHeight; }
-      resizeAnnot();
-      window.addEventListener('resize', resizeAnnot);
-
-      c.addEventListener('mousedown', e => { drawing = true; lx=e.clientX; ly=e.clientY; });
-      window.addEventListener('mouseup', () => drawing = false);
-      c.addEventListener('mousemove', e => {
-        if (!drawing) return;
-        ctx.lineWidth = size;
-        ctx.lineCap = 'round';
-        if (mode === 'eraser') {
-          ctx.globalCompositeOperation = 'destination-out';
-          ctx.strokeStyle = 'rgba(0,0,0,1)';
-        } else {
-          ctx.globalCompositeOperation = 'source-over';
-          ctx.strokeStyle = color;
-        }
-        ctx.beginPath();
-        ctx.moveTo(lx, ly);
-        ctx.lineTo(e.clientX, e.clientY);
-        ctx.stroke();
-        lx=e.clientX; ly=e.clientY;
-      });
-      $('annot-pen').onclick = () => mode = 'pen';
-      $('annot-eraser').onclick = () => mode = 'eraser';
-      $('annot-size').oninput = e => size = Number(e.target.value);
-      $('annot-color').oninput = e => color = e.target.value;
-      $('annot-clear').onclick = () => ctx.clearRect(0,0,c.width,c.height);
-      $('annot-exit').onclick = () => { el.annotOverlay.style.display='none'; el.annotTools.style.display='none'; };
-    }
-
-    function renderSettingsValues() {
-      $('set-wallpaper').value = state.theme.wallpaper || '';
-      $('set-accent').value = state.theme.accent || '#4f8cff';
-      $('set-glass').value = String(state.theme.glass || 56);
-      $('set-font-size').value = String(state.theme.uiFontSize || 13);
-      $('set-radius').value = String(state.theme.radius || 10);
-      $('set-font-family').value = state.theme.fontFamily || '"Segoe UI", "Inter", sans-serif';
-      $('set-autosave').checked = !!state.prefs.autosave;
-      $('set-click-close').checked = !!state.prefs.clickClose;
-      $('set-open-start').checked = !!state.prefs.openStartOnLoad;
-      $('set-snap').checked = !!state.prefs.snap;
-      $('set-homepage').value = state.prefs.homepage || 'https://www.wikipedia.org';
-    }
-
-    function renderAll() {
-      applyTheme();
-      renderSpaces();
-      renderDesktop();
-      renderStart(el.startSearch.value || '');
-      renderNotes();
-      renderTasks();
-      renderBooks();
-      renderVault();
-      renderDashboard();
-      renderBrowserTabs();
-      loadActiveTab();
-      renderSettingsValues();
-      if (state.prefs.openStartOnLoad) showStart();
-      else hideStart();
-      hideQuickNote();
-      setActiveTaskbar('');
-      renderCustomTimer();
-    }
-
-    function setAuthUI(user) {
-      if (!user) {
-        $('btn-login').style.display = 'inline-block';
-        $('btn-logout').style.display = 'none';
-      } else {
-        $('btn-login').style.display = 'none';
-        $('btn-logout').style.display = 'inline-block';
-      }
-    }
-
-    bindWindowUX();
-    bindEvents();
-    bindAnnotationOverlay();
-
-    setInterval(() => {
-      tickCustomTimer();
-      el.clock.textContent = new Date().toLocaleString([], { hour:'2-digit', minute:'2-digit', day:'numeric', month:'short' });
-    }, 1000);
-
-    setInterval(() => {
-      renderDashboard();
-    }, 30000);
-
-    setInterval(() => {
-      if (!activeWindowId) return;
-      addAppMinutes(activeWindowId, 0.25);
-      if (Math.random() < 0.2) queueSave();
-    }, 15000);
-
-function markRunningIndicators() {
-  const open = new Set([...document.querySelectorAll('.window')].filter(w => w.style.display !== 'none').map(w => w.id));
-  [...document.querySelectorAll('.tb-btn[data-open]')].forEach(b => b.classList.toggle('running', open.has(b.dataset.open)));
+  <div class="cbody">
+    <div class="slbl">Key limits to memorize</div>
+    <div class="frow"><span class="fm">lim(x→0) sinx/x = 1</span><span class="fn">Most repeated limit. Also: lim tanx/x = 1</span></div>
+    <div class="frow"><span class="fm">lim(x→0)(1+x)^(1/x) = e</span><span class="fn">Definition of e. Variants appear often.</span></div>
+    <div class="frow"><span class="fm">lim(x→a)(xⁿ−aⁿ)/(x−a) = naⁿ⁻¹</span><span class="fn">Use when you see (xⁿ−aⁿ) form</span></div>
+    <div class="slbl">Differentiation rules</div>
+    <div class="frow"><span class="fm">d/dx(xⁿ) = nxⁿ⁻¹</span><span class="fn">Power rule — backbone of all differentiation</span></div>
+    <div class="frow"><span class="fm">d/dx(uv) = u'v + uv'</span><span class="fn">Product rule</span></div>
+    <div class="frow"><span class="fm">d/dx(u/v) = (u'v − uv') / v²</span><span class="fn">Quotient rule</span></div>
+    <div class="frow"><span class="fm">Chain: dy/dx = dy/du · du/dx</span><span class="fn">Composite function differentiation</span></div>
+    <div class="frow"><span class="fm">d/dx(sinx)=cosx, d/dx(cosx)=−sinx</span><span class="fn">Trig derivatives — memorize all 6</span></div>
+    <div class="frow"><span class="fm">d/dx(eˣ)=eˣ, d/dx(ln x)=1/x</span><span class="fn">Exponential/log derivatives</span></div>
+    <div class="slbl">Integration formulas</div>
+    <div class="frow"><span class="fm">∫xⁿ dx = xⁿ⁺¹/(n+1) + C</span><span class="fn">Most used integration formula</span></div>
+    <div class="frow"><span class="fm">∫sinx dx = −cosx + C</span><span class="fn">Basic trig integral</span></div>
+    <div class="frow"><span class="fm">∫cosx dx = sinx + C</span><span class="fn">Basic trig integral</span></div>
+    <div class="frow"><span class="fm">∫eˣ dx = eˣ + C</span><span class="fn">Standard result</span></div>
+    <div class="frow"><span class="fm">∫1/x dx = ln|x| + C</span><span class="fn">Standard result</span></div>
+    <div class="frow"><span class="fm">∫1/(x²+a²)dx = (1/a)tan⁻¹(x/a)+C</span><span class="fn">Very commonly tested form</span></div>
+    <div class="frow"><span class="fm">Area = ∫ₐᵇ f(x) dx</span><span class="fn">Area under curve between x=a and x=b</span></div>
+    <div class="tip tm">Exam trick: Most AEEE integration questions are substitution type. Spot the derivative of inner function in numerator → use u-substitution directly.</div>
+  </div>
+</div>
+
+<!-- ALGEBRA -->
+<div class="card open">
+  <div class="chdr" onclick="tog(this)">
+    <span class="ctitle">Algebra — Matrices, Determinants, Quadratic Equations, Sequences</span>
+    <div class="cmeta"><span class="badge bm">8–10 Qs</span><span class="chev">▼</span></div>
+  </div>
+  <div class="cbody">
+    <div class="slbl">Matrices & Determinants</div>
+    <div class="frow"><span class="fm">|A| for 2×2 = ad − bc</span><span class="fn">Determinant of [[a,b],[c,d]]</span></div>
+    <div class="frow"><span class="fm">A⁻¹ = adj(A) / |A|</span><span class="fn">Inverse matrix formula — |A| ≠ 0 required</span></div>
+    <div class="frow"><span class="fm">(AB)⁻¹ = B⁻¹A⁻¹</span><span class="fn">Reversal law for inverse</span></div>
+    <div class="frow"><span class="fm">Rank: row reduce to echelon form</span><span class="fn">Count non-zero rows after reduction</span></div>
+    <div class="slbl">Quadratic equations</div>
+    <div class="frow"><span class="fm">x = (−b ± √(b²−4ac)) / 2a</span><span class="fn">Quadratic formula — memorize this exactly</span></div>
+    <div class="frow"><span class="fm">Sum of roots = −b/a</span><span class="fn">For ax²+bx+c=0</span></div>
+    <div class="frow"><span class="fm">Product of roots = c/a</span><span class="fn">Very frequently tested directly</span></div>
+    <div class="frow"><span class="fm">D = b²−4ac: >0 real, =0 equal, <0 complex</span><span class="fn">Discriminant tells you nature of roots</span></div>
+    <div class="slbl">AP and GP</div>
+    <div class="frow"><span class="fm">AP nth term: a + (n−1)d</span><span class="fn">a = first term, d = common difference</span></div>
+    <div class="frow"><span class="fm">AP Sum: n/2 × [2a + (n−1)d]</span><span class="fn">Sum of n terms of AP</span></div>
+    <div class="frow"><span class="fm">GP nth term: ar^(n−1)</span><span class="fn">r = common ratio</span></div>
+    <div class="frow"><span class="fm">GP Sum: a(rⁿ−1) / (r−1)</span><span class="fn">When r ≠ 1</span></div>
+    <div class="frow"><span class="fm">Infinite GP Sum = a / (1−r), |r| < 1</span><span class="fn">Very commonly tested</span></div>
+    <div class="slbl">Binomial theorem</div>
+    <div class="frow"><span class="fm">(a+b)ⁿ = Σ C(n,r)·aⁿ⁻ʳ·bʳ</span><span class="fn">General term: T(r+1) = C(n,r)·aⁿ⁻ʳ·bʳ</span></div>
+  </div>
+</div>
+
+<!-- COORDINATE GEOMETRY -->
+<div class="card open">
+  <div class="chdr" onclick="tog(this)">
+    <span class="ctitle">Coordinate Geometry — Lines, Circles, Conics</span>
+    <div class="cmeta"><span class="badge bm">5–6 Qs</span><span class="chev">▼</span></div>
+  </div>
+  <div class="cbody">
+    <div class="slbl">Straight lines</div>
+    <div class="frow"><span class="fm">Slope m = (y₂−y₁) / (x₂−x₁)</span><span class="fn">Slope between two points</span></div>
+    <div class="frow"><span class="fm">y − y₁ = m(x − x₁)</span><span class="fn">Point-slope form — most used</span></div>
+    <div class="frow"><span class="fm">Distance = √[(x₂−x₁)²+(y₂−y₁)²]</span><span class="fn">Distance between two points</span></div>
+    <div class="frow"><span class="fm">|ax₁+by₁+c| / √(a²+b²)</span><span class="fn">Distance from point to line ax+by+c=0</span></div>
+    <div class="frow"><span class="fm">Parallel: m₁=m₂ | Perp: m₁×m₂=−1</span><span class="fn">Conditions for parallel / perpendicular lines</span></div>
+    <div class="slbl">Circles</div>
+    <div class="frow"><span class="fm">(x−h)² + (y−k)² = r²</span><span class="fn">Standard form — centre (h,k), radius r</span></div>
+    <div class="frow"><span class="fm">x²+y²+2gx+2fy+c=0</span><span class="fn">General form — centre (−g,−f), radius = √(g²+f²−c)</span></div>
+    <div class="slbl">Parabola, Ellipse, Hyperbola</div>
+    <div class="frow"><span class="fm">y²=4ax: focus(a,0), directrix x=−a</span><span class="fn">Standard parabola — know focus and directrix</span></div>
+    <div class="frow"><span class="fm">x²/a² + y²/b² = 1</span><span class="fn">Ellipse — a>b; vertices at (±a, 0)</span></div>
+    <div class="frow"><span class="fm">x²/a² − y²/b² = 1</span><span class="fn">Hyperbola — asymptotes y = ±(b/a)x</span></div>
+  </div>
+</div>
+
+<!-- VECTORS, 3D, PROBABILITY -->
+<div class="card open">
+  <div class="chdr" onclick="tog(this)">
+    <span class="ctitle">Vectors, Probability & Binomial Distribution</span>
+    <div class="cmeta"><span class="badge bm">5–7 Qs</span><span class="chev">▼</span></div>
+  </div>
+  <div class="cbody">
+    <div class="slbl">Vectors</div>
+    <div class="frow"><span class="fm">|a| = √(x²+y²+z²)</span><span class="fn">Magnitude of vector a = xi+yj+zk</span></div>
+    <div class="frow"><span class="fm">a·b = |a||b|cosθ</span><span class="fn">Dot product — use to find angle between vectors</span></div>
+    <div class="frow"><span class="fm">a·b = x₁x₂+y₁y₂+z₁z₂</span><span class="fn">Component form of dot product</span></div>
+    <div class="frow"><span class="fm">|a×b| = |a||b|sinθ</span><span class="fn">Magnitude of cross product</span></div>
+    <div class="frow"><span class="fm">a⊥b when a·b=0, a∥b when a×b=0</span><span class="fn">Perpendicular and parallel conditions</span></div>
+    <div class="slbl">Probability</div>
+    <div class="frow"><span class="fm">P(A) = n(A) / n(S)</span><span class="fn">Basic probability definition</span></div>
+    <div class="frow"><span class="fm">P(A∪B) = P(A)+P(B)−P(A∩B)</span><span class="fn">Addition rule</span></div>
+    <div class="frow"><span class="fm">P(A|B) = P(A∩B) / P(B)</span><span class="fn">Conditional probability</span></div>
+    <div class="frow"><span class="fm">Bayes: P(A|B)=P(B|A)P(A)/P(B)</span><span class="fn">Usually 1 direct question in exam</span></div>
+    <div class="frow"><span class="fm">Binomial: P(X=r) = C(n,r)·pʳ·qⁿ⁻ʳ</span><span class="fn">q = 1−p; mean = np; variance = npq</span></div>
+  </div>
+</div>
+
+<!-- TRIGONOMETRY — NEW -->
+<div class="card">
+  <div class="chdr" onclick="tog(this)">
+    <span class="ctitle">Trigonometry — Identities, Values & Heights/Distances</span>
+    <div class="cmeta"><span class="badge bm">4–5 Qs</span><span class="badge bnew">NEW</span><span class="chev">▼</span></div>
+  </div>
+  <div class="cbody">
+    <div class="slbl">Fundamental identities</div>
+    <div class="frow"><span class="fm">sin²θ + cos²θ = 1</span><span class="fn">Most used. Also: sin²θ = 1−cos²θ, cos²θ = 1−sin²θ</span></div>
+    <div class="frow"><span class="fm">1 + tan²θ = sec²θ</span><span class="fn">Divide sin²+cos²=1 by cos²θ</span></div>
+    <div class="frow"><span class="fm">1 + cot²θ = cosec²θ</span><span class="fn">Divide sin²+cos²=1 by sin²θ</span></div>
+    <div class="slbl">Compound & double angle</div>
+    <div class="frow"><span class="fm">sin(A±B) = sinAcosB ± cosAsinB</span><span class="fn">Essential — used in almost every trig problem</span></div>
+    <div class="frow"><span class="fm">cos(A±B) = cosAcosB ∓ sinAsinB</span><span class="fn">Note: sign flips for cos</span></div>
+    <div class="frow"><span class="fm">tan(A+B) = (tanA+tanB)/(1−tanAtanB)</span><span class="fn">tan(A−B): change both signs</span></div>
+    <div class="frow"><span class="fm">sin2A = 2sinAcosA</span><span class="fn">Also: 2tanA/(1+tan²A)</span></div>
+    <div class="frow"><span class="fm">cos2A = cos²A−sin²A = 2cos²A−1 = 1−2sin²A</span><span class="fn">Three equivalent forms — all tested</span></div>
+    <div class="frow"><span class="fm">tan2A = 2tanA / (1−tan²A)</span><span class="fn">Used in simplification questions</span></div>
+    <div class="slbl">Standard values</div>
+    <div class="frow"><span class="fm">sin: 0°=0, 30°=½, 45°=1/√2, 60°=√3/2, 90°=1</span><span class="fn">Memorize this row completely</span></div>
+    <div class="frow"><span class="fm">cos: 0°=1, 30°=√3/2, 45°=1/√2, 60°=½, 90°=0</span><span class="fn">cos values are sin in reverse order</span></div>
+    <div class="frow"><span class="fm">tan: 0°=0, 30°=1/√3, 45°=1, 60°=√3, 90°=∞</span><span class="fn">tan90° is undefined</span></div>
+    <div class="slbl">Heights & distances</div>
+    <div class="frow"><span class="fm">tanθ = height / base</span><span class="fn">Angle of elevation from ground — θ is at observer</span></div>
+    <div class="frow"><span class="fm">Sine rule: a/sinA = b/sinB = c/sinC</span><span class="fn">Non-right triangles — two angles + one side given</span></div>
+    <div class="frow"><span class="fm">Cosine rule: a² = b²+c² − 2bc·cosA</span><span class="fn">Use when all 3 sides or 2 sides + included angle given</span></div>
+    <div class="tip tm">Most AEEE trig problems use sin²+cos²=1 or double angle formulas. If you see "simplify", substitute identities directly rather than computing angles.</div>
+  </div>
+</div>
+
+<!-- PERMUTATIONS & COMBINATIONS — NEW -->
+<div class="card">
+  <div class="chdr" onclick="tog(this)">
+    <span class="ctitle">Permutations & Combinations</span>
+    <div class="cmeta"><span class="badge bm">3–4 Qs</span><span class="badge bnew">NEW</span><span class="chev">▼</span></div>
+  </div>
+  <div class="cbody">
+    <div class="frow"><span class="fm">nPr = n! / (n−r)!</span><span class="fn">Arrangement of r items from n (order matters)</span></div>
+    <div class="frow"><span class="fm">nCr = n! / [r!(n−r)!]</span><span class="fn">Selection of r items from n (order doesn't matter)</span></div>
+    <div class="frow"><span class="fm">nCr = nC(n−r)</span><span class="fn">Symmetry property — always use to simplify</span></div>
+    <div class="frow"><span class="fm">nC0 = nCn = 1</span><span class="fn">Choosing none or all = 1 way</span></div>
+    <div class="frow"><span class="fm">Arrangements with repeats: n!/p!q!...</span><span class="fn">p, q = count of identical elements</span></div>
+    <div class="crow"><p>Circular arrangement of n distinct objects = (n−1)!</p><span>Necklace/bracelet (can flip): (n−1)!/2</span></div>
+    <div class="crow"><p>At least one condition: Total − (none of the condition)</p><span>E.g. "at least one girl" = Total − (all boys)</span></div>
+    <div class="tip tm">If question says "arrange" → use P. If "choose/select/form team" → use C. Most AEEE questions are direct substitution.</div>
+  </div>
+</div>
+
+<!-- COMPLEX NUMBERS — NEW -->
+<div class="card">
+  <div class="chdr" onclick="tog(this)">
+    <span class="ctitle">Complex Numbers</span>
+    <div class="cmeta"><span class="badge bm">2–3 Qs</span><span class="badge bnew">NEW</span><span class="chev">▼</span></div>
+  </div>
+  <div class="cbody">
+    <div class="frow"><span class="fm">i² = −1, i³ = −i, i⁴ = 1</span><span class="fn">Powers of i cycle every 4: check remainder when exponent ÷ 4</span></div>
+    <div class="frow"><span class="fm">z = a + ib; |z| = √(a²+b²)</span><span class="fn">Modulus (magnitude) of complex number</span></div>
+    <div class="frow"><span class="fm">z̄ = a − ib (conjugate)</span><span class="fn">To divide z₁/z₂: multiply top and bottom by conjugate of z₂</span></div>
+    <div class="frow"><span class="fm">z · z̄ = |z|² = a² + b²</span><span class="fn">Always a real number — key property</span></div>
+    <div class="frow"><span class="fm">arg(z) = tan⁻¹(b/a)</span><span class="fn">Angle with positive x-axis — check which quadrant</span></div>
+    <div class="frow"><span class="fm">z = r(cosθ + i sinθ)</span><span class="fn">Polar form; r = |z|, θ = arg(z)</span></div>
+    <div class="frow"><span class="fm">(cosθ+i sinθ)ⁿ = cosnθ + i sinnθ</span><span class="fn">De Moivre's theorem — nth power / roots</span></div>
+    <div class="crow"><p>Cube roots of unity: 1, ω, ω² where ω³=1</p><span>Key properties: 1+ω+ω²=0 and ω³=1 — memorize both</span></div>
+    <div class="tip tm">Most MCQs test: (1) powers of i — divide exponent by 4, take remainder, (2) |z| calculations, (3) conjugate multiplication for division.</div>
+  </div>
+</div>
+
+<!-- STATISTICS & REASONING — NEW -->
+<div class="card">
+  <div class="chdr" onclick="tog(this)">
+    <span class="ctitle">Statistics & Mathematical Reasoning</span>
+    <div class="cmeta"><span class="badge bm">2–3 Qs</span><span class="badge bnew">NEW</span><span class="chev">▼</span></div>
+  </div>
+  <div class="cbody">
+    <div class="slbl">Statistics</div>
+    <div class="frow"><span class="fm">Mean = Σfx / Σf</span><span class="fn">For grouped data; x = midpoint, f = frequency</span></div>
+    <div class="frow"><span class="fm">Variance σ² = Σfx²/Σf − (x̄)²</span><span class="fn">Easier computational form</span></div>
+    <div class="frow"><span class="fm">Std deviation σ = √(Variance)</span><span class="fn">AEEE usually asks for variance or SD directly</span></div>
+    <div class="frow"><span class="fm">Median: middle value (sort data first)</span><span class="fn">For grouped: L + [(n/2 − cf)/f] × h</span></div>
+    <div class="frow"><span class="fm">Mode: most frequent value</span><span class="fn">For grouped: L + [f₁−f₀ / 2f₁−f₀−f₂] × h</span></div>
+    <div class="slbl">Mathematical reasoning (logic)</div>
+    <div class="crow"><p>Contrapositive of "If P then Q" is "If not Q then not P" — same truth value as original</p></div>
+    <div class="crow"><p>Converse: "If Q then P". Inverse: "If not P then not Q". Neither is equivalent to original.</p></div>
+    <div class="crow"><p>p ∧ q (AND): true only when BOTH true. p ∨ q (OR): false only when BOTH false.</p></div>
+    <div class="crow"><p>Negation of "all X are Y" → "some X are not Y". Negation of "some X are Y" → "no X are Y".</p></div>
+    <div class="tip tm">Reasoning questions are pure logic — no calculation. Identify statement type, apply contrapositive or negation. Easy 3 marks if you know the rules.</div>
+  </div>
+</div>
+
+<!-- 3D GEOMETRY — NEW -->
+<div class="card">
+  <div class="chdr" onclick="tog(this)">
+    <span class="ctitle">3D Geometry — Lines & Planes in Space</span>
+    <div class="cmeta"><span class="badge bm">2 Qs</span><span class="badge bnew">NEW</span><span class="chev">▼</span></div>
+  </div>
+  <div class="cbody">
+    <div class="frow"><span class="fm">l²+m²+n² = 1</span><span class="fn">l, m, n are direction cosines of a line</span></div>
+    <div class="frow"><span class="fm">cosθ = l₁l₂+m₁m₂+n₁n₂</span><span class="fn">Angle between two lines by direction cosines</span></div>
+    <div class="frow"><span class="fm">(x−x₁)/a = (y−y₁)/b = (z−z₁)/c</span><span class="fn">Symmetric form of line; a,b,c = direction ratios</span></div>
+    <div class="frow"><span class="fm">ax + by + cz = d (plane)</span><span class="fn">General plane equation; a,b,c = normal vector</span></div>
+    <div class="frow"><span class="fm">dist = |ax₁+by₁+cz₁−d| / √(a²+b²+c²)</span><span class="fn">Distance from point (x₁,y₁,z₁) to plane</span></div>
+    <div class="tip tm">3D Geometry AEEE questions are: (1) angle between lines/planes, or (2) distance from point to plane. These two formulas cover ~80% of cases.</div>
+  </div>
+</div>
+
+</div><!-- end maths -->
+
+<!-- ════════════════════════════════
+     PHYSICS
+════════════════════════════════ -->
+<div class="sec" id="sec-p">
+
+<!-- MODERN PHYSICS -->
+<div class="card open">
+  <div class="chdr" onclick="tog(this)">
+    <span class="ctitle">Modern Physics — Photoelectric, Atomic, Nuclear</span>
+    <div class="cmeta"><span class="badge bp">4–5 Qs</span><span class="chev">▼</span></div>
+  </div>
+  <div class="cbody">
+    <div class="slbl">Photoelectric effect</div>
+    <div class="frow"><span class="fm">E = hf = hc/λ</span><span class="fn">Energy of a photon; h = 6.63×10⁻³⁴ J·s</span></div>
+    <div class="frow"><span class="fm">KE_max = hf − φ</span><span class="fn">Einstein's equation; φ = work function</span></div>
+    <div class="frow"><span class="fm">eV_stop = KE_max</span><span class="fn">Stopping potential formula</span></div>
+    <div class="frow"><span class="fm">λ_dB = h / mv</span><span class="fn">de Broglie wavelength of a particle</span></div>
+    <div class="slbl">Bohr's atomic model</div>
+    <div class="frow"><span class="fm">rₙ = 0.529n²/Z Å</span><span class="fn">Radius of nth orbit (Z = atomic number)</span></div>
+    <div class="frow"><span class="fm">Eₙ = −13.6Z²/n² eV</span><span class="fn">Energy of nth orbit — negative = bound state</span></div>
+    <div class="frow"><span class="fm">ΔE = hf = E₂ − E₁</span><span class="fn">Photon emitted when electron drops levels</span></div>
+    <div class="slbl">Nuclear physics</div>
+    <div class="frow"><span class="fm">N = N₀(1/2)^(t/T½)</span><span class="fn">Radioactive decay; T½ = half-life</span></div>
+    <div class="frow"><span class="fm">N = N₀e^(−λt)</span><span class="fn">λ = 0.693/T½ (decay constant)</span></div>
+    <div class="frow"><span class="fm">Binding Energy = Δm × 931.5 MeV</span><span class="fn">Δm = mass defect in amu</span></div>
+    <div class="tip tp">Half-life and Bohr's energy level questions appear every year. Master these two types first.</div>
+  </div>
+</div>
+
+<!-- OPTICS -->
+<div class="card open">
+  <div class="chdr" onclick="tog(this)">
+    <span class="ctitle">Optics — Ray & Wave Optics</span>
+    <div class="cmeta"><span class="badge bp">3–4 Qs</span><span class="chev">▼</span></div>
+  </div>
+  <div class="cbody">
+    <div class="slbl">Ray optics</div>
+    <div class="frow"><span class="fm">1/v − 1/u = 1/f (mirror)</span><span class="fn">Mirror formula; sign convention: distances from pole</span></div>
+    <div class="frow"><span class="fm">1/v − 1/u = 1/f (lens)</span><span class="fn">Same form for thin lens</span></div>
+    <div class="frow"><span class="fm">m = −v/u (mirror), m = v/u (lens)</span><span class="fn">Magnification; m>0 virtual, m<0 real image</span></div>
+    <div class="frow"><span class="fm">n = sinᵢ / sinr (Snell's law)</span><span class="fn">Refraction at interface</span></div>
+    <div class="frow"><span class="fm">sinC = 1/n (critical angle)</span><span class="fn">Total internal reflection condition</span></div>
+    <div class="frow"><span class="fm">P = 1/f (metres) → Dioptre</span><span class="fn">Power of lens; lenses in contact: P = P₁+P₂</span></div>
+    <div class="slbl">Wave optics (Young's double slit)</div>
+    <div class="frow"><span class="fm">β = λD / d</span><span class="fn">Fringe width; D = screen distance, d = slit separation</span></div>
+    <div class="frow"><span class="fm">Path diff for bright = nλ</span><span class="fn">Constructive interference condition</span></div>
+    <div class="frow"><span class="fm">Path diff for dark = (2n−1)λ/2</span><span class="fn">Destructive interference condition</span></div>
+  </div>
+</div>
+
+<!-- EMI & AC -->
+<div class="card open">
+  <div class="chdr" onclick="tog(this)">
+    <span class="ctitle">Electromagnetic Induction & AC Circuits</span>
+    <div class="cmeta"><span class="badge bp">3–4 Qs</span><span class="chev">▼</span></div>
+  </div>
+  <div class="cbody">
+    <div class="slbl">EMI</div>
+    <div class="frow"><span class="fm">EMF = −dΦ/dt</span><span class="fn">Faraday's law; Φ = BAcosθ (magnetic flux)</span></div>
+    <div class="frow"><span class="fm">EMF = Blv</span><span class="fn">Motional EMF; conductor of length l, speed v</span></div>
+    <div class="slbl">AC circuits</div>
+    <div class="frow"><span class="fm">I_rms = I₀/√2, V_rms = V₀/√2</span><span class="fn">RMS values — most tested direct question</span></div>
+    <div class="frow"><span class="fm">X_L = ωL = 2πfL</span><span class="fn">Inductive reactance</span></div>
+    <div class="frow"><span class="fm">X_C = 1/ωC = 1/2πfC</span><span class="fn">Capacitive reactance</span></div>
+    <div class="frow"><span class="fm">Z = √(R² + (X_L − X_C)²)</span><span class="fn">Impedance of LCR series circuit</span></div>
+    <div class="frow"><span class="fm">Resonance: X_L=X_C → f₀=1/2π√(LC)</span><span class="fn">At resonance Z = R (minimum impedance)</span></div>
+    <div class="frow"><span class="fm">Power factor = cosφ = R/Z</span><span class="fn">φ = phase angle between V and I</span></div>
+  </div>
+</div>
+
+<!-- ELECTROSTATICS & CURRENT -->
+<div class="card open">
+  <div class="chdr" onclick="tog(this)">
+    <span class="ctitle">Current Electricity & Electrostatics</span>
+    <div class="cmeta"><span class="badge bp">3–4 Qs</span><span class="chev">▼</span></div>
+  </div>
+  <div class="cbody">
+    <div class="slbl">Electrostatics</div>
+    <div class="frow"><span class="fm">F = kq₁q₂ / r²</span><span class="fn">Coulomb's law; k = 9×10⁹ N·m²/C²</span></div>
+    <div class="frow"><span class="fm">E = kq / r²</span><span class="fn">Electric field due to point charge</span></div>
+    <div class="frow"><span class="fm">V = kq / r</span><span class="fn">Electric potential; V = Work/charge</span></div>
+    <div class="frow"><span class="fm">C = Q/V, C_parallel = C₁+C₂</span><span class="fn">Capacitance; series: 1/C = 1/C₁+1/C₂</span></div>
+    <div class="frow"><span class="fm">Energy = ½CV² = ½QV = Q²/2C</span><span class="fn">Energy stored in capacitor</span></div>
+    <div class="slbl">Current electricity</div>
+    <div class="frow"><span class="fm">V = IR (Ohm's law)</span><span class="fn">Applies when R is constant (ohmic conductor)</span></div>
+    <div class="frow"><span class="fm">R_series = R₁+R₂; 1/R_par = 1/R₁+1/R₂</span><span class="fn">Resistor combinations</span></div>
+    <div class="frow"><span class="fm">KCL: ΣI_in = ΣI_out</span><span class="fn">Current at a junction</span></div>
+    <div class="frow"><span class="fm">KVL: ΣV = 0 (closed loop)</span><span class="fn">Voltage around any closed loop = 0</span></div>
+    <div class="frow"><span class="fm">Wheatstone: P/Q = R/S (balanced)</span><span class="fn">No current through galvanometer when balanced</span></div>
+  </div>
+</div>
+
+<!-- LAWS OF MOTION & THERMO -->
+<div class="card open">
+  <div class="chdr" onclick="tog(this)">
+    <span class="ctitle">Laws of Motion, Work-Energy & Thermodynamics</span>
+    <div class="cmeta"><span class="badge bp">4 Qs</span><span class="chev">▼</span></div>
+  </div>
+  <div class="cbody">
+    <div class="slbl">Laws of motion</div>
+    <div class="frow"><span class="fm">F = ma</span><span class="fn">Newton's 2nd law</span></div>
+    <div class="frow"><span class="fm">Impulse = FΔt = Δp</span><span class="fn">Change in momentum</span></div>
+    <div class="frow"><span class="fm">f = μN</span><span class="fn">Friction force; μ = coefficient of friction</span></div>
+    <div class="slbl">Work, energy, momentum</div>
+    <div class="frow"><span class="fm">W = Fs cosθ</span><span class="fn">Work done by force F at angle θ</span></div>
+    <div class="frow"><span class="fm">KE = ½mv², PE = mgh</span><span class="fn">Kinetic and potential energy</span></div>
+    <div class="frow"><span class="fm">KE₁+PE₁ = KE₂+PE₂</span><span class="fn">Energy conservation when no external forces act</span></div>
+    <div class="frow"><span class="fm">p = mv; m₁v₁ = m₂v₂</span><span class="fn">Momentum conservation in collisions</span></div>
+    <div class="slbl">Thermodynamics</div>
+    <div class="frow"><span class="fm">ΔU = Q − W (1st law)</span><span class="fn">Internal energy = heat in − work done by gas</span></div>
+    <div class="frow"><span class="fm">η = 1 − T₂/T₁ (Carnot)</span><span class="fn">Maximum efficiency; T in Kelvin</span></div>
+    <div class="frow"><span class="fm">PV = nRT (ideal gas)</span><span class="fn">R = 8.314 J/mol·K</span></div>
+    <div class="frow"><span class="fm">v_rms = √(3RT/M)</span><span class="fn">RMS speed of gas molecules; M = molar mass</span></div>
+  </div>
+</div>
+
+<!-- ROTATIONAL MOTION — NEW -->
+<div class="card">
+  <div class="chdr" onclick="tog(this)">
+    <span class="ctitle">Rotational Motion & Centre of Mass</span>
+    <div class="cmeta"><span class="badge bp">3–4 Qs</span><span class="badge bnew">NEW</span><span class="chev">▼</span></div>
+  </div>
+  <div class="cbody">
+    <div class="slbl">Rotational kinematics</div>
+    <div class="frow"><span class="fm">ω = ω₀ + αt</span><span class="fn">Angular velocity; α = angular acceleration (rad/s²)</span></div>
+    <div class="frow"><span class="fm">θ = ω₀t + ½αt²</span><span class="fn">Angular displacement</span></div>
+    <div class="frow"><span class="fm">ω² = ω₀² + 2αθ</span><span class="fn">Exact rotational analogs of v=u+at, s=ut+½at², v²=u²+2as</span></div>
+    <div class="slbl">Torque & moment of inertia</div>
+    <div class="frow"><span class="fm">τ = r × F = I·α</span><span class="fn">Torque; I = moment of inertia (rotational analog of mass)</span></div>
+    <div class="frow"><span class="fm">L = Iω (angular momentum)</span><span class="fn">Conserved when no external torque acts</span></div>
+    <div class="frow"><span class="fm">KE_rot = ½Iω²</span><span class="fn">Rotational kinetic energy</span></div>
+    <div class="slbl">Standard moments of inertia</div>
+    <div class="frow"><span class="fm">Solid sphere: I = (2/5)MR²</span><span class="fn">About diameter axis</span></div>
+    <div class="frow"><span class="fm">Hollow sphere: I = (2/3)MR²</span><span class="fn">About diameter axis</span></div>
+    <div class="frow"><span class="fm">Solid disc: I = (1/2)MR²</span><span class="fn">About central axis (perpendicular to disc)</span></div>
+    <div class="frow"><span class="fm">Rod (centre): I = ML²/12</span><span class="fn">Thin rod about centre; about end = ML²/3</span></div>
+    <div class="frow"><span class="fm">Parallel axis: I = I_cm + Md²</span><span class="fn">d = distance between parallel axes</span></div>
+    <div class="tip tp">Rolling (no slipping): v = Rω. Total KE = ½mv² + ½Iω². This combined formula appears directly in AEEE questions.</div>
+  </div>
+</div>
+
+<!-- GRAVITATION — NEW -->
+<div class="card">
+  <div class="chdr" onclick="tog(this)">
+    <span class="ctitle">Gravitation</span>
+    <div class="cmeta"><span class="badge bp">2–3 Qs</span><span class="badge bnew">NEW</span><span class="chev">▼</span></div>
+  </div>
+  <div class="cbody">
+    <div class="frow"><span class="fm">F = Gm₁m₂ / r²</span><span class="fn">Newton's law; G = 6.67×10⁻¹¹ N·m²/kg²</span></div>
+    <div class="frow"><span class="fm">g = GM/R²</span><span class="fn">Surface gravity; M = earth mass, R = earth radius</span></div>
+    <div class="frow"><span class="fm">g_h = g(1 − 2h/R)</span><span class="fn">Approximate at height h (valid when h << R)</span></div>
+    <div class="frow"><span class="fm">g_d = g(1 − d/R)</span><span class="fn">g decreases linearly with depth below surface</span></div>
+    <div class="frow"><span class="fm">Orbital speed: v₀ = √(GM/r)</span><span class="fn">r = orbital radius from Earth's centre</span></div>
+    <div class="frow"><span class="fm">Escape speed: vₑ = √(2GM/R) = √(2gR)</span><span class="fn">vₑ = √2 × v₀ at surface</span></div>
+    <div class="frow"><span class="fm">T² ∝ r³ (Kepler's 3rd law)</span><span class="fn">T = 2π√(r³/GM) — if r doubles, T increases by 2√2</span></div>
+    <div class="frow"><span class="fm">PE = −GMm/r, Total E = −GMm/2r</span><span class="fn">Total orbital energy always negative (bound orbit)</span></div>
+    <div class="tip tp">Kepler's 3rd law (T²∝r³) is tested every year. Practice: if r doubles → T multiplies by 2√2 ≈ 2.83.</div>
+  </div>
+</div>
+
+<!-- FLUID MECHANICS — NEW -->
+<div class="card">
+  <div class="chdr" onclick="tog(this)">
+    <span class="ctitle">Fluid Mechanics & Surface Tension</span>
+    <div class="cmeta"><span class="badge bp">2 Qs</span><span class="badge bnew">NEW</span><span class="chev">▼</span></div>
+  </div>
+  <div class="cbody">
+    <div class="frow"><span class="fm">P = ρgh</span><span class="fn">Hydrostatic pressure at depth h in fluid density ρ</span></div>
+    <div class="frow"><span class="fm">Buoyant force = ρ_fluid × V_sub × g</span><span class="fn">Archimedes; object floats when B = Weight</span></div>
+    <div class="frow"><span class="fm">Continuity: A₁v₁ = A₂v₂</span><span class="fn">For incompressible fluid (conservation of mass)</span></div>
+    <div class="frow"><span class="fm">Bernoulli: P + ½ρv² + ρgh = const</span><span class="fn">Energy conservation for ideal fluid flow</span></div>
+    <div class="frow"><span class="fm">Terminal velocity: v_t = 2r²(ρ−σ)g/9η</span><span class="fn">ρ = sphere density, σ = fluid density, η = viscosity</span></div>
+    <div class="frow"><span class="fm">Excess pressure in soap bubble: 4T/r</span><span class="fn">Two surfaces; liquid drop (one surface): 2T/r</span></div>
+    <div class="tip tp">AEEE tests: (1) floating condition — density ratio, (2) Bernoulli — higher velocity = lower pressure (venturimeter), (3) terminal velocity formula.</div>
+  </div>
+</div>
+
+<!-- SHM & WAVES — NEW -->
+<div class="card">
+  <div class="chdr" onclick="tog(this)">
+    <span class="ctitle">Simple Harmonic Motion (SHM) & Waves</span>
+    <div class="cmeta"><span class="badge bp">3 Qs</span><span class="badge bnew">NEW</span><span class="chev">▼</span></div>
+  </div>
+  <div class="cbody">
+    <div class="slbl">SHM fundamentals</div>
+    <div class="frow"><span class="fm">x = A sin(ωt + φ)</span><span class="fn">Displacement; A = amplitude, ω = 2π/T = 2πf</span></div>
+    <div class="frow"><span class="fm">v = ω√(A²−x²)</span><span class="fn">Velocity at displacement x (max at x=0)</span></div>
+    <div class="frow"><span class="fm">a = −ω²x</span><span class="fn">Acceleration (max at x=±A, zero at x=0)</span></div>
+    <div class="frow"><span class="fm">T_spring = 2π√(m/k)</span><span class="fn">k = spring constant</span></div>
+    <div class="frow"><span class="fm">T_pendulum = 2π√(L/g)</span><span class="fn">Independent of mass and amplitude (small angles)</span></div>
+    <div class="frow"><span class="fm">Total E = ½mω²A² = ½kA²</span><span class="fn">Energy ∝ A² — memorize this fact</span></div>
+    <div class="slbl">Waves</div>
+    <div class="frow"><span class="fm">v = fλ</span><span class="fn">Wave speed; f = frequency (Hz), λ = wavelength (m)</span></div>
+    <div class="frow"><span class="fm">Speed of sound: v = √(γRT/M)</span><span class="fn">Increases with temperature; γ = 1.4 for diatomic</span></div>
+    <div class="frow"><span class="fm">Beats frequency = |f₁ − f₂|</span><span class="fn">Loud-soft cycles per second</span></div>
+    <div class="frow"><span class="fm">Doppler: f' = f(v ± v_obs)/(v ∓ v_src)</span><span class="fn">+ numerator / − denominator for approaching; reverse for receding</span></div>
+    <div class="tip tp">SHM questions: either (1) find velocity/acceleration at given x, or (2) time period of spring/pendulum. Master these two types.</div>
+  </div>
+</div>
+
+<!-- MAGNETIC EFFECTS — NEW -->
+<div class="card">
+  <div class="chdr" onclick="tog(this)">
+    <span class="ctitle">Magnetic Effects of Current</span>
+    <div class="cmeta"><span class="badge bp">2–3 Qs</span><span class="badge bnew">NEW</span><span class="chev">▼</span></div>
+  </div>
+  <div class="cbody">
+    <div class="frow"><span class="fm">F = qvBsinθ</span><span class="fn">Lorentz force on moving charge in magnetic field B</span></div>
+    <div class="frow"><span class="fm">r = mv / qB</span><span class="fn">Radius of circular path of charged particle in B field</span></div>
+    <div class="frow"><span class="fm">F = BIL sinθ</span><span class="fn">Force on current-carrying conductor of length L</span></div>
+    <div class="frow"><span class="fm">B = μ₀I / 2πr (long wire)</span><span class="fn">Field at distance r from long straight wire</span></div>
+    <div class="frow"><span class="fm">B = μ₀nI (solenoid)</span><span class="fn">n = turns per unit length; uniform field inside</span></div>
+    <div class="frow"><span class="fm">Torque: τ = BINA sinθ</span><span class="fn">N = turns, A = area; max torque at θ=90°</span></div>
+    <div class="tip tp">Fleming's Left Hand Rule: forefinger = B, middle finger = current, thumb = force (FBI). AEEE tests direction questions directly — know this rule.</div>
+  </div>
+</div>
+
+<!-- SEMICONDUCTORS — NEW -->
+<div class="card">
+  <div class="chdr" onclick="tog(this)">
+    <span class="ctitle">Semiconductors, Logic Gates & Communication</span>
+    <div class="cmeta"><span class="badge bp">2–3 Qs</span><span class="badge bnew">NEW</span><span class="chev">▼</span></div>
+  </div>
+  <div class="cbody">
+    <div class="slbl">Semiconductor basics</div>
+    <div class="crow"><p>Intrinsic semiconductor: pure Ge/Si — electrons = holes at any temperature</p></div>
+    <div class="crow"><p>N-type: doped with pentavalent (P, As) — excess electrons (majority carriers)</p></div>
+    <div class="crow"><p>P-type: doped with trivalent (B, Al) — excess holes (majority carriers)</p></div>
+    <div class="crow"><p>Forward bias: p-side to +ve terminal; current flows; barrier decreases</p></div>
+    <div class="crow"><p>Reverse bias: p-side to −ve terminal; only tiny leakage current; barrier increases</p></div>
+    <div class="slbl">Logic gates (memorize all 5)</div>
+    <div class="frow"><span class="fm">AND: Y = A·B</span><span class="fn">Output 1 only when BOTH inputs are 1</span></div>
+    <div class="frow"><span class="fm">OR: Y = A+B</span><span class="fn">Output 1 when AT LEAST ONE input is 1</span></div>
+    <div class="frow"><span class="fm">NOT: Y = Ā</span><span class="fn">Output is opposite of input</span></div>
+    <div class="frow"><span class="fm">NAND: Y = (A·B)̄ = Ā+B̄</span><span class="fn">AND + NOT; universal gate — can make any other gate</span></div>
+    <div class="frow"><span class="fm">NOR: Y = (A+B)̄ = Ā·B̄</span><span class="fn">OR + NOT; also universal gate</span></div>
+    <div class="slbl">Communication systems</div>
+    <div class="frow"><span class="fm">Modulation index μ = Am/Ac</span><span class="fn">Am = message amplitude, Ac = carrier; μ ≤ 1 for no distortion</span></div>
+    <div class="frow"><span class="fm">Bandwidth of AM = 2fm</span><span class="fn">fm = highest message frequency</span></div>
+    <div class="frow"><span class="fm">Range: d = √(2Rh)</span><span class="fn">Max line-of-sight; R = Earth radius, h = antenna height</span></div>
+    <div class="tip tp">Draw the truth table for each gate on paper once — you'll remember permanently. Logic gates appear every single year in AEEE.</div>
+  </div>
+</div>
+
+</div><!-- end physics -->
+
+<!-- ════════════════════════════════
+     CHEMISTRY
+════════════════════════════════ -->
+<div class="sec" id="sec-c">
+
+<!-- ELECTROCHEMISTRY -->
+<div class="card open">
+  <div class="chdr" onclick="tog(this)">
+    <span class="ctitle">Electrochemistry</span>
+    <div class="cmeta"><span class="badge bc">2–3 Qs</span><span class="chev">▼</span></div>
+  </div>
+  <div class="cbody">
+    <div class="slbl">Cell potential</div>
+    <div class="frow"><span class="fm">E_cell = E°_cathode − E°_anode</span><span class="fn">Standard cell EMF; higher reduction potential = cathode</span></div>
+    <div class="frow"><span class="fm">E = E° − (0.059/n) log Q</span><span class="fn">Nernst equation at 25°C (simplified)</span></div>
+    <div class="frow"><span class="fm">ΔG° = −nFE°</span><span class="fn">Relationship between EMF and Gibbs energy</span></div>
+    <div class="slbl">Faraday's laws of electrolysis</div>
+    <div class="frow"><span class="fm">W = (M/nF) × I × t</span><span class="fn">Mass deposited W; F = 96500 C/mol</span></div>
+    <div class="frow"><span class="fm">Charge = nF per mole of electrons</span><span class="fn">n = electrons exchanged per ion</span></div>
+    <div class="tip tc">AEEE always asks: calculate mass deposited at electrode given current and time. Practice 5 such numericals.</div>
+  </div>
+</div>
+
+<!-- EQUILIBRIUM & THERMO -->
+<div class="card open">
+  <div class="chdr" onclick="tog(this)">
+    <span class="ctitle">Chemical Equilibrium & Thermodynamics</span>
+    <div class="cmeta"><span class="badge bc">2–3 Qs</span><span class="chev">▼</span></div>
+  </div>
+  <div class="cbody">
+    <div class="slbl">Equilibrium</div>
+    <div class="frow"><span class="fm">Kc = [products] / [reactants]</span><span class="fn">Equilibrium constant in concentration terms</span></div>
+    <div class="frow"><span class="fm">Kp = Kc(RT)^Δn</span><span class="fn">Δn = moles gas products − moles gas reactants</span></div>
+    <div class="frow"><span class="fm">ΔG° = −RT lnKc</span><span class="fn">Links equilibrium constant to Gibbs energy</span></div>
+    <div class="slbl">Le Chatelier's principle</div>
+    <div class="crow"><p>Increase reactant concentration → equilibrium shifts right (more products)</p></div>
+    <div class="crow"><p>Increase pressure (gas reaction) → shifts toward fewer moles of gas</p></div>
+    <div class="crow"><p>Increase temperature → shifts in endothermic direction</p></div>
+    <div class="slbl">Thermodynamics</div>
+    <div class="frow"><span class="fm">ΔH = ΔU + ΔnRT</span><span class="fn">Relates enthalpy to internal energy</span></div>
+    <div class="frow"><span class="fm">Hess's law: ΔH = ΣΔH_prod − ΣΔH_react</span><span class="fn">Most tested thermochemistry formula</span></div>
+    <div class="frow"><span class="fm">ΔG = ΔH − TΔS</span><span class="fn">Spontaneous when ΔG < 0</span></div>
+  </div>
+</div>
+
+<!-- STOICHIOMETRY -->
+<div class="card open">
+  <div class="chdr" onclick="tog(this)">
+    <span class="ctitle">Stoichiometry & Mole Concept</span>
+    <div class="cmeta"><span class="badge bc">2 Qs</span><span class="chev">▼</span></div>
+  </div>
+  <div class="cbody">
+    <div class="frow"><span class="fm">n = m / M</span><span class="fn">n = moles, m = mass (g), M = molar mass (g/mol)</span></div>
+    <div class="frow"><span class="fm">n = V / 22.4 (at STP)</span><span class="fn">Volume of 1 mole gas at STP = 22.4 L</span></div>
+    <div class="frow"><span class="fm">Molarity M = n / V(litres)</span><span class="fn">Moles per litre of solution</span></div>
+    <div class="frow"><span class="fm">Molality m = n / W(kg solvent)</span><span class="fn">Moles per kg of solvent</span></div>
+    <div class="frow"><span class="fm">Eq. weight = M / n-factor</span><span class="fn">n-factor = electrons transferred or H⁺ displaced</span></div>
+    <div class="frow"><span class="fm">% yield = (actual/theoretical) × 100</span><span class="fn">Limiting reagent gives theoretical yield</span></div>
+    <div class="tip tc">Method: Identify limiting reagent first — whichever gives fewer moles of product. Calculate from that reactant only.</div>
+  </div>
+</div>
+
+<!-- ORGANIC CHEMISTRY -->
+<div class="card open">
+  <div class="chdr" onclick="tog(this)">
+    <span class="ctitle">Organic Chemistry — Named Reactions & Tests</span>
+    <div class="cmeta"><span class="badge bc">3–4 Qs</span><span class="chev">▼</span></div>
+  </div>
+  <div class="cbody">
+    <div class="slbl">Must-know named reactions</div>
+    <div class="crow"><p>Aldol condensation — two aldehydes/ketones join to form β-hydroxy carbonyl compound</p><span>Reagent: dilute NaOH</span></div>
+    <div class="crow"><p>Cannizzaro reaction — disproportionation of aldehyde with no α-H; gives acid + alcohol</p><span>Reagent: conc. NaOH; e.g. HCHO → CH₃OH + HCOONa</span></div>
+    <div class="crow"><p>Grignard reagent (RMgX) — reacts with carbonyl to add R group; produces alcohol after hydrolysis</p><span>Solvent: dry ether</span></div>
+    <div class="crow"><p>SN1 — unimolecular; 2-step; tertiary carbons, polar protic solvents; racemization</p></div>
+    <div class="crow"><p>SN2 — bimolecular; 1-step; primary carbons, polar aprotic solvents; inversion of configuration</p></div>
+    <div class="crow"><p>Markovnikov's rule — H adds to C with more H atoms already (electrophilic addition)</p></div>
+    <div class="crow"><p>Hofmann bromamide degradation — RCONH₂ + Br₂ + NaOH → RNH₂ (amine with one fewer C)</p></div>
+    <div class="slbl">Functional group tests</div>
+    <div class="crow"><p>Aldehyde: gives silver mirror test (Tollen's), Fehling's test (brick red ppt)</p></div>
+    <div class="crow"><p>Carboxylic acid: effervescence with Na₂CO₃ (CO₂ gas)</p></div>
+    <div class="crow"><p>Alcohol: Lucas test — tertiary reacts immediately, primary doesn't</p></div>
+    <div class="tip tc">Don't memorize mechanisms step-by-step. Know: what goes in + conditions → what comes out. That's all AEEE tests.</div>
+  </div>
+</div>
+
+<!-- SOLUTIONS & ATOMIC STRUCTURE -->
+<div class="card open">
+  <div class="chdr" onclick="tog(this)">
+    <span class="ctitle">Solutions, Atomic Structure & Chemical Bonding</span>
+    <div class="cmeta"><span class="badge bc">3–4 Qs</span><span class="chev">▼</span></div>
+  </div>
+  <div class="cbody">
+    <div class="slbl">Colligative properties</div>
+    <div class="frow"><span class="fm">ΔTb = Kb × m × i</span><span class="fn">Boiling point elevation; i = van't Hoff factor</span></div>
+    <div class="frow"><span class="fm">ΔTf = Kf × m × i</span><span class="fn">Freezing point depression</span></div>
+    <div class="frow"><span class="fm">π = iCRT</span><span class="fn">Osmotic pressure; C = molarity, R = 0.0821 L·atm/mol·K</span></div>
+    <div class="frow"><span class="fm">i = 1 + α(n−1)</span><span class="fn">α = degree of dissociation, n = ions from 1 formula unit</span></div>
+    <div class="slbl">Atomic structure</div>
+    <div class="frow"><span class="fm">Eₙ = −13.6/n² eV (H atom)</span><span class="fn">Energy of hydrogen orbital</span></div>
+    <div class="frow"><span class="fm">Quantum numbers: n, l, m, s</span><span class="fn">l = 0 to n−1; m = −l to +l; s = ±½</span></div>
+    <div class="crow"><p>Aufbau: fill lowest energy orbitals first (1s 2s 2p 3s 3p 4s 3d...)</p></div>
+    <div class="crow"><p>Hund's rule: one electron in each degenerate orbital before pairing</p></div>
+    <div class="crow"><p>Pauli exclusion: no two electrons with same 4 quantum numbers</p></div>
+    <div class="slbl">Chemical bonding</div>
+    <div class="crow"><p>VSEPR: count bond pairs + lone pairs around central atom to predict shape (linear, bent, tetrahedral, etc.)</p></div>
+    <div class="crow"><p>Hybridization: sp (linear), sp² (trigonal planar), sp³ (tetrahedral), sp³d (trigonal bipyramidal)</p></div>
+  </div>
+</div>
+
+<!-- PERIODIC TABLE — NEW -->
+<div class="card">
+  <div class="chdr" onclick="tog(this)">
+    <span class="ctitle">Periodic Table — Trends & p-Block Elements</span>
+    <div class="cmeta"><span class="badge bc">3–4 Qs</span><span class="badge bnew">NEW</span><span class="chev">▼</span></div>
+  </div>
+  <div class="cbody">
+    <div class="slbl">Periodic trends (direction matters!)</div>
+    <div class="frow"><span class="fm">Atomic radius: ↑ down group, ← across period</span><span class="fn">Decreases left→right (more protons); increases top→bottom</span></div>
+    <div class="frow"><span class="fm">Ionization energy: ↓ down group, → across period</span><span class="fn">Opposite of radius. Exceptions: Be>B, N>O (half-filled stability)</span></div>
+    <div class="frow"><span class="fm">Electronegativity order: F>O>N>Cl>Br>C>H</span><span class="fn">Increases right and up the periodic table. Memorize this order.</span></div>
+    <div class="frow"><span class="fm">Electron affinity: Cl > F (exception)</span><span class="fn">F is smaller but electron repulsion makes Cl have higher EA</span></div>
+    <div class="slbl">p-block key facts</div>
+    <div class="crow"><p>Group 15 (N, P): NH₃ is basic, pyramidal sp³. N₂ very stable (triple bond).</p></div>
+    <div class="crow"><p>Group 16 (O, S): H₂O is bent sp³ (2 lone pairs). H₂S has lower bp than H₂O despite higher MW.</p></div>
+    <div class="crow"><p>Group 17 (Halogens): Cl₂ bleaches in presence of water (HOCl). Bond energy: Cl-Cl > F-F > Br-Br.</p></div>
+    <div class="crow"><p>Group 18 (Noble gases): First noble gas compound XeF₂. He in balloons; Ar in light bulbs; Ne in neon signs.</p></div>
+    <div class="tip tc">AEEE tests "which is largest/most electronegative" — know direction of each trend and the two key exceptions: Be>B and N>O for ionization energy.</div>
+  </div>
+</div>
+
+<!-- COORDINATION COMPOUNDS — NEW -->
+<div class="card">
+  <div class="chdr" onclick="tog(this)">
+    <span class="ctitle">Coordination Compounds</span>
+    <div class="cmeta"><span class="badge bc">2–3 Qs</span><span class="badge bnew">NEW</span><span class="chev">▼</span></div>
+  </div>
+  <div class="cbody">
+    <div class="slbl">Nomenclature rules</div>
+    <div class="crow"><p>Name order: ligands (alphabetical) → central metal → oxidation state in Roman numerals → counter ion</p><span>Example: [Co(NH₃)₄Cl₂]Cl = tetraamminedichloridocobalt(III) chloride</span></div>
+    <div class="crow"><p>Anionic ligands end in "-o": Cl⁻ = chlorido, CN⁻ = cyanido, OH⁻ = hydroxido, NO₂⁻ = nitrito</p></div>
+    <div class="crow"><p>Neutral ligands: NH₃ = ammine, H₂O = aqua, CO = carbonyl, NO = nitrosyl</p></div>
+    <div class="frow"><span class="fm">Coordination number = ligands attached to metal</span><span class="fn">CN=6 → octahedral; CN=4 → tetrahedral or square planar</span></div>
+    <div class="crow"><p>Oxidation state calculation: metal OS + ligand charges + counter ion charges = 0</p><span>Example: [Fe(CN)₆]³⁻ → Fe + 6(−1) = −3, so Fe = +3</span></div>
+    <div class="crow"><p>Isomerism: Geometric (cis-trans) for MA₂B₂ octahedral. Optical (non-superimposable mirror images).</p></div>
+    <div class="tip tc">Finding oxidation state appears every year — practice with 5 examples: [Cu(NH₃)₄]²⁺, [Fe(CN)₆]³⁻, [Cr(H₂O)₆]³⁺, [Co(en)₃]³⁺, [Ni(CO)₄].</div>
+  </div>
+</div>
+
+<!-- SOLID STATE & IONIC EQ — NEW -->
+<div class="card">
+  <div class="chdr" onclick="tog(this)">
+    <span class="ctitle">Solid State & Ionic Equilibrium</span>
+    <div class="cmeta"><span class="badge bc">2–3 Qs</span><span class="badge bnew">NEW</span><span class="chev">▼</span></div>
+  </div>
+  <div class="cbody">
+    <div class="slbl">Crystal structures</div>
+    <div class="frow"><span class="fm">Simple cubic: 1 atom/cell, packing 52%</span><span class="fn">Corner atoms: 8 × (1/8) = 1</span></div>
+    <div class="frow"><span class="fm">BCC: 2 atoms/cell, packing 68%</span><span class="fn">1 (corners) + 1 (centre) = 2. Na, K, Fe.</span></div>
+    <div class="frow"><span class="fm">FCC: 4 atoms/cell, packing 74%</span><span class="fn">1 (corners) + 3 (faces) = 4. Cu, Al, Au — densest packing.</span></div>
+    <div class="frow"><span class="fm">d = nM / (Nₐ × a³)</span><span class="fn">Density; n = atoms/cell, a = edge length</span></div>
+    <div class="slbl">Ionic equilibrium</div>
+    <div class="frow"><span class="fm">Ka = [H⁺][A⁻] / [HA]</span><span class="fn">Acid dissociation constant; stronger acid → larger Ka</span></div>
+    <div class="frow"><span class="fm">pH = −log[H⁺]</span><span class="fn">pH + pOH = 14 at 25°C. Neutral water: pH=7</span></div>
+    <div class="frow"><span class="fm">pH of weak acid = ½(pKa − log C)</span><span class="fn">C = initial concentration of acid</span></div>
+    <div class="frow"><span class="fm">Henderson-Hasselbalch: pH = pKa + log([A⁻]/[HA])</span><span class="fn">Buffer equation — salt/acid buffer solutions</span></div>
+    <div class="frow"><span class="fm">Ksp = [Mⁿ⁺][Xⁿ⁻] (for MX salt)</span><span class="fn">Precipitation when Q > Ksp</span></div>
+    <div class="tip tc">Buffer and Ksp questions appear every year. For MₐXᵦ salt → Ksp = (as)ᵃ × (bs)ᵇ where s = solubility.</div>
+  </div>
+</div>
+
+<!-- SURFACE CHEMISTRY — NEW -->
+<div class="card">
+  <div class="chdr" onclick="tog(this)">
+    <span class="ctitle">Surface Chemistry & Colloids</span>
+    <div class="cmeta"><span class="badge bc">2 Qs</span><span class="badge bnew">NEW</span><span class="chev">▼</span></div>
+  </div>
+  <div class="cbody">
+    <div class="crow"><p>Physisorption: weak van der Waals, reversible, exothermic, decreases with temperature, multilayer</p></div>
+    <div class="crow"><p>Chemisorption: chemical bond, irreversible, forms monolayer, initially increases then decreases with temp</p></div>
+    <div class="crow"><p>Colloid size: 1–1000 nm (between true solution <1 nm and suspension >1000 nm)</p></div>
+    <div class="crow"><p>Tyndall effect: scattering of light by colloidal particles — distinguishes colloid from true solution</p></div>
+    <div class="crow"><p>Hardy-Schulze rule: higher valency of coagulating ion = more effective coagulation of colloid</p></div>
+    <div class="frow"><span class="fm">Activation energy with catalyst: E_a' < E_a</span><span class="fn">Catalyst lowers activation energy; doesn't affect equilibrium position</span></div>
+    <div class="tip tc">Surface chemistry MCQs are mostly conceptual. Know: Tyndall effect, physisorption vs chemisorption comparison, Hardy-Schulze rule for coagulation.</div>
+  </div>
+</div>
+
+<!-- POLYMERS & BIOMOLECULES — NEW -->
+<div class="card">
+  <div class="chdr" onclick="tog(this)">
+    <span class="ctitle">Polymers & Biomolecules</span>
+    <div class="cmeta"><span class="badge bc">2 Qs</span><span class="badge bnew">NEW</span><span class="chev">▼</span></div>
+  </div>
+  <div class="cbody">
+    <div class="slbl">Important polymers</div>
+    <div class="frow"><span class="fm">Nylon-6,6 (condensation)</span><span class="fn">Hexamethylenediamine + adipic acid. Fabrics, ropes.</span></div>
+    <div class="frow"><span class="fm">Teflon / PTFE (addition)</span><span class="fn">Polymerization of tetrafluoroethylene. Non-stick coatings.</span></div>
+    <div class="frow"><span class="fm">Bakelite (condensation)</span><span class="fn">Phenol + formaldehyde. Thermosetting — does not soften on reheating.</span></div>
+    <div class="frow"><span class="fm">Natural rubber: cis-polyisoprene</span><span class="fn">Vulcanization with S increases hardness and elasticity</span></div>
+    <div class="frow"><span class="fm">PVC (addition): vinyl chloride monomer</span><span class="fn">Pipes, cables. Thermoplastic — can be reshaped.</span></div>
+    <div class="slbl">Biomolecules</div>
+    <div class="crow"><p>Glucose (C₆H₁₂O₆): reducing sugar; open chain has aldehyde; gives Tollen's and Fehling's test</p></div>
+    <div class="crow"><p>Sucrose: glucose + fructose; NON-reducing (no free anomeric OH). Fructose = sweetest sugar.</p></div>
+    <div class="crow"><p>Amino acids: contain both −NH₂ and −COOH groups. Peptide bond = −CO−NH− linkage.</p></div>
+    <div class="crow"><p>DNA: thymine, deoxyribose sugar, double helix. RNA: uracil, ribose sugar, single stranded.</p></div>
+    <div class="tip tc">Thermoplastic = can be reshaped (Nylon, PVC, Teflon). Thermosetting = cannot be reshaped (Bakelite). Addition polymer = one monomer. Condensation = two monomers + small molecule released.</div>
+  </div>
+</div>
+
+<!-- d-BLOCK — NEW -->
+<div class="card">
+  <div class="chdr" onclick="tog(this)">
+    <span class="ctitle">d-Block (Transition) Elements</span>
+    <div class="cmeta"><span class="badge bc">2 Qs</span><span class="badge bnew">NEW</span><span class="chev">▼</span></div>
+  </div>
+  <div class="cbody">
+    <div class="crow"><p>d-block: Groups 3–12 (Sc to Zn). Variable oxidation states due to similar energies of ns and (n−1)d electrons.</p></div>
+    <div class="crow"><p>Most stable states: Mn²⁺ (d⁵ half-filled), Fe³⁺ (d⁵), Cu²⁺ more stable than Cu⁺ in aqueous solution</p></div>
+    <div class="crow"><p>Paramagnetism: due to unpaired d electrons. More unpaired = more paramagnetic.</p></div>
+    <div class="crow"><p>Catalysts: Fe in Haber (N₂+3H₂→2NH₃); V₂O₅ in Contact process; Ni in hydrogenation; Pt in catalytic converters</p></div>
+    <div class="crow"><p>Colour in solution: due to d-d electron transitions. Cu²⁺=blue, Cr³⁺=green, Mn²⁺=pale pink, Fe³⁺=yellow</p></div>
+    <div class="frow"><span class="fm">KMnO₄: MnO₄⁻ → Mn²⁺ (gains 5e⁻, purple→colourless)</span><span class="fn">Strong oxidizing agent in acid medium. Oxidizes Fe²⁺, I⁻, oxalates.</span></div>
+    <div class="frow"><span class="fm">K₂Cr₂O₇: Cr₂O₇²⁻ → 2Cr³⁺ (gains 6e⁻, orange→green)</span><span class="fn">Oxidizes alcohols to aldehydes/acids in acid medium.</span></div>
+    <div class="tip tc">Know the catalyst-process pairs, common solution colours of ions, and both oxidizing agents (KMnO₄ and K₂Cr₂O₇) — these are 90% conceptual marks.</div>
+  </div>
+</div>
+
+</div><!-- end chemistry -->
+
+<!-- ════════════════════════════════
+     QUANT APTITUDE
+════════════════════════════════ -->
+<div class="sec" id="sec-q">
+
+<div class="card open">
+  <div class="chdr" onclick="tog(this)">
+    <span class="ctitle">Ratios, Percentages, Profit & Loss</span>
+    <div class="cmeta"><span class="badge bq">3–4 Qs</span><span class="chev">▼</span></div>
+  </div>
+  <div class="cbody">
+    <div class="frow"><span class="fm">% = (part/whole) × 100</span><span class="fn">Core percentage formula</span></div>
+    <div class="frow"><span class="fm">% change = (new−old)/old × 100</span><span class="fn">Increase/decrease percentage</span></div>
+    <div class="frow"><span class="fm">Profit% = (Profit/CP) × 100</span><span class="fn">CP = cost price, SP = selling price, Profit = SP−CP</span></div>
+    <div class="frow"><span class="fm">SP = CP × (100+P%) / 100</span><span class="fn">When profit % is known</span></div>
+    <div class="frow"><span class="fm">Discount% = (discount/MP) × 100</span><span class="fn">MP = marked price; SP = MP × (1−D%/100)</span></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="chdr" onclick="tog(this)">
+    <span class="ctitle">Time-Speed-Distance, Work & Averages</span>
+    <div class="cmeta"><span class="badge bq">3 Qs</span><span class="chev">▼</span></div>
+  </div>
+  <div class="cbody">
+    <div class="frow"><span class="fm">Speed = Distance / Time</span><span class="fn">Convert km/h to m/s: multiply by 5/18</span></div>
+    <div class="frow"><span class="fm">Avg speed = 2S₁S₂ / (S₁+S₂)</span><span class="fn">When equal distances at speeds S₁ and S₂</span></div>
+    <div class="frow"><span class="fm">Work rate = 1/n per day</span><span class="fn">If A finishes in n days, rate = 1/n per day</span></div>
+    <div class="frow"><span class="fm">Together: 1/T = 1/A + 1/B</span><span class="fn">Combined time when A takes A days, B takes B days</span></div>
+    <div class="frow"><span class="fm">Average = Sum / Count</span><span class="fn">If average changes, set up equation and solve</span></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="chdr" onclick="tog(this)">
+    <span class="ctitle">Simple & Compound Interest, Number Series</span>
+    <div class="cmeta"><span class="badge bq">3 Qs</span><span class="chev">▼</span></div>
+  </div>
+  <div class="cbody">
+    <div class="frow"><span class="fm">SI = PRT / 100</span><span class="fn">P = principal, R = rate%, T = time in years</span></div>
+    <div class="frow"><span class="fm">CI: A = P(1 + R/100)ᵀ</span><span class="fn">Amount after T years; CI = A − P</span></div>
+    <div class="frow"><span class="fm">CI − SI = P(R/100)² for 2 yrs</span><span class="fn">Quick shortcut for 2-year difference questions</span></div>
+    <div class="slbl">Number series patterns</div>
+    <div class="crow"><p>Arithmetic series: each term differs by constant d (find d = T₂ − T₁)</p></div>
+    <div class="crow"><p>Geometric series: each term multiplied by constant r (find r = T₂/T₁)</p></div>
+    <div class="crow"><p>Difference series: check differences of consecutive terms — often form AP/GP themselves</p></div>
+    <div class="crow"><p>Square/cube series: 1,4,9,16... or 1,8,27,64... — spot perfect squares or cubes</p></div>
+    <div class="tip tq">Strategy: For number series, immediately compute differences between consecutive terms. Constant → AP. Constant ratio → GP. Differences form AP → quadratic sequence.</div>
+  </div>
+</div>
+
+</div><!-- end quant -->
+
+<!-- ════════════════════════════════
+     ENGLISH
+════════════════════════════════ -->
+<div class="sec" id="sec-e">
+
+<div class="card open">
+  <div class="chdr" onclick="tog(this)">
+    <span class="ctitle">Synonyms, Antonyms & Analogies — High-Frequency Word List</span>
+    <div class="cmeta"><span class="badge be">3 Qs</span><span class="chev">▼</span></div>
+  </div>
+  <div class="cbody">
+    <div class="slbl">High-frequency word pairs</div>
+    <div class="frow"><span class="fm">Abate → Decrease / Diminish</span><span class="fn">Antonym: Increase, Intensify</span></div>
+    <div class="frow"><span class="fm">Benevolent → Generous / Kind</span><span class="fn">Antonym: Malevolent, Cruel</span></div>
+    <div class="frow"><span class="fm">Candid → Frank / Honest</span><span class="fn">Antonym: Evasive, Dishonest</span></div>
+    <div class="frow"><span class="fm">Diligent → Hardworking / Industrious</span><span class="fn">Antonym: Lazy, Indolent</span></div>
+    <div class="frow"><span class="fm">Eloquent → Fluent / Articulate</span><span class="fn">Antonym: Inarticulate, Tongue-tied</span></div>
+    <div class="frow"><span class="fm">Frugal → Thrifty / Economical</span><span class="fn">Antonym: Extravagant, Wasteful</span></div>
+    <div class="frow"><span class="fm">Haughty → Arrogant / Proud</span><span class="fn">Antonym: Humble, Modest</span></div>
+    <div class="frow"><span class="fm">Impede → Hinder / Obstruct</span><span class="fn">Antonym: Facilitate, Assist</span></div>
+    <div class="frow"><span class="fm">Jovial → Cheerful / Merry</span><span class="fn">Antonym: Gloomy, Melancholic</span></div>
+    <div class="frow"><span class="fm">Lethargic → Sluggish / Inactive</span><span class="fn">Antonym: Energetic, Active</span></div>
+    <div class="frow"><span class="fm">Meticulous → Careful / Precise</span><span class="fn">Antonym: Careless, Sloppy</span></div>
+    <div class="frow"><span class="fm">Novel → New / Original</span><span class="fn">Antonym: Old, Conventional</span></div>
+    <div class="frow"><span class="fm">Obscure → Unclear / Vague</span><span class="fn">Antonym: Clear, Obvious</span></div>
+    <div class="frow"><span class="fm">Prudent → Wise / Cautious</span><span class="fn">Antonym: Reckless, Imprudent</span></div>
+    <div class="tip te">Analogy tip: identify the relationship first (cause→effect, part→whole, worker→tool). Apply same relationship to the question pair.</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="chdr" onclick="tog(this)">
+    <span class="ctitle">Grammar — Articles, Prepositions, Tenses & Verbs</span>
+    <div class="cmeta"><span class="badge be">2 Qs</span><span class="chev">▼</span></div>
+  </div>
+  <div class="cbody">
+    <div class="slbl">Articles (a, an, the)</div>
+    <div class="crow"><p>"a" → before consonant sounds: a book, a university (note: 'u' sounds like 'y')</p></div>
+    <div class="crow"><p>"an" → before vowel sounds: an apple, an hour (note: 'h' is silent here)</p></div>
+    <div class="crow"><p>"the" → specific/known noun; unique things (the sun); superlatives (the best)</p></div>
+    <div class="crow"><p>No article → general plural nouns (Dogs are loyal), languages, subjects (I study Physics)</p></div>
+    <div class="slbl">Prepositions</div>
+    <div class="frow"><span class="fm">in: months, years, cities</span><span class="fn">in January / in 2026 / in Chennai</span></div>
+    <div class="frow"><span class="fm">on: days, dates, surfaces</span><span class="fn">on Monday / on 21st April / on the table</span></div>
+    <div class="frow"><span class="fm">at: specific time or place</span><span class="fn">at 9 AM / at the station / at home</span></div>
+    <div class="slbl">Common tense rules</div>
+    <div class="crow"><p>Simple past: use "did" in question/negative; no "-ed" with "did" (I did go, not I did went)</p></div>
+    <div class="crow"><p>Present perfect: have/has + past participle — for actions with present relevance (I have studied)</p></div>
+    <div class="crow"><p>Subject-verb agreement: singular subject → singular verb (The team is, not The team are)</p></div>
+  </div>
+</div>
+
+</div><!-- end english -->
+
+</div><!-- end main -->
+
+<script>
+function show(id, btn, cls) {
+  document.querySelectorAll('.sec').forEach(s => s.classList.remove('vis'));
+  document.querySelectorAll('.nbtn').forEach(b => b.classList.remove('am','ap','ac','aq','ae'));
+  document.getElementById('sec-'+id).classList.add('vis');
+  btn.classList.add(cls);
 }
-const openWindowOriginal = openWindow;
-openWindow = function(id){ openWindowOriginal(id); markRunningIndicators(); state.session.lastOpenWindows = [...document.querySelectorAll('.window')].filter(w=>w.style.display!=='none').map(w=>w.id); };
-const closeWindowOriginal = closeWindow;
-closeWindow = function(id){ closeWindowOriginal(id); markRunningIndicators(); state.session.lastOpenWindows = [...document.querySelectorAll('.window')].filter(w=>w.style.display!=='none').map(w=>w.id); };
-
-function renderNoteBlocks() {
-  const sp = getSpace();
-  const cur = sp.notes.find(n => n.id === sp.selectedNoteId);
-  if (!cur) return;
-  cur.blocks = cur.blocks || [];
-  const c = $('note-blocks');
-  c.innerHTML = cur.blocks.map((b, i) => `
-    <div class="note-block" draggable="true" data-type="${esc(b.type || 'text')}" data-block-index="${i}">
-      <div class="block-top">
-        <span class="block-tag">${esc(b.type || 'text')}</span>
-        <div class="block-controls">
-          <button class="btn" data-up-block="${i}" title="Move up">↑</button>
-          <button class="btn" data-down-block="${i}" title="Move down">↓</button>
-          <button class="btn" data-del-block="${i}" title="Delete">✕</button>
-        </div>
-      </div>
-      <div class="block-content" contenteditable="true" data-editable-block="${i}">${esc(b.text || '')}</div>
-    </div>
-  `).join('') || '<div class="note-block">No blocks yet. Type /concept in the editor bar and press Enter.</div>';
-
-  c.querySelectorAll('[data-del-block]').forEach(n => n.onclick = () => {
-    cur.blocks.splice(Number(n.dataset.delBlock),1);
-    renderNoteBlocks();
-    saveCurrentNote();
-  });
-  c.querySelectorAll('[data-up-block]').forEach(n => n.onclick = () => {
-    const i = Number(n.dataset.upBlock);
-    if (i <= 0) return;
-    [cur.blocks[i-1], cur.blocks[i]] = [cur.blocks[i], cur.blocks[i-1]];
-    renderNoteBlocks();
-    saveCurrentNote();
-  });
-  c.querySelectorAll('[data-down-block]').forEach(n => n.onclick = () => {
-    const i = Number(n.dataset.downBlock);
-    if (i >= cur.blocks.length - 1) return;
-    [cur.blocks[i+1], cur.blocks[i]] = [cur.blocks[i], cur.blocks[i+1]];
-    renderNoteBlocks();
-    saveCurrentNote();
-  });
-
-  c.querySelectorAll('[data-editable-block]').forEach(n => {
-    n.oninput = () => {
-      const i = Number(n.dataset.editableBlock);
-      if (!cur.blocks[i]) return;
-      cur.blocks[i].text = n.innerText;
-    };
-    n.onblur = () => saveCurrentNote();
-    n.onkeydown = e => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        const i = Number(n.dataset.editableBlock);
-        cur.blocks.splice(i + 1, 0, { type:'text', text:'', at:Date.now() });
-        renderNoteBlocks();
-        const nx = c.querySelector(`[data-editable-block="${i+1}"]`);
-        nx?.focus();
-        saveCurrentNote();
-      }
-    };
-  });
-
-  const blocks = [...c.querySelectorAll('[data-block-index]')];
-  let dragIdx = -1;
-  blocks.forEach(node => {
-    node.ondragstart = () => { dragIdx = Number(node.dataset.blockIndex); };
-    node.ondragover = e => e.preventDefault();
-    node.ondrop = () => {
-      const dropIdx = Number(node.dataset.blockIndex);
-      if (dragIdx < 0 || dragIdx === dropIdx) return;
-      const item = cur.blocks.splice(dragIdx,1)[0];
-      cur.blocks.splice(dropIdx,0,item);
-      renderNoteBlocks();
-      saveCurrentNote();
-    };
-  });
-}
-
-function generateFlashcardsFromCurrentNote() {
-  const sp = getSpace();
-  const cur = sp.notes.find(n => n.id === sp.selectedNoteId);
-  if (!cur) return;
-  const lines = (cur.content || '').split(/\n+/).map(l => l.trim()).filter(Boolean);
-  const cards = [];
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    if (line.endsWith('?') && i + 1 < lines.length) {
-      cards.push({ id: crypto.randomUUID(), q: line, a: lines[i+1], createdAt: Date.now() });
-      i += 1;
-    }
-  }
-  if (!cards.length) return;
-  sp.flashcards = cards;
-  flashIndex = 0;
-  flashFlipped = false;
-  queueSave();
-  renderFlashcardReview();
-  showToast(`Generated ${cards.length} flashcards`);
-}
-
-function renderFlashcardReview() {
-  const sp = getSpace();
-  const list = sp.flashcards || [];
-  const container = document.getElementById('flashcard-content');
-  if (!container) return;
-  if (!list.length) {
-    container.textContent = 'No flashcards available. Use Notes → Generate Flashcards.';
-    return;
-  }
-  flashIndex = Math.max(0, Math.min(flashIndex, list.length - 1));
-  const card = list[flashIndex];
-  const text = flashFlipped ? card.a : card.q;
-  container.innerHTML = `<div style="width:100%;"><div style="font-size:12px;opacity:.7;margin-bottom:6px;">${flashIndex+1}/${list.length}</div><div style="white-space:pre-wrap;">${esc(text)}</div></div>`;
-}
-
-function renderKnowledgeGraph() { /* removed for simplicity */ }
-
-function renderRevisionSummary() { /* removed for simplicity */ }
-
-async function runOCROnCurrentView() {
-  if (pdfDoc) return runOCRForPage(pdfPage);
-  const active = document.querySelector('.window.active');
-  if (!active) return '';
-  const t = (active.querySelector('textarea.field')?.value || active.innerText || '').slice(0, 5000);
-  return t;
-}
-
-function setupContextMenus() {
-  const desktopCtx = $('desktop-context');
-  const winCtx = $('window-context');
-      el.desktop.addEventListener('contextmenu', e => {
-        e.preventDefault();
-      });
-      document.querySelectorAll('.window .titlebar').forEach(bar => bar.addEventListener('contextmenu', e => {
-    e.preventDefault();
-    const id = bar.dataset.window;
-    winCtx.dataset.window = id;
-    winCtx.style.display = 'block';
-    winCtx.style.left = `${e.clientX}px`;
-    winCtx.style.top = `${e.clientY}px`;
-  }));
-      document.addEventListener('click', () => { if(desktopCtx) {desktopCtx.style.display='none';} if(winCtx) {winCtx.style.display='none';} });
-  [...desktopCtx.querySelectorAll('[data-ctx]')].forEach(i => i.onclick = () => {
-    if (i.dataset.ctx === 'refresh') renderDesktop();
-    if (i.dataset.ctx === 'new-note') $('note-new').click();
-    if (i.dataset.ctx === 'focus') launchApp('focus-window');
-  });
-  [...winCtx.querySelectorAll('[data-wctx]')].forEach(i => i.onclick = () => {
-    const id = winCtx.dataset.window;
-    const w = $(id);
-    if (!w) return;
-    if (i.dataset.wctx === 'left') { w.style.left='8px'; w.style.top='8px'; w.style.width='calc(50vw - 12px)'; w.style.height='calc(100vh - var(--taskbar-h) - 20px)'; }
-    if (i.dataset.wctx === 'right') { w.style.left='calc(50vw + 4px)'; w.style.top='8px'; w.style.width='calc(50vw - 12px)'; w.style.height='calc(100vh - var(--taskbar-h) - 20px)'; }
-    if (i.dataset.wctx === 'top') { w.style.left='8px'; w.style.top='8px'; w.style.width='calc(100vw - 16px)'; w.style.height='calc(50vh)'; }
-    saveWindowRect(id); queueSave();
-  });
-}
-
-async function runOCRForPage(pageNumber) {
-  const sp = getSpace();
-  const key = `${currentBookTitle || 'book'}:${pageNumber}`;
-  if (sp.ocrCache[key]) return sp.ocrCache[key];
-  const page = await pdfDoc.getPage(pageNumber);
-  const vp = page.getViewport({ scale: 1.4, });
-  const c = document.createElement('canvas');
-  c.width = vp.width; c.height = vp.height;
-  await page.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
-  const { data } = await Tesseract.recognize(c, 'eng');
-  sp.ocrCache[key] = data.text || '';
-  queueSave();
-  return sp.ocrCache[key];
-}
-
-async function loadPDF(url, second = false) {
-  if (!second) setStudyViewerMode('pdf');
-  const loadingTask = pdfjsLib.getDocument(url);
-  const doc = await loadingTask.promise;
-  if (second) { pdfDoc2 = doc; pdfPage2 = 1; } else { pdfDoc = doc; pdfPage = 1; }
-  await renderPage(second);
-  if (!second) renderThumbnails();
-}
-
-async function renderPage(second = false) {
-  const doc = second ? pdfDoc2 : pdfDoc;
-  if (!doc) return;
-  const pageNo = second ? pdfPage2 : pdfPage;
-  const canvas = second ? $('pdf-canvas-2') : $('pdf-canvas');
-  const page = await doc.getPage(pageNo);
-  const viewport = page.getViewport({scale: pdfScale});
-  canvas.width = viewport.width;
-  canvas.height = viewport.height;
-  await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
-  if (!second) {
-    $('pdf-page-info').textContent = `Page ${pdfPage} / ${pdfDoc.numPages}`;
-    if (el.pdfSlider) { el.pdfSlider.max = String(pdfDoc.numPages || 1); el.pdfSlider.value = String(pdfPage); }
-    localStorage.setItem(`pdf-last-page:${currentBookTitle}`, String(pdfPage));
-    const sp = getSpace();
-    const book = (sp.books || []).find(b => b.title === currentBookTitle);
-    if (book) {
-      book.lastPage = pdfPage;
-      book.totalPages = pdfDoc.numPages || book.totalPages || 0;
-      book.openedAt = Date.now();
-    }
-  }
-  renderPDFSidebars();
-}
-
-async function renderThumbnails(){
-  if (!pdfDoc) return;
-  const container = $('pdf-thumbnails');
-  const total = pdfDoc.numPages;
-  container.innerHTML = '';
-  for (let i = 1; i <= Math.min(total, 25); i++) {
-    const item = document.createElement('div');
-    item.className = `thumb-item ${i===pdfPage?'active':''}`;
-    item.textContent = `Page ${i}`;
-    item.onclick = () => { pdfPage = i; renderPage(); renderThumbnails(); };
-    container.appendChild(item);
-  }
-}
-
-function detectFormula(text=''){
-  return /=|∫|Σ|sigma|\\vec|vector|Δ/i.test(text);
-}
-
-function renderPDFSidebars() {
-  const sp = getSpace();
-  const b = (sp.bookmarks || []).filter(x => x.book === (currentBookTitle || x.book)).slice(0, 12);
-  $('pdf-bookmarks').innerHTML = `<div style="font-weight:700;padding:4px;">Bookmarks</div>` + (b.map(x => `<div class="thumb-item" data-bmk="${x.page}">Page ${x.page}</div>`).join('') || '<div class="thumb-item">No bookmarks.</div>');
-  [...$('pdf-bookmarks').querySelectorAll('[data-bmk]')].forEach(n => n.onclick = () => { pdfPage = Number(n.dataset.bmk); renderPage(); renderThumbnails(); });
-  const hs = (sp.highlights || []).filter(h => h.book === currentBookTitle).slice(0, 12);
-  $('pdf-highlight-list').innerHTML = `<div style="font-weight:700;padding:4px;">Highlight Timeline</div>` + (hs.map(h => `<div class="thumb-item" data-hp="${h.page}">P${h.page}: ${esc(h.text.slice(0,40))}</div>`).join('') || '<div class="thumb-item">No highlights.</div>');
-  [...$('pdf-highlight-list').querySelectorAll('[data-hp]')].forEach(n => n.onclick = () => { pdfPage = Number(n.dataset.hp); renderPage(); renderThumbnails(); });
-}
-
-function setupAdvancedBindings() {
-  const viewer = $('pdf-viewer-container');
-  if (viewer && el.floatingHl) {
-    viewer.addEventListener('mouseup', e => {
-      const t = window.getSelection?.().toString().trim();
-      if (!t || !pdfDoc) { el.floatingHl.style.display='none'; return; }
-      el.floatingHl.style.display='flex';
-      el.floatingHl.style.left=`${Math.min(window.innerWidth-340, e.clientX)}px`;
-      el.floatingHl.style.top=`${Math.max(40, e.clientY-42)}px`;
-      el.floatingHl.dataset.sel = t;
-    });
-    document.addEventListener('mousedown', ev => { if (!ev.target.closest('#floating-highlight-toolbar')) el.floatingHl.style.display='none'; });
-    [...el.floatingHl.querySelectorAll('[data-hl-kind]')].forEach(b => b.onclick = () => {
-      $('pdf-highlight-color').value = b.dataset.hlKind;
-      const text = el.floatingHl.dataset.sel || '';
-      if (!text) return;
-      const meta = { id: crypto.randomUUID(), type: b.dataset.hlKind, text, source: `${currentBookTitle || 'Book'} – Page ${pdfPage}`, at: Date.now(), page: pdfPage, book: currentBookTitle || 'Book' };
-      const sp = getSpace();
-      sp.highlights.unshift(meta);
-      sp.vault.unshift({ text: `[From Book: ${meta.book} – Page ${meta.page}]\n${meta.text}`, at: Date.now() });
-      renderHighlightsPanel(); renderVault(); renderPDFSidebars(); queueSave();
-      el.floatingHl.style.display='none';
-    });
-  }
-  $('pdf-next').onclick = () => { if (!pdfDoc || pdfPage >= pdfDoc.numPages) return; pdfPage++; renderPage(); renderThumbnails(); };
-  $('pdf-prev').onclick = () => { if (!pdfDoc || pdfPage <= 1) return; pdfPage--; renderPage(); renderThumbnails(); };
-  $('pdf-zoom-in').onclick = () => { pdfScale += 0.15; renderPage(); if (splitPDF) renderPage(true); };
-  $('pdf-zoom-out').onclick = () => { pdfScale = Math.max(0.6, pdfScale - 0.15); renderPage(); if (splitPDF) renderPage(true); };
-  $('pdf-run-search').onclick = async () => {
-    const q = ($('pdf-search').value || '').trim().toLowerCase();
-    if (!q) return;
-    if (!pdfDoc) {
-      const txt = ($('doc-text-viewer').textContent || '').toLowerCase();
-      $('pdf-search-results').innerHTML = txt.includes(q)
-        ? `<div class="thumb-item">Found in current document preview</div>`
-        : `<div class="thumb-item">No results in current document</div>`;
-      return;
-    }
-    const out = [];
-    for (let i = 1; i <= Math.min(pdfDoc.numPages, 15); i++) {
-      const page = await pdfDoc.getPage(i);
-      const txt = await page.getTextContent();
-      let merged = txt.items.map(x => x.str).join(' ');
-      if (!merged.trim()) merged = await runOCRForPage(i);
-      if (merged.toLowerCase().includes(q)) out.push({ page: i, sample: merged.slice(0,120) });
-    }
-    $('pdf-search-results').innerHTML = out.map(r => `<div class="thumb-item" data-goto="${r.page}">P${r.page}: ${esc(r.sample)}</div>`).join('') || 'No results';
-    [...$('pdf-search-results').querySelectorAll('[data-goto]')].forEach(n => n.onclick = () => { pdfPage = Number(n.dataset.goto); renderPage(); renderThumbnails(); });
-  };
-
-  $('pdf-highlight').onclick = () => {
-    const text = prompt('Highlight text');
-    if (!text?.trim()) return;
-    const kind = $('pdf-highlight-color').value;
-    const source = `${currentBookTitle || 'Book'} – Page ${pdfPage}`;
-    const meta = { id: crypto.randomUUID(), type: kind, text: text.trim(), source, at: Date.now(), page: pdfPage, book: currentBookTitle || 'Book' };
-    const sp = getSpace();
-    sp.highlights.unshift(meta);
-    const prefix = `[From Book: ${meta.book} – Page ${meta.page}]\n`;
-    sp.vault.unshift({ text: `${prefix}${meta.text}`, at: Date.now() });
-    $('workspace-notes').innerText += `\n${prefix}${meta.text}`;
-
-    renderHighlightsPanel(); renderVault();   renderPDFSidebars(); queueSave();
-  };
-
-  $('pdf-bookmark-page').onclick = () => {
-    const sp = getSpace();
-    sp.bookmarks.unshift({ id: crypto.randomUUID(), page: pdfPage, book: currentBookTitle || 'Book', at: Date.now() });
-    renderPDFSidebars();
-    queueSave(); };
-  if ($('note-exam-template')) $('note-exam-template').onclick = () => {
-    const tpl = `# Chapter
-## Definitions
--
-## Core Formulas
--
-## PYQ Patterns
--
-## Mistakes to Avoid
--
-## 1-day Revision`;
-    const sp = getSpace(); const cur = sp.notes.find(n => n.id === sp.selectedNoteId); if (!cur) return;
-    cur.blocks = cur.blocks || []; cur.blocks.push({ type:'heading', text:'Exam Template', at:Date.now() }); cur.blocks.push({ type:'text', text: tpl, at:Date.now() });
-    renderNoteBlocks(); saveCurrentNote();
-  };
-  if ($('note-quick-revision')) $('note-quick-revision').onclick = () => { showToast('Quick revision not implemented yet'); };
-
-  if ($('note-generate-quiz')) $('note-generate-quiz').onclick = () => { showToast('Quiz generator not implemented yet'); };
-
-  $('flash-prev').onclick = () => { flashIndex = Math.max(0, flashIndex - 1); renderFlashcardReview(); };
-  $('flash-next').onclick = () => { flashIndex = Math.min((getSpace().flashcards||[]).length - 1, flashIndex + 1); renderFlashcardReview(); };
-  $('flash-flip').onclick = () => { flashFlipped = !flashFlipped; renderFlashcardReview(); const nl = $('notes-layout'); if (nl) nl.className='app-body mobile-pane-editor'; };
-
-  $('note-add-block').onclick = () => {
-    const sp = getSpace();
-    const cur = sp.notes.find(n => n.id === sp.selectedNoteId);
-    if (!cur) return;
-    cur.blocks = cur.blocks || [];
-    const t = $('note-block-type').value;
-    cur.blocks.push({ type: t, text: '', at: Date.now() });
-    renderNoteBlocks();
-    const idx = cur.blocks.length - 1;
-    $('note-blocks')?.querySelector(`[data-editable-block="${idx}"]`)?.focus();
-    saveCurrentNote();
-  };
-  $('note-add-block-fab').onclick = () => $('note-add-block').click();
-
-  $('focus-start').onclick = () => {
-    clearInterval(pomodoroTimer);
-    pomodoroRemaining = 25 * 60;
-    pomodoroTimer = setInterval(() => {
-      pomodoroRemaining--;
-      const m = Math.floor(pomodoroRemaining / 60), s = pomodoroRemaining % 60;
-      $('focus-timer').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-      if (pomodoroRemaining <= 0) { clearInterval(pomodoroTimer); showToast('Pomodoro completed'); }
-    }, 1000);
-  };
-  $('focus-stop').onclick = () => clearInterval(pomodoroTimer);
-  $('focus-fullscreen').onclick = () => document.documentElement.requestFullscreen?.();
-    $('lp-close').onclick = () => el.lpPanel.style.display = 'none';
-  $('lp-clear').onclick = () => { el.lpInput.value=''; };
-  $('lp-save-vault').onclick = () => {
-    const txt = (el.lpInput.value || '').trim(); if (!txt) return;
-    getSpace().vault.unshift({ text: txt, at: Date.now() });
-    renderVault(); queueSave();
-  };
-  $('lp-save-notes').onclick = () => {
-    const txt = (el.lpInput.value || '').trim(); if (!txt) return;
-    const sp = getSpace(); const cur = sp.notes.find(n => n.id === sp.selectedNoteId) || sp.notes[0]; if (!cur) return;
-    const sourceMeta = `${currentBookTitle || 'Quick Capture'}${pdfDoc ? ` • p${pdfPage}` : ''}`;
-    cur.content = `${cur.content || ''}
-
-[Quick Capture ${sourceMeta}]
-${txt}`.trim();
-    if (el.noteEditor) el.noteEditor.value = cur.content;
-    saveCurrentNote();
-    el.lpInput.value = '';
-    showToast('Saved to Notes');
-  };
-  $('ocr-run-current').onclick = async () => {
-    $('ocr-center-text').textContent = 'Processing OCR...';
-    const txt = await runOCROnCurrentView();
-    $('ocr-center-text').textContent = txt || 'No OCR content found for current app.';
-  };
-  $('ocr-send-to-notes').onclick = () => {
-    const txt = ($('ocr-center-text').textContent || '').trim();
-    if (!txt) return;
-    const sp = getSpace();
-    const cur = sp.notes.find(n => n.id === sp.selectedNoteId) || sp.notes[0];
-    if (!cur) return;
-    cur.content = `${cur.content || ''}\n\n[OCR Capture]\n${txt.slice(0,2000)}`.trim();
-    cur.updatedAt = Date.now();
-    renderNotes();
-    queueSave();
-    showToast('OCR sent to Notes');
-  };
-
-
-  $('pdf-canvas').addEventListener('contextmenu', e => {
-    e.preventDefault();
-    const action = prompt('PDF context: type "diagram" to save diagram from current page');
-    if ((action || '').toLowerCase() !== 'diagram') return;
-    const data = $('pdf-canvas').toDataURL('image/png');
-    const sp = getSpace();
-    sp.vault.unshift({ text: `[Diagram] ${currentBookTitle || 'Book'} p${pdfPage}`, image: data, at: Date.now() });
-    const cur = sp.notes.find(n => n.id === sp.selectedNoteId);
-    if (cur) {
-      cur.blocks = cur.blocks || [];
-      cur.blocks.push({ type:'image', text:data, at: Date.now(), source:`${currentBookTitle} p${pdfPage}` });
-    }
-    $('workspace-notes').innerText += `
-[Diagram saved from ${currentBookTitle || 'Book'} page ${pdfPage}]`;
-    renderVault();
-    renderNoteBlocks();
-    queueSave();
-  });
-
-  $('workspace-notes').addEventListener('dragover', e => { e.preventDefault(); e.currentTarget.classList.add('drop-target'); });
-  $('workspace-notes').addEventListener('dragleave', e => e.currentTarget.classList.remove('drop-target'));
-
-  // Intelligent search over notes/highlights/knowledge/formulas/OCR
-  el.startSearch.addEventListener('keydown', async e => {
-    if (e.key !== 'Enter') return;
-    const q = (el.startSearch.value || '').toLowerCase().trim();
-    const sp = getSpace();
-    const grouped = {
-      Notes: (sp.notes || []).filter(n => `${n.title} ${n.content}`.toLowerCase().includes(q)).map(n => n.title || 'Untitled'),
-      Highlights: (sp.highlights || []).filter(h => (h.text || '').toLowerCase().includes(q)).map(h => `p${h.page || '?'} • ${h.text.slice(0,60)}`),
-      Formulas: (sp.formulaVault || []).filter(f => (f.formula || '').toLowerCase().includes(q)).map(f => `${f.formula} • p${f.page}`),
-      OCR: Object.entries(sp.ocrCache || {}).filter(([,v]) => (v || '').toLowerCase().includes(q)).map(([k]) => k)
-    };
-    const html = Object.entries(grouped).map(([k,v]) => `<div style="font-weight:700;padding:4px 0;">${k}</div>${(v.slice(0,8).map(x => `<div class="thumb-item">${esc(String(x))}</div>`).join('') || '<div class="thumb-item">No matches</div>')}`).join('');
-    $('pdf-search-results').innerHTML = html || 'No global matches';
-  });
-}
-
-const renderNotesOriginal = renderNotes;
-renderNotes = function(){ renderNotesOriginal(); };
-
-const renderAllOriginal = renderAll;
-renderAll = function() {
-  renderAllOriginal();
-  markRunningIndicators();
-  renderNoteBlocks();
-
-
-
-  renderPDFSidebars();
-  renderKnowledgeCardsList();
-  $('focus-analytics').innerHTML = Object.entries(getSpace().analytics.appMinutes || {}).map(([k,v]) => `<div>${k.replace('-window','')}: ${Math.round(v)} minutes</div>`).join('') || 'No analytics yet.';
-};
-
-
-function initPDFViewer() {
-  if (pdfDoc) {renderPage();}
-}
-
-function openPDFDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open('studyos-pdf-cache', 2);
-    req.onupgradeneeded = () => {
-      if (!req.result.objectStoreNames.contains('pdfs')) {
-        req.result.createObjectStore('pdfs');
-      }
-    };
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
-}
-
-async function savePDFToDB(id, dataUrl) {
-  const db = await openPDFDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction('pdfs', 'readwrite');
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-    tx.objectStore('pdfs').put(dataUrl, id);
-  });
-}
-
-async function getPDFFromDB(id) {
-  try {
-    const db = await openPDFDB();
-    return await new Promise(resolve => {
-      const tx = db.transaction('pdfs', 'readonly');
-      const req = tx.objectStore('pdfs').get(id);
-      req.onsuccess = () => resolve(req.result || null);
-      req.onerror = () => resolve(null);
-    });
-  } catch { return null; }
-}
-
-setupContextMenus();
-setupAdvancedBindings();
-
-onAuthStateChanged(auth, async user => {
-  currentUser = user;
-  setAuthUI(user);
-  state = await loadState(user);
-  renderAll();
-  el.status.textContent = user ? 'Loaded Firebase' : 'Loaded local';
-  document.querySelectorAll('.window').forEach(w => { w.style.display='none'; w.classList.remove('active'); });
-  (state.session.lastOpenWindows || []).forEach(id => openWindow(id));
-  activeWindowId = '';
-  setActiveTaskbar('');
-});
-
-window.addEventListener('error', e => showToast(`Runtime error: ${e.message}`));
-window.addEventListener('unhandledrejection', e => showToast(`Async error: ${e.reason?.message || e.reason || 'unknown'}`));
-  </script>
+function tog(hdr) { hdr.closest('.card').classList.toggle('open'); }
+</script>
 </body>
 </html>
